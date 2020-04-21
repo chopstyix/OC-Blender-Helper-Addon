@@ -56,6 +56,7 @@ class OctaneMaterialsMenu(Menu):
         layout = self.layout
         layout.operator(OctaneAssignUniversal.bl_idname)
         layout.operator(OctaneAssignDiffuse.bl_idname)
+        layout.operator(OctaneAssignEmissive.bl_idname)
         layout.operator(OctaneAssignGlossy.bl_idname)
         layout.operator(OctaneAssignSpecular.bl_idname)
         layout.operator(OctaneAssignMix.bl_idname)
@@ -84,6 +85,15 @@ class OctaneAssignDiffuse(Operator):
 
     def execute(self, context):
         assign_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat', context)
+        return {'FINISHED'}
+
+class OctaneAssignEmissive(Operator):
+    bl_label = 'Emissive Material'
+    bl_idname = 'octane.assign_emissive'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        assign_material('OC_Emissive', 'ShaderNodeOctDiffuseMat', context)
         return {'FINISHED'}
 
 class OctaneAssignGlossy(Operator):
@@ -177,6 +187,17 @@ class OctaneAssignHair(Operator):
         return {'FINISHED'}
 
 # Helper methods
+def add_emissive_nodes(mat):
+    nodes = mat.node_tree.nodes
+    emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+    emissionNode.location = (-210, 300)
+    emissionNode.inputs['Surface brightness'].default_value = True
+    rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+    rgbNode.location = (-410, 300)
+    rgbNode.inputs['Color'].default_value = (1, 1, 1, 1)
+    mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
+    mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+
 def create_material(name, type):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -187,6 +208,7 @@ def create_material(name, type):
     mainMat.location = oldMainMat.location
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
+    if(name == 'OC_Emissive'): add_emissive_nodes(mat)
     return mat
 
 def assign_material(name, type, context):
@@ -215,6 +237,7 @@ classes = (
     OctaneMaterialsMenu,
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
+    OctaneAssignEmissive,
     OctaneAssignGlossy,
     OctaneAssignSpecular,
     OctaneAssignMix,
