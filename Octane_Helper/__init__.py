@@ -39,6 +39,7 @@ class VIEW3D_MT_object_octane(Menu):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname)
         layout.menu(OctaneEnvironmentMenu.bl_idname)
+        layout.menu(OctaneLayersMenu.bl_idname)
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -75,6 +76,14 @@ class OctaneEnvironmentMenu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup HDRI Environment')
+
+class OctaneLayersMenu(Menu):
+    bl_label = 'Layers'
+    bl_idname = 'OCTANE_MT_layers'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(OctaneSetRenderID.bl_idname)
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -231,6 +240,28 @@ class OctaneSetupHDRIEnv(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
+class OctaneSetRenderID(Operator):
+    bl_label = 'Set Render Layer ID'
+    bl_idname = 'octane.set_renderid'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    rid = IntProperty(
+        name = 'Render Layer ID',
+        min = 1,
+        max = 255,
+        step = 1,
+        default = 1
+    )
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            obj.octane.render_layer_id = self.rid
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 # Helper methods
 def add_emissive_nodes(mat):
     nodes = mat.node_tree.nodes
@@ -286,6 +317,7 @@ classes = (
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
     OctaneEnvironmentMenu,
+    OctaneLayersMenu,
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
     OctaneAssignEmissive,
@@ -299,7 +331,8 @@ classes = (
     OctaneAssignLayered,
     OctaneAssignComposite,
     OctaneAssignHair,
-    OctaneSetupHDRIEnv
+    OctaneSetupHDRIEnv,
+    OctaneSetRenderID
 )
 
 def object_menu_func(self, context):
