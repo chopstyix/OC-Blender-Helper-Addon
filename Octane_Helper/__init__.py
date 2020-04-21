@@ -74,7 +74,7 @@ class OctaneEnvironmentMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator(OctaneSetupHDRIEnv.bl_idname)
+        layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup HDRI Environment')
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -195,7 +195,7 @@ class OctaneAssignHair(Operator):
         return {'FINISHED'}
 
 class OctaneSetupHDRIEnv(Operator):
-    bl_label = 'Setup HDRI Environment'
+    bl_label = 'Setup'
     bl_idname = 'octane.setup_hdri'
     bl_options = {'REGISTER', 'UNDO'}
 
