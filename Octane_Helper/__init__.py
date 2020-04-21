@@ -16,7 +16,7 @@
 
 import bpy
 from bpy.types import Operator, Menu
-from bpy.props import IntProperty, EnumProperty, BoolProperty
+from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty
 import bmesh
 
 bl_info = {
@@ -38,7 +38,7 @@ class VIEW3D_MT_object_octane(Menu):
     def draw(self, context):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname)
-
+        layout.menu(OctaneEnvironmentMenu.bl_idname)
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -50,7 +50,7 @@ class VIEW3D_MT_edit_mesh_octane(Menu):
 # Sub Octane menus
 class OctaneMaterialsMenu(Menu):
     bl_label = 'Materials'
-    bl_idname = 'view3d.octane_materials'
+    bl_idname = 'OCTANE_MT_materials'
 
     def draw(self, context):
         layout = self.layout
@@ -67,6 +67,14 @@ class OctaneMaterialsMenu(Menu):
         layout.operator(OctaneAssignLayered.bl_idname)
         layout.operator(OctaneAssignComposite.bl_idname)
         layout.operator(OctaneAssignHair.bl_idname)
+
+class OctaneEnvironmentMenu(Menu):
+    bl_label = 'Environment'
+    bl_idname = 'OCTANE_MT_environment'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator(OctaneSetupHDRIEnv.bl_idname)
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -186,6 +194,43 @@ class OctaneAssignHair(Operator):
         assign_material('OC_Hair', 'ShaderNodeOctHairMat', context)
         return {'FINISHED'}
 
+class OctaneSetupHDRIEnv(Operator):
+    bl_label = 'Setup HDRI Environment'
+    bl_idname = 'octane.setup_hdri'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    filepath = StringProperty(subtype="FILE_PATH")
+    filter_glob = StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+
+    def execute(self, context):
+        if self.filepath != '':
+            world = create_world('OC_Environment')
+            nodes = world.node_tree.nodes
+            imgNode = nodes.new('ShaderNodeOctImageTex')
+            imgNode.location = (-210, 300)
+            imgNode.inputs['Gamma'].default_value = 1
+            imgNode.image = bpy.data.images.load(self.filepath)
+            sphereNode = nodes.new('ShaderNodeOctSphericalProjection')
+            sphereNode.location = (-410, 100)
+            transNode = nodes.new('ShaderNodeOct3DTransform')
+            transNode.location = (-610, 100)
+            world.node_tree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
+            world.node_tree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
+            world.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Texture'])
+            context.scene.world = world
+            # Setting up the octane
+            context.scene.display_settings.display_device = 'None'
+            context.scene.view_settings.exposure = 0
+            context.scene.view_settings.gamma = 1
+            context.scene.octane.hdr_tonemap_preview_enable = True
+            context.scene.octane.use_preview_setting_for_camera_imager = True
+
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {"RUNNING_MODAL"}
+
 # Helper methods
 def add_emissive_nodes(mat):
     nodes = mat.node_tree.nodes
@@ -211,6 +256,11 @@ def create_material(name, type):
     if(name == 'OC_Emissive'): add_emissive_nodes(mat)
     return mat
 
+def create_world(name):
+    world = bpy.data.worlds.new(name)
+    world.use_nodes = True
+    return world
+
 def assign_material(name, type, context):
     mat = create_material(name, type)
     if(context.mode == 'OBJECT'):
@@ -235,6 +285,7 @@ classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
+    OctaneEnvironmentMenu,
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
     OctaneAssignEmissive,
@@ -247,7 +298,8 @@ classes = (
     OctaneAssignMetal,
     OctaneAssignLayered,
     OctaneAssignComposite,
-    OctaneAssignHair
+    OctaneAssignHair,
+    OctaneSetupHDRIEnv
 )
 
 def object_menu_func(self, context):
