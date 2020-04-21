@@ -47,3 +47,10 @@ A helper addon for Octane Blender edition
 * Make sure the Octane render is enabled, otherwise the menu will not show up
 * It works in either object mode or edit mode, but provides different functions
 
+## WIP
+
+* Toggle clay mode rendering
+* Popup dialog for users to change some settings when adding materials
+  * e.g. RGB color and emission power of the lights
+* Menu to create octane-related objects 
+  * e.g. Directional light, backdrops
