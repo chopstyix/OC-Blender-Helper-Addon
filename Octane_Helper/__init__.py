@@ -16,7 +16,7 @@
 
 import bpy
 from bpy.types import Operator, Menu
-from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty
+from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import bmesh
 
 bl_info = {
@@ -57,7 +57,6 @@ class OctaneMaterialsMenu(Menu):
         layout = self.layout
         layout.operator(OctaneAssignUniversal.bl_idname)
         layout.operator(OctaneAssignDiffuse.bl_idname)
-        layout.operator(OctaneAssignEmissive.bl_idname)
         layout.operator(OctaneAssignGlossy.bl_idname)
         layout.operator(OctaneAssignSpecular.bl_idname)
         layout.operator(OctaneAssignMix.bl_idname)
@@ -68,6 +67,9 @@ class OctaneMaterialsMenu(Menu):
         layout.operator(OctaneAssignLayered.bl_idname)
         layout.operator(OctaneAssignComposite.bl_idname)
         layout.operator(OctaneAssignHair.bl_idname)
+        layout.separator()
+        layout.operator(OctaneAssignEmissive.bl_idname)
+        layout.separator()
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'
@@ -115,21 +117,44 @@ class OctaneAssignEmissive(Operator):
     bl_idname = 'octane.assign_emissive'
     bl_options = {'REGISTER', 'UNDO'}
 
+    rgb_emission_color = FloatVectorProperty(
+        name="Color",
+        size=4,
+        default = (1, 1, 1, 1),
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+    
+    emission_power = FloatProperty(
+        name="Power", 
+        default=10, 
+        min=0.0001,
+        step=10, 
+        precision=4)
+    
+    emission_surface_brightness = BoolProperty(
+        name="Surface Brightness",
+        default=True)
+
     def execute(self, context):
         # Create material
         mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
         nodes = mat.node_tree.nodes
         emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
         emissionNode.location = (-210, 300)
-        emissionNode.inputs['Surface brightness'].default_value = True
+        emissionNode.inputs['Power'].default_value = self.emission_power
+        emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
         rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
         rgbNode.location = (-410, 300)
-        rgbNode.inputs['Color'].default_value = (1, 1, 1, 1)
+        rgbNode.inputs['Color'].default_value = self.rgb_emission_color
         mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
         mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         # Assign materials to selected
         assign_material(context, mat)
         return {'FINISHED'}
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 class OctaneAssignGlossy(Operator):
     bl_label = 'Glossy Material'
