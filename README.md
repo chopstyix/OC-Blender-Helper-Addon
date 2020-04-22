@@ -49,6 +49,7 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
+* Copy and paste materials to selected
 * Toggle clay mode rendering
 * Popup dialog for users to change some settings when adding materials
   * e.g. RGB color and emission power of the lights
