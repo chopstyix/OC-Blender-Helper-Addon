@@ -71,6 +71,10 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
+* PBR Material
+* SSS Material
+* Medium environment
+
 * Toggle clay mode rendering
 * Menu to create octane-related objects 
   * e.g. Directional light, backdrops
