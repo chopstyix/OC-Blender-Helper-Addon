@@ -93,9 +93,9 @@ class OctaneAssignUniversal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Universal', 'ShaderNodeOctUniversalMat')
+        mat = create_material(context, 'OC_Universal', 'ShaderNodeOctUniversalMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignDiffuse(Operator):
@@ -105,9 +105,9 @@ class OctaneAssignDiffuse(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignEmissive(Operator):
@@ -117,7 +117,7 @@ class OctaneAssignEmissive(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
         nodes = mat.node_tree.nodes
         emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
         emissionNode.location = (-210, 300)
@@ -128,7 +128,7 @@ class OctaneAssignEmissive(Operator):
         mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
         mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignGlossy(Operator):
@@ -138,9 +138,9 @@ class OctaneAssignGlossy(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Glossy', 'ShaderNodeOctGlossyMat')
+        mat = create_material(context, 'OC_Glossy', 'ShaderNodeOctGlossyMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignSpecular(Operator):
@@ -150,9 +150,9 @@ class OctaneAssignSpecular(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Specular', 'ShaderNodeOctSpecularMat')
+        mat = create_material(context, 'OC_Specular', 'ShaderNodeOctSpecularMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignMix(Operator):
@@ -162,9 +162,9 @@ class OctaneAssignMix(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Mix', 'ShaderNodeOctMixMat')
+        mat = create_material(context, 'OC_Mix', 'ShaderNodeOctMixMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignPortal(Operator):
@@ -174,9 +174,9 @@ class OctaneAssignPortal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Portal', 'ShaderNodeOctPortalMat')
+        mat = create_material(context, 'OC_Portal', 'ShaderNodeOctPortalMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignShadowCatcher(Operator):
@@ -186,9 +186,9 @@ class OctaneAssignShadowCatcher(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
+        mat = create_material(context, 'OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignToon(Operator):
@@ -198,9 +198,9 @@ class OctaneAssignToon(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Toon', 'ShaderNodeOctToonMat')
+        mat = create_material(context, 'OC_Toon', 'ShaderNodeOctToonMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignMetal(Operator):
@@ -210,9 +210,9 @@ class OctaneAssignMetal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Metal', 'ShaderNodeOctMetalMat')
+        mat = create_material(context, 'OC_Metal', 'ShaderNodeOctMetalMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignLayered(Operator):
@@ -222,9 +222,9 @@ class OctaneAssignLayered(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Layered', 'ShaderNodeOctLayeredMat')
+        mat = create_material(context, 'OC_Layered', 'ShaderNodeOctLayeredMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignComposite(Operator):
@@ -234,9 +234,9 @@ class OctaneAssignComposite(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Composite', 'ShaderNodeOctCompositeMat')
+        mat = create_material(context, 'OC_Composite', 'ShaderNodeOctCompositeMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneAssignHair(Operator):
@@ -246,9 +246,9 @@ class OctaneAssignHair(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material('OC_Hair', 'ShaderNodeOctHairMat')
+        mat = create_material(context, 'OC_Hair', 'ShaderNodeOctHairMat')
         # Assign materials to selected
-        assign_material(self, mat)
+        assign_material(context, mat)
         return {'FINISHED'}
 
 class OctaneSetupHDRIEnv(Operator):
@@ -311,7 +311,7 @@ class OctaneSetRenderID(Operator):
         return wm.invoke_props_dialog(self)
 
 # Helper methods
-def create_material(self, name, root):
+def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
@@ -323,15 +323,15 @@ def create_material(self, name, root):
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
     return mat
 
-def assign_material(self, mat):
+def assign_material(context, mat):
     # Object mode
-    if(self.context.mode == 'OBJECT'):
-        for obj in self.context.selected_objects:
+    if(context.mode == 'OBJECT'):
+        for obj in context.selected_objects:
             if(obj.type == 'MESH'):
                 obj.active_material = mat
     # Edit mode
-    elif(self.context.mode == 'EDIT_MESH'):
-        for obj in self.context.selected_objects:
+    elif(context.mode == 'EDIT_MESH'):
+        for obj in context.selected_objects:
             if(obj.type == 'MESH'):
                 bm = bmesh.from_edit_mesh(obj.data)
                 for face in bm.faces:
