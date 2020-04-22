@@ -4,48 +4,56 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * OctaneRender™ for Blender 2019 and later
-* Current version **v1.1.1**
+* Current version **v1.2.0**
   * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
 
 ## Features
 
-* In the object mode, we can assign octane materials to all selected objects
+* In object mode, we can assign octane materials to all selected objects
 
-  ![image-20200421222625975](README.assets/image-20200421222625975.png)
+  ![image-20200422132030146](README.assets/image-20200422132030146.png)
 
-* In the edit mode, we can assign octane materials to all selected faces of selected objects
+* In edit mode, we can assign octane materials to all selected faces of selected objects
 
   * If an object has no base material, it will create one
 
-  ![image-20200421222651196](README.assets/image-20200421222651196.png)
+  ![image-20200422131952257](README.assets/image-20200422131952257.png)
 
-* In either object or edit mode, we can copy an active material from one object, and paste it to all selected objects
+* In either object or edit mode, we can copy an active material from one object, and paste it to all other selected objects
 
-  ![image-20200421222852469](README.assets/image-20200421222852469.png)
+  ![image-20200422132118537](README.assets/image-20200422132118537.png)
 
-* Supports emissive material
+* We can search a material and assign it to all selected objects or faces
 
-  ![image-20200421222929542](README.assets/image-20200421222929542.png)
+  ![image-20200422132420426](README.assets/image-20200422132420426.png)
+
+* Support emissive material
 
   ![image-20200421222947085](README.assets/image-20200421222947085.png)
 
-* Setup the texture environment in one click
+* Setup texture environment in one click
 
   * Overwrite option
     * Modifies Blender display device settings to get a correct response
-    * Set hdr image's gamma to 1.0
+    * Set hdri image's gamma to 1.0
     * Overwrites settings of Octane Camera Imager
     * Adds a 3D transform node to the environment texture
   * Backplate and backplate color option
     * Replace visible environment with a RGB color
 
-  ![image-20200421180047638](README.assets/image-20200421180047638.png)
+  ![image-20200422132605979](README.assets/image-20200422132605979.png)
 
   ![image-20200421222231259](README.assets/image-20200421222231259.png)
 
-* Set specific render layer id to all selected objects
+* Transform existing texture environment dynamically
 
-  ![image-20200421180502940](README.assets/image-20200421180502940.png)
+  * Make sure you have a 3D transform node connected to the graph
+
+  ![image-20200422132740312](README.assets/image-20200422132740312.png)
+  
+  ![image-20200422132833253](README.assets/image-20200422132833253.png)
+  
+* Set specific render layer id to all selected objects
 
   ![image-20200421180539851](README.assets/image-20200421180539851.png)
 

@@ -23,7 +23,7 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou",
-    "version": (1, 1, 1),
+    "version": (1, 2, 0),
     "blender": (2, 81, 0),
     "warning": "",
     "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
@@ -83,7 +83,7 @@ class OctaneEnvironmentMenu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup Texture Environment', icon='WORLD')
-        layout.operator(OctaneTransformHDRIEnv.bl_idname)
+        layout.operator(OctaneTransformHDRIEnv.bl_idname, icon='FILE_3D')
 
 class OctaneLayersMenu(Menu):
     bl_label = 'Layers'
