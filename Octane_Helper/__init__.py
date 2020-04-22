@@ -31,6 +31,8 @@ bl_info = {
     "category": "3D View"
 }
 
+bpy.types.Material.copied_mat = None
+
 # Main Octane menu
 class VIEW3D_MT_object_octane(Menu):
     bl_label = 'Octane'
@@ -70,6 +72,8 @@ class OctaneMaterialsMenu(Menu):
         layout.separator()
         layout.operator(OctaneAssignEmissive.bl_idname)
         layout.separator()
+        layout.operator(OctaneCopyMat.bl_idname)
+        layout.operator(OctanePasteMat.bl_idname)
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'
@@ -276,6 +280,31 @@ class OctaneAssignHair(Operator):
         assign_material(context, mat)
         return {'FINISHED'}
 
+class OctaneCopyMat(Operator):
+    bl_label = 'Copy'
+    bl_idname = 'octane.copy_mat'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        obj = context.active_object
+        if(obj.type == 'MESH'):
+            if(len(obj.material_slots)>=1):
+                bpy.types.Material.copied_mat = obj.active_material
+        return {'FINISHED'}
+
+class OctanePasteMat(Operator):
+    bl_label = 'Paste'
+    bl_idname = 'octane.paste_mat'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return (bpy.types.Material.copied_mat is not None)
+    def execute(self, context):
+        if(bpy.types.Material.copied_mat):
+            assign_material(context, bpy.types.Material.copied_mat)
+        return {'FINISHED'}
+
 class OctaneSetupHDRIEnv(Operator):
     bl_label = 'Setup'
     bl_idname = 'octane.setup_hdri'
@@ -394,6 +423,8 @@ classes = (
     OctaneAssignLayered,
     OctaneAssignComposite,
     OctaneAssignHair,
+    OctaneCopyMat,
+    OctanePasteMat,
     OctaneSetupHDRIEnv,
     OctaneSetRenderID
 )
