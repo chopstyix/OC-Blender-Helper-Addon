@@ -23,7 +23,7 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou",
-    "version": (1, 2, 0),
+    "version": (1, 2, 1),
     "blender": (2, 81, 0),
     "warning": "",
     "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
@@ -75,6 +75,8 @@ class OctaneMaterialsMenu(Menu):
         layout.separator()
         layout.operator(OctaneCopyMat.bl_idname, icon='COPYDOWN')
         layout.operator(OctanePasteMat.bl_idname, icon='PASTEDOWN')
+        layout.separator()
+        layout.prop(context.scene, 'is_smooth')
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'
@@ -450,6 +452,8 @@ def create_material(context, name, root):
     oldMainMat = nodes[1]
     mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location
+    if('Smooth' in mainMat.inputs):
+        mainMat.inputs['Smooth'].default_value = context.scene.is_smooth
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
     return mat
@@ -525,6 +529,7 @@ def selected_mat_update(self, context):
 def register():
     bpy.types.Material.copied_mat = None
     bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
+    bpy.types.Scene.is_smooth = BoolProperty(name='Enable Smooth', default=True)
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
