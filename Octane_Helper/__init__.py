@@ -92,7 +92,10 @@ class OctaneAssignUniversal(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Universal', 'ShaderNodeOctUniversalMat', context)
+        # Create material
+        mat = create_material('OC_Universal', 'ShaderNodeOctUniversalMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignDiffuse(Operator):
@@ -101,7 +104,10 @@ class OctaneAssignDiffuse(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat', context)
+        # Create material
+        mat = create_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignEmissive(Operator):
@@ -110,7 +116,19 @@ class OctaneAssignEmissive(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Emissive', 'ShaderNodeOctDiffuseMat', context)
+        # Create material
+        mat = create_material('OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        nodes = mat.node_tree.nodes
+        emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+        emissionNode.location = (-210, 300)
+        emissionNode.inputs['Surface brightness'].default_value = True
+        rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+        rgbNode.location = (-410, 300)
+        rgbNode.inputs['Color'].default_value = (1, 1, 1, 1)
+        mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
+        mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignGlossy(Operator):
@@ -119,7 +137,10 @@ class OctaneAssignGlossy(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Glossy', 'ShaderNodeOctGlossyMat', context)
+        # Create material
+        mat = create_material('OC_Glossy', 'ShaderNodeOctGlossyMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignSpecular(Operator):
@@ -128,7 +149,10 @@ class OctaneAssignSpecular(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Specular', 'ShaderNodeOctSpecularMat', context)
+        # Create material
+        mat = create_material('OC_Specular', 'ShaderNodeOctSpecularMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignMix(Operator):
@@ -137,7 +161,10 @@ class OctaneAssignMix(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Mix', 'ShaderNodeOctMixMat', context)
+        # Create material
+        mat = create_material('OC_Mix', 'ShaderNodeOctMixMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignPortal(Operator):
@@ -146,7 +173,10 @@ class OctaneAssignPortal(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Portal', 'ShaderNodeOctPortalMat', context)
+        # Create material
+        mat = create_material('OC_Portal', 'ShaderNodeOctPortalMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignShadowCatcher(Operator):
@@ -155,7 +185,10 @@ class OctaneAssignShadowCatcher(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat', context)
+        # Create material
+        mat = create_material('OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignToon(Operator):
@@ -164,7 +197,10 @@ class OctaneAssignToon(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Toon', 'ShaderNodeOctToonMat', context)
+        # Create material
+        mat = create_material('OC_Toon', 'ShaderNodeOctToonMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignMetal(Operator):
@@ -173,7 +209,10 @@ class OctaneAssignMetal(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Metal', 'ShaderNodeOctMetalMat', context)
+        # Create material
+        mat = create_material('OC_Metal', 'ShaderNodeOctMetalMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignLayered(Operator):
@@ -182,7 +221,10 @@ class OctaneAssignLayered(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Layered', 'ShaderNodeOctLayeredMat', context)
+        # Create material
+        mat = create_material('OC_Layered', 'ShaderNodeOctLayeredMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignComposite(Operator):
@@ -191,7 +233,10 @@ class OctaneAssignComposite(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Composite', 'ShaderNodeOctCompositeMat', context)
+        # Create material
+        mat = create_material('OC_Composite', 'ShaderNodeOctCompositeMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneAssignHair(Operator):
@@ -200,7 +245,10 @@ class OctaneAssignHair(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        assign_material('OC_Hair', 'ShaderNodeOctHairMat', context)
+        # Create material
+        mat = create_material('OC_Hair', 'ShaderNodeOctHairMat')
+        # Assign materials to selected
+        assign_material(self, mat)
         return {'FINISHED'}
 
 class OctaneSetupHDRIEnv(Operator):
@@ -263,54 +311,44 @@ class OctaneSetRenderID(Operator):
         return wm.invoke_props_dialog(self)
 
 # Helper methods
-def add_emissive_nodes(mat):
-    nodes = mat.node_tree.nodes
-    emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
-    emissionNode.location = (-210, 300)
-    emissionNode.inputs['Surface brightness'].default_value = True
-    rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
-    rgbNode.location = (-410, 300)
-    rgbNode.inputs['Color'].default_value = (1, 1, 1, 1)
-    mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
-    mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
-
-def create_material(name, type):
+def create_material(self, name, root):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     nodes = mat.node_tree.nodes
     outNode = nodes[0]
     oldMainMat = nodes[1]
-    mainMat = nodes.new(type)
+    mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
-    if(name == 'OC_Emissive'): add_emissive_nodes(mat)
     return mat
 
-def create_world(name):
-    world = bpy.data.worlds.new(name)
-    world.use_nodes = True
-    return world
-
-def assign_material(name, type, context):
-    mat = create_material(name, type)
-    if(context.mode == 'OBJECT'):
-        for obj in context.selected_objects:
+def assign_material(self, mat):
+    # Object mode
+    if(self.context.mode == 'OBJECT'):
+        for obj in self.context.selected_objects:
             if(obj.type == 'MESH'):
                 obj.active_material = mat
-    elif(context.mode == 'EDIT_MESH'):
-        for obj in context.selected_objects:
+    # Edit mode
+    elif(self.context.mode == 'EDIT_MESH'):
+        for obj in self.context.selected_objects:
             if(obj.type == 'MESH'):
                 bm = bmesh.from_edit_mesh(obj.data)
                 for face in bm.faces:
                     if face.select:
+                        # If no base material found, create one
                         if (len(obj.material_slots)==0):
-                            obj.active_material = create_material(name + '_Base', type)
+                            obj.active_material = create_material(mat.name + '_Base', type)
                         obj.data.materials.append(mat)
                         obj.active_material_index = len(obj.material_slots) - 1
                         face.material_index = len(obj.material_slots) - 1
                 obj.data.update()
 
+def create_world(name):
+    world = bpy.data.worlds.new(name)
+    world.use_nodes = True
+    return world
+    
 # Register and Unregister
 classes = (
     VIEW3D_MT_object_octane,
