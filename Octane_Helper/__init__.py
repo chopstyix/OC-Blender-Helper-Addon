@@ -83,7 +83,7 @@ class OctaneEnvironmentMenu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup Texture Environment', icon='WORLD')
-        #layout.operator(OctaneTransformHDRIEnv.bl_idname)
+        layout.operator(OctaneTransformHDRIEnv.bl_idname)
 
 class OctaneLayersMenu(Menu):
     bl_label = 'Layers'
@@ -340,6 +340,7 @@ class OctaneSetupHDRIEnv(Operator):
             sphereNode.location = (-410, 100)
             transNode = nodes.new('ShaderNodeOct3DTransform')
             transNode.location = (-610, 100)
+            transNode.name = 'Texture_3D_Transform'
             if(self.enable_backplate):
                 texenvNode = nodes.new('ShaderNodeOctTextureEnvironment')
                 texenvNode.location = (10, 0)
@@ -363,19 +364,60 @@ class OctaneSetupHDRIEnv(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
-'''
+def get_enum_trs(self, context):
+    world = context.scene.world
+    items = [(node.name, node.name, '') for node in world.node_tree.nodes if node.type=='OCT_3D_TRN']
+    return items
+
+def update_enum_trs(self, context):
+    world = context.scene.world
+    self.rotation = world.node_tree.nodes[self.transNodes].inputs['Rotation'].default_value
+    self.scale = world.node_tree.nodes[self.transNodes].inputs['Scale'].default_value
+    self.translation = world.node_tree.nodes[self.transNodes].inputs['Translation'].default_value
+
+def update_hdri_rotation(self, context):
+    world = context.scene.world
+    world.node_tree.nodes[self.transNodes].inputs['Rotation'].default_value = self.rotation
+
+def update_hdri_scale(self, context):
+    world = context.scene.world
+    world.node_tree.nodes[self.transNodes].inputs['Scale'].default_value = self.scale
+
+def update_hdri_translation(self, context):
+    world = context.scene.world
+    world.node_tree.nodes[self.transNodes].inputs['Translation'].default_value = self.translation
+
 class OctaneTransformHDRIEnv(Operator):
-    # TODO
+    bl_label = 'Transform Texture Environment'
+    bl_idname = 'octane.transform_hdri'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    transNodes: EnumProperty(items=get_enum_trs, name='Nodes', update=update_enum_trs)
+
+    rotation: FloatVectorProperty(name='Rotation', precision=3, step=10, min=-360, max=360, update=update_hdri_rotation)
+    scale: FloatVectorProperty(name='Scale', precision=3, step=10, update=update_hdri_scale)
+    translation: FloatVectorProperty(name='Translation', subtype='TRANSLATION', step=10, precision=3, update=update_hdri_translation)
+
     @classmethod
     def poll(cls, context):
         world = context.scene.world
-        if('3D Transform' in world.node_tree.nodes):
+        if(len([node for node in world.node_tree.nodes if node.type=='OCT_3D_TRN'])):
             return True
         else:
             return False
     def execute(self, context):
         return {'FINISHED'}
-'''
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, 'transNodes', text='')
+        col.prop(self, 'rotation')
+        col.prop(self, 'scale')
+        col.prop(self, 'translation')
+    def invoke(self, context, event):
+        update_enum_trs(self, context)
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 class OctaneSetRenderID(Operator):
     bl_label = 'Set Render Layer ID'
@@ -461,7 +503,8 @@ classes = (
     OctaneCopyMat,
     OctanePasteMat,
     OctaneSetupHDRIEnv,
-    OctaneSetRenderID
+    OctaneSetRenderID,
+    OctaneTransformHDRIEnv
 )
 
 def object_menu_func(self, context):
