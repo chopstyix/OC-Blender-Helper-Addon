@@ -146,7 +146,7 @@ class OctaneAssignEmissive(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Emissive', 'ShaderNodeOctDiffuseMat')
         nodes = mat.node_tree.nodes
         emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
         emissionNode.location = (-210, 300)
