@@ -312,6 +312,19 @@ class OctaneSetupHDRIEnv(Operator):
 
     filepath = StringProperty(subtype="FILE_PATH")
     filter_glob = StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+    enable_overwrite = BoolProperty(
+        name="Overwrite",
+        default=True)
+    enable_backplate = BoolProperty(
+        name="Backplate",
+        default=False)
+    backplate_color = FloatVectorProperty(
+        name="",
+        size=4,
+        default = (1, 1, 1, 1),
+        min = 0,
+        max = 1,
+        subtype="COLOR")
 
     def execute(self, context):
         if self.filepath != '':
@@ -325,17 +338,23 @@ class OctaneSetupHDRIEnv(Operator):
             sphereNode.location = (-410, 100)
             transNode = nodes.new('ShaderNodeOct3DTransform')
             transNode.location = (-610, 100)
+            if(self.enable_backplate):
+                texenvNode = nodes.new('ShaderNodeOctTextureEnvironment')
+                texenvNode.location = (10, 0)
+                texenvNode.inputs['Texture'].default_value = self.backplate_color
+                texenvNode.inputs['Visable env Backplate'].default_value = True
             world.node_tree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
             world.node_tree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
             world.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Texture'])
+            world.node_tree.links.new(texenvNode.outputs[0], nodes[0].inputs['Octane VisibleEnvironment'])
             context.scene.world = world
             # Setting up the octane
-            context.scene.display_settings.display_device = 'None'
-            context.scene.view_settings.exposure = 0
-            context.scene.view_settings.gamma = 1
-            context.scene.octane.hdr_tonemap_preview_enable = True
-            context.scene.octane.use_preview_setting_for_camera_imager = True
-
+            if self.enable_overwrite:
+                context.scene.display_settings.display_device = 'None'
+                context.scene.view_settings.exposure = 0
+                context.scene.view_settings.gamma = 1
+                context.scene.octane.hdr_tonemap_preview_enable = True
+                context.scene.octane.use_preview_setting_for_camera_imager = True
         return {'FINISHED'}
     
     def invoke(self, context, event):
