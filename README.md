@@ -11,23 +11,37 @@ A helper addon for Octane Blender edition
 
 * In the object mode, we can assign octane materials to all selected objects
 
-  ![image-20200421175448704](README.assets/image-20200421175448704.png)
+  ![image-20200421222625975](README.assets/image-20200421222625975.png)
 
 * In the edit mode, we can assign octane materials to all selected faces of selected objects
 
   * If an object has no base material, it will create one
 
-  ![image-20200421175938477](README.assets/image-20200421175938477.png)
+  ![image-20200421222651196](README.assets/image-20200421222651196.png)
+
+* In either object or edit mode, we can copy an active material from one object, and paste it to all selected objects
+
+  ![image-20200421222852469](README.assets/image-20200421222852469.png)
+
+* Supports emissive material
+
+  ![image-20200421222929542](README.assets/image-20200421222929542.png)
+
+  ![image-20200421222947085](README.assets/image-20200421222947085.png)
 
 * Setup the texture environment in one click
 
-  * Modify Blender display device settings to get a correct response
-  * Overwrites settings of Octane Camera Imager (recommended)
-  * Add a 3D transform node to the environment texture
+  * Overwrite option
+    * Modifies Blender display device settings to get a correct response
+    * Set hdr image's gamma to 1.0
+    * Overwrites settings of Octane Camera Imager
+    * Adds a 3D transform node to the environment texture
+  * Backplate and backplate color option
+    * Replace visible environment with a RGB color
 
   ![image-20200421180047638](README.assets/image-20200421180047638.png)
 
-  ![image-20200421180353848](README.assets/image-20200421180353848.png)
+  ![image-20200421222231259](README.assets/image-20200421222231259.png)
 
 * Set specific render layer id to all selected objects
 
@@ -49,9 +63,6 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* Copy and paste materials to selected
 * Toggle clay mode rendering
-* Popup dialog for users to change some settings when adding materials
-  * e.g. RGB color and emission power of the lights
 * Menu to create octane-related objects 
   * e.g. Directional light, backdrops
