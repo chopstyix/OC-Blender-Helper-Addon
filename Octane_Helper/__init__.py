@@ -23,7 +23,7 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou",
-    "version": (1, 1, 0),
+    "version": (1, 1, 1),
     "blender": (2, 81, 0),
     "warning": "",
     "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
@@ -343,10 +343,10 @@ class OctaneSetupHDRIEnv(Operator):
                 texenvNode.location = (10, 0)
                 texenvNode.inputs['Texture'].default_value = self.backplate_color
                 texenvNode.inputs['Visable env Backplate'].default_value = True
+                world.node_tree.links.new(texenvNode.outputs[0], nodes[0].inputs['Octane VisibleEnvironment'])
             world.node_tree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
             world.node_tree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
             world.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Texture'])
-            world.node_tree.links.new(texenvNode.outputs[0], nodes[0].inputs['Octane VisibleEnvironment'])
             context.scene.world = world
             # Setting up the octane
             if self.enable_overwrite:
