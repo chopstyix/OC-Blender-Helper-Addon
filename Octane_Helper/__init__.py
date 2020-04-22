@@ -31,8 +31,6 @@ bl_info = {
     "category": "3D View"
 }
 
-bpy.types.Material.copied_mat = None
-
 # Main Octane menu
 class VIEW3D_MT_object_octane(Menu):
     bl_label = 'Octane'
@@ -57,23 +55,26 @@ class OctaneMaterialsMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator(OctaneAssignUniversal.bl_idname)
-        layout.operator(OctaneAssignDiffuse.bl_idname)
-        layout.operator(OctaneAssignGlossy.bl_idname)
-        layout.operator(OctaneAssignSpecular.bl_idname)
-        layout.operator(OctaneAssignMix.bl_idname)
-        layout.operator(OctaneAssignPortal.bl_idname)
-        layout.operator(OctaneAssignShadowCatcher.bl_idname)
-        layout.operator(OctaneAssignToon.bl_idname)
-        layout.operator(OctaneAssignMetal.bl_idname)
-        layout.operator(OctaneAssignLayered.bl_idname)
-        layout.operator(OctaneAssignComposite.bl_idname)
-        layout.operator(OctaneAssignHair.bl_idname)
+        layout.label(text='Select a Material to apply')
+        layout.prop_search(context.scene, property='selected_mat', search_data=bpy.data, search_property='materials', text='', icon='MATERIAL')
         layout.separator()
-        layout.operator(OctaneAssignEmissive.bl_idname)
+        layout.operator(OctaneAssignUniversal.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignDiffuse.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignGlossy.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignSpecular.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignMix.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignPortal.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignShadowCatcher.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignToon.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignMetal.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignLayered.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignComposite.bl_idname, icon='NODE_MATERIAL')
+        layout.operator(OctaneAssignHair.bl_idname, icon='NODE_MATERIAL')
         layout.separator()
-        layout.operator(OctaneCopyMat.bl_idname)
-        layout.operator(OctanePasteMat.bl_idname)
+        layout.operator(OctaneAssignEmissive.bl_idname, icon='LIGHT')
+        layout.separator()
+        layout.operator(OctaneCopyMat.bl_idname, icon='COPYDOWN')
+        layout.operator(OctanePasteMat.bl_idname, icon='PASTEDOWN')
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'
@@ -81,7 +82,8 @@ class OctaneEnvironmentMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup HDRI Environment')
+        layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup Texture Environment', icon='WORLD')
+        #layout.operator(OctaneTransformHDRIEnv.bl_idname)
 
 class OctaneLayersMenu(Menu):
     bl_label = 'Layers'
@@ -89,7 +91,7 @@ class OctaneLayersMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator(OctaneSetRenderID.bl_idname)
+        layout.operator(OctaneSetRenderID.bl_idname, icon='RENDERLAYERS')
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -121,7 +123,7 @@ class OctaneAssignEmissive(Operator):
     bl_idname = 'octane.assign_emissive'
     bl_options = {'REGISTER', 'UNDO'}
 
-    rgb_emission_color = FloatVectorProperty(
+    rgb_emission_color: FloatVectorProperty(
         name="Color",
         size=4,
         default = (1, 1, 1, 1),
@@ -129,14 +131,14 @@ class OctaneAssignEmissive(Operator):
         max = 1,
         subtype="COLOR")
     
-    emission_power = FloatProperty(
+    emission_power: FloatProperty(
         name="Power", 
         default=10, 
         min=0.0001,
         step=10, 
         precision=4)
     
-    emission_surface_brightness = BoolProperty(
+    emission_surface_brightness: BoolProperty(
         name="Surface Brightness",
         default=True)
 
@@ -310,15 +312,15 @@ class OctaneSetupHDRIEnv(Operator):
     bl_idname = 'octane.setup_hdri'
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath = StringProperty(subtype="FILE_PATH")
-    filter_glob = StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
-    enable_overwrite = BoolProperty(
+    filepath: StringProperty(subtype="FILE_PATH")
+    filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+    enable_overwrite: BoolProperty(
         name="Overwrite",
         default=True)
-    enable_backplate = BoolProperty(
+    enable_backplate: BoolProperty(
         name="Backplate",
         default=False)
-    backplate_color = FloatVectorProperty(
+    backplate_color: FloatVectorProperty(
         name="",
         size=4,
         default = (1, 1, 1, 1),
@@ -361,12 +363,26 @@ class OctaneSetupHDRIEnv(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
+'''
+class OctaneTransformHDRIEnv(Operator):
+    # TODO
+    @classmethod
+    def poll(cls, context):
+        world = context.scene.world
+        if('3D Transform' in world.node_tree.nodes):
+            return True
+        else:
+            return False
+    def execute(self, context):
+        return {'FINISHED'}
+'''
+
 class OctaneSetRenderID(Operator):
     bl_label = 'Set Render Layer ID'
     bl_idname = 'octane.set_renderid'
     bl_options = {'REGISTER', 'UNDO'}
 
-    rid = IntProperty(
+    rid: IntProperty(
         name = 'Render Layer ID',
         min = 1,
         max = 255,
@@ -458,7 +474,14 @@ def edit_menu_func(self, context):
         self.layout.menu('VIEW3D_MT_edit_mesh_octane')
         self.layout.separator()
 
+def selected_mat_update(self, context):
+    if(context.scene.selected_mat!=''):
+        assign_material(context, bpy.data.materials[context.scene.selected_mat])
+        context.scene.selected_mat = ''
+
 def register():
+    bpy.types.Material.copied_mat = None
+    bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
