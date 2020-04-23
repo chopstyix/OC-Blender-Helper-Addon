@@ -18,6 +18,7 @@ import bpy
 from bpy.types import Operator, Menu
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import bmesh
+import os
 
 bl_info = {
     "name": "Octane Helper",
@@ -37,9 +38,9 @@ class VIEW3D_MT_object_octane(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.menu(OctaneMaterialsMenu.bl_idname)
-        layout.menu(OctaneEnvironmentMenu.bl_idname)
-        layout.menu(OctaneLayersMenu.bl_idname)
+        layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
+        layout.menu(OctaneEnvironmentMenu.bl_idname, icon='LIGHT_SUN')
+        layout.menu(OctaneLayersMenu.bl_idname, icon='RENDERLAYERS')
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -93,7 +94,7 @@ class OctaneLayersMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator(OctaneSetRenderID.bl_idname, icon='RENDERLAYERS')
+        layout.operator(OctaneSetRenderID.bl_idname, icon='FILE_IMAGE')
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -536,6 +537,7 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 
 def unregister():
+    bpy.utils.previews.remove(oct_icons)
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)
