@@ -40,7 +40,7 @@ class VIEW3D_MT_object_octane(Menu):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
         layout.menu(OctaneEnvironmentMenu.bl_idname, icon='LIGHT_SUN')
-        layout.menu(OctaneLayersMenu.bl_idname, icon='RENDERLAYERS')
+        layout.menu(OctaneRenderMenu.bl_idname, icon='RENDERLAYERS')
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -88,9 +88,9 @@ class OctaneEnvironmentMenu(Menu):
         layout.operator(OctaneSetupHDRIEnv.bl_idname, text='Setup Texture Environment', icon='WORLD')
         layout.operator(OctaneTransformHDRIEnv.bl_idname, icon='FILE_3D')
 
-class OctaneLayersMenu(Menu):
-    bl_label = 'Layers'
-    bl_idname = 'OCTANE_MT_layers'
+class OctaneRenderMenu(Menu):
+    bl_label = 'Render'
+    bl_idname = 'OCTANE_MT_render'
 
     def draw(self, context):
         layout = self.layout
@@ -505,7 +505,7 @@ classes = (
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
     OctaneEnvironmentMenu,
-    OctaneLayersMenu,
+    OctaneRenderMenu,
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
     OctaneAssignEmissive,
