@@ -640,13 +640,24 @@ class OctaneManageDenoiser(Operator):
         col = layout.column(align=True)
         col.prop(oct_cam, 'enable_denoising', text='Enable Denosier')
         col.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
+        
         col = layout.column(align=True)
         col.enabled = (oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
+        col.label(text="Spectral AI Denoiser")
         col.prop(oct_cam, 'denoise_volumes')
         col.prop(oct_cam, 'denoise_on_completion')
         col.prop(oct_cam, 'min_denoiser_samples')
         col.prop(oct_cam, 'max_denoiser_interval')
         col.prop(oct_cam, 'denoiser_blend')
+
+        col = layout.column(align=True)
+        col.enabled = (oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
+        col.label(text="AI Up-Sampler")
+        col.prop(oct_cam.ai_up_sampler, 'sample_mode')
+        col.prop(oct_cam.ai_up_sampler, 'enable_ai_up_sampling')
+        col.prop(oct_cam.ai_up_sampler, 'up_sampling_on_completion')
+        col.prop(oct_cam.ai_up_sampler, 'min_up_sampler_samples')
+        col.prop(oct_cam.ai_up_sampler, 'max_up_sampler_interval')
 
     def execute(self, context):
         return {'FINISHED'}
