@@ -95,6 +95,7 @@ class OctaneLayersMenu(Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator(OctaneSetRenderID.bl_idname, icon='FILE_IMAGE')
+        layout.operator(OctaneOpenCompositor.bl_idname, icon='NODE_COMPOSITING')
 
 # Octane operators
 class OctaneAssignUniversal(Operator):
@@ -444,6 +445,19 @@ class OctaneSetRenderID(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+class OctaneOpenCompositor(Operator):
+    bl_label = 'Open Compositor'
+    bl_idname = 'octane.open_compositor'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+        area = bpy.context.window_manager.windows[-1].screen.areas[0]
+        area.ui_type = 'CompositorNodeTree'
+        bpy.context.scene.use_nodes = True
+        bpy.context.space_data.show_backdrop = True
+        return {'FINISHED'}
+
 # Helper methods
 def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
@@ -509,7 +523,8 @@ classes = (
     OctanePasteMat,
     OctaneSetupHDRIEnv,
     OctaneSetRenderID,
-    OctaneTransformHDRIEnv
+    OctaneTransformHDRIEnv,
+    OctaneOpenCompositor
 )
 
 def object_menu_func(self, context):
