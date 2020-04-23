@@ -101,6 +101,8 @@ class OctaneRenderMenu(Menu):
         layout.operator('octane.manage_imager', icon='IMAGE')
         layout.operator('octane.manage_postprocess', icon='CAMERA_STEREO')
         layout.operator('octane.manage_denoiser', icon='OUTLINER_OB_LIGHTPROBE')
+        layout.operator('octane.manage_render_passes')
+        layout.operator('octane.manage_render_layers')
         layout.operator('octane.toggle_claymode', icon='SCULPTMODE_HLT')
         layout.separator()
         layout.operator('octane.set_renderid', icon='FILE_IMAGE')
