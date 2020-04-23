@@ -551,6 +551,37 @@ class OctaneModifyBackplate(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+class OctaneManagePostprocess(Operator):
+    bl_label = 'Postprocess'
+    bl_idname = 'octane.manage_postprocess'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def draw(self, context):
+        oct_cam = context.scene.oct_view_cam
+        layout = self.layout
+        col = layout.column(align=True)
+        col.prop(context.scene.oct_view_cam, "postprocess", text="Enable Postprocess")
+        col.prop(context.scene.octane, "use_preview_post_process_setting")
+        col = layout.column(align=True)
+        col.enabled = context.scene.oct_view_cam.postprocess
+        col.prop(oct_cam, "cut_off")
+        col.prop(oct_cam, "bloom_power")
+        col.prop(oct_cam, "glare_power")
+        col = layout.column(align=True)
+        col.enabled = context.scene.oct_view_cam.postprocess
+        col.prop(oct_cam, "glare_ray_count")
+        col.prop(oct_cam, "glare_angle")
+        col.prop(oct_cam, "glare_blur")
+        col.prop(oct_cam, "spectral_intencity")
+        col.prop(oct_cam, "spectral_shift")
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 classes = (
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
@@ -574,7 +605,8 @@ classes = (
     OctaneToggleClayMode,
     OctaneAddBackplate,
     OctaneRemoveBackplate,
-    OctaneModifyBackplate
+    OctaneModifyBackplate,
+    OctaneManagePostprocess
 )
 
 def register_operators():
