@@ -18,7 +18,7 @@ import bpy
 from bpy.types import Operator, Menu
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import bmesh
-import os
+from . icons import register_icons, unregister_icons, get_icon
 
 bl_info = {
     "name": "Octane Helper",
@@ -514,12 +514,12 @@ classes = (
 
 def object_menu_func(self, context):
     if context.scene.render.engine == 'octane':
-        self.layout.menu('VIEW3D_MT_object_octane')
+        self.layout.menu('VIEW3D_MT_object_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
 def edit_menu_func(self, context):
     if context.scene.render.engine == 'octane':
-        self.layout.menu('VIEW3D_MT_edit_mesh_octane')
+        self.layout.menu('VIEW3D_MT_edit_mesh_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
 def selected_mat_update(self, context):
@@ -528,6 +528,7 @@ def selected_mat_update(self, context):
         context.scene.selected_mat = ''
 
 def register():
+    register_icons()
     bpy.types.Material.copied_mat = None
     bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
     bpy.types.Scene.is_smooth = BoolProperty(name='Enable Smooth', default=True)
@@ -537,7 +538,7 @@ def register():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 
 def unregister():
-    bpy.utils.previews.remove(oct_icons)
+    unregister_icons()
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)

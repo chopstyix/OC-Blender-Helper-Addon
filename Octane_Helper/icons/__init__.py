@@ -1,0 +1,20 @@
+import bpy
+import os
+
+icons = None
+icons_dir = os.path.dirname(__file__)
+
+def get_icon(name):
+    return icons[name].icon_id
+
+def register_icons():
+    global icons
+    icons = bpy.utils.previews.new()
+    for fn in os.listdir(icons_dir):
+        if fn.endswith('.png'):
+            name = fn[:-4]
+            path = os.path.join(icons_dir, fn)
+            icons.load(name, path, 'IMAGE')
+
+def unregister_icons():
+    bpy.utils.previews.remove(icons)
