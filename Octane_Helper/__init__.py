@@ -40,7 +40,7 @@ class VIEW3D_MT_object_octane(Menu):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
         layout.menu(OctaneEnvironmentMenu.bl_idname, icon='LIGHT_SUN')
-        layout.menu(OctaneRenderMenu.bl_idname, icon='RENDERLAYERS')
+        layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -101,8 +101,8 @@ class OctaneRenderMenu(Menu):
         layout.operator('octane.manage_imager', icon='IMAGE')
         layout.operator('octane.manage_postprocess', icon='CAMERA_STEREO')
         layout.operator('octane.manage_denoiser', icon='OUTLINER_OB_LIGHTPROBE')
-        layout.operator('octane.manage_render_passes')
-        layout.operator('octane.manage_render_layers')
+        layout.operator('octane.manage_render_passes', icon='IMAGE_REFERENCE')
+        layout.operator('octane.manage_render_layers', icon='RENDERLAYERS')
         layout.operator('octane.toggle_claymode', icon='SCULPTMODE_HLT')
         layout.separator()
         layout.operator('octane.set_renderid', icon='FILE_IMAGE')
