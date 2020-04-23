@@ -412,7 +412,7 @@ class OctaneOpenCompositor(Operator):
         return {'FINISHED'}
 
 class OctaneToggleClayMode(Operator):
-    bl_label = 'Claymode'
+    bl_label = 'Clay Mode'
     bl_idname = 'octane.toggle_claymode'
     bl_options = {'REGISTER', 'UNDO'}
 
