@@ -563,17 +563,90 @@ class OctaneManagePostprocess(Operator):
         col.prop(context.scene.oct_view_cam, "postprocess", text="Enable Postprocess")
         col.prop(context.scene.octane, "use_preview_post_process_setting")
         col = layout.column(align=True)
-        col.enabled = context.scene.oct_view_cam.postprocess
+        col.enabled = (context.scene.oct_view_cam.postprocess and context.scene.octane.use_preview_post_process_setting)
         col.prop(oct_cam, "cut_off")
         col.prop(oct_cam, "bloom_power")
         col.prop(oct_cam, "glare_power")
         col = layout.column(align=True)
-        col.enabled = context.scene.oct_view_cam.postprocess
+        col.enabled = (context.scene.oct_view_cam.postprocess and context.scene.octane.use_preview_post_process_setting)
         col.prop(oct_cam, "glare_ray_count")
         col.prop(oct_cam, "glare_angle")
         col.prop(oct_cam, "glare_blur")
         col.prop(oct_cam, "spectral_intencity")
         col.prop(oct_cam, "spectral_shift")
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneManageImager(Operator):
+    bl_label = 'Imager'
+    bl_idname = 'octane.manage_imager'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def draw(self, context):
+        oct_cam = context.scene.oct_view_cam
+        layout = self.layout
+        col = layout.column(align=True)
+        col.prop(context.scene.octane, "hdr_tonemap_preview_enable", text="Enable Camera Imager")
+        col.prop(context.scene.octane, "use_preview_setting_for_camera_imager")
+
+        col = layout.column(align=True)
+        col.enabled = (context.scene.octane.hdr_tonemap_preview_enable and context.scene.octane.use_preview_setting_for_camera_imager)
+        col.prop(oct_cam, "camera_imager_order")
+        col = layout.column(align=True)
+        col.enabled = (context.scene.octane.hdr_tonemap_preview_enable and context.scene.octane.use_preview_setting_for_camera_imager)
+        col.prop(oct_cam, "response_type")
+        col = layout.column(align=True)
+        col.enabled = (context.scene.octane.hdr_tonemap_preview_enable and context.scene.octane.use_preview_setting_for_camera_imager)
+        col.prop(oct_cam, "white_balance")
+        col = layout.column(align=True)
+        col.enabled = (context.scene.octane.hdr_tonemap_preview_enable and context.scene.octane.use_preview_setting_for_camera_imager)
+        col.prop(oct_cam, "exposure")
+        col.prop(oct_cam, "gamma")
+        col.prop(oct_cam, "vignetting")
+        col.prop(oct_cam, "saturation")
+        col.prop(oct_cam, "white_saturation")
+        col.prop(oct_cam, "hot_pix")
+        col.prop(oct_cam, "min_display_samples")
+        col.prop(oct_cam, "highlight_compression")
+        col.prop(oct_cam, "max_tonemap_interval")
+        col.prop(oct_cam, "dithering")
+        col.prop(oct_cam, "premultiplied_alpha")
+        col.prop(oct_cam, "neutral_response")
+        col.prop(oct_cam, "disable_partial_alpha")
+        #col.prop(oct_cam, "custom_lut")
+        #col.prop(oct_cam, "lut_strength")
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneManageDenoiser(Operator):
+    bl_label = 'AI Denoiser'
+    bl_idname = 'octane.manage_denoiser'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def draw(self, context):
+        oct_cam = context.scene.oct_view_cam
+        view_layer = context.window.view_layer
+        layout = self.layout
+        col = layout.column(align=True)
+        col.prop(oct_cam, 'enable_denoising', text='Enable Denosier')
+        col.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
+        col = layout.column(align=True)
+        col.enabled = (oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
+        col.prop(oct_cam, 'denoise_volumes')
+        col.prop(oct_cam, 'denoise_on_completion')
+        col.prop(oct_cam, 'min_denoiser_samples')
+        col.prop(oct_cam, 'max_denoiser_interval')
+        col.prop(oct_cam, 'denoiser_blend')
 
     def execute(self, context):
         return {'FINISHED'}
@@ -606,7 +679,9 @@ classes = (
     OctaneAddBackplate,
     OctaneRemoveBackplate,
     OctaneModifyBackplate,
-    OctaneManagePostprocess
+    OctaneManagePostprocess,
+    OctaneManageImager,
+    OctaneManageDenoiser
 )
 
 def register_operators():

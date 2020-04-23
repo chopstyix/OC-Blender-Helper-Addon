@@ -98,10 +98,12 @@ class OctaneRenderMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('octane.set_renderid', icon='FILE_IMAGE')
-        layout.separator()
+        layout.operator('octane.manage_imager', icon='IMAGE')
         layout.operator('octane.manage_postprocess', icon='CAMERA_STEREO')
+        layout.operator('octane.manage_denoiser', icon='OUTLINER_OB_LIGHTPROBE')
         layout.operator('octane.toggle_claymode', icon='SCULPTMODE_HLT')
+        layout.separator()
+        layout.operator('octane.set_renderid', icon='FILE_IMAGE')
         layout.separator()
         layout.operator('octane.open_compositor', icon='NODE_COMPOSITING')
         
