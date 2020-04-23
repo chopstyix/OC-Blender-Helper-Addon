@@ -552,7 +552,7 @@ class OctaneModifyBackplate(Operator):
         return wm.invoke_props_dialog(self)
 
 class OctaneManagePostprocess(Operator):
-    bl_label = 'Postprocess'
+    bl_label = 'Post Processing'
     bl_idname = 'octane.manage_postprocess'
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -583,7 +583,7 @@ class OctaneManagePostprocess(Operator):
         return wm.invoke_props_dialog(self)
 
 class OctaneManageImager(Operator):
-    bl_label = 'Imager'
+    bl_label = 'Camera Imager'
     bl_idname = 'octane.manage_imager'
     bl_options = {'REGISTER', 'UNDO'}
     
