@@ -90,6 +90,7 @@ class OctaneEnvironmentMenu(Menu):
         layout.separator()
         layout.operator('octane.add_backplate', icon='ADD')
         layout.operator('octane.remove_backplate', icon='REMOVE')
+        layout.operator('octane.modify_backplate', icon='MODIFIER_DATA')
 
 class OctaneRenderMenu(Menu):
     bl_label = 'Render'

@@ -26,6 +26,13 @@ def update_hdri_translation(self, context):
     world = context.scene.world
     world.node_tree.nodes[self.transNodes].inputs['Translation'].default_value = self.translation
 
+def update_backplate(self, context):
+    world = context.scene.world
+    nodes = world.node_tree.nodes
+    outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+    texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
+    texenvNode.inputs['Texture'].default_value = self.backplate_color
+
 def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
@@ -491,7 +498,58 @@ class OctaneRemoveBackplate(Operator):
         outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
         link = outNode.inputs['Octane VisibleEnvironment'].links[0]
         nodes.remove(link.from_node)
+        nodes.update()
         return {'FINISHED'}
+
+class OctaneModifyBackplate(Operator):
+    bl_label = 'Modify Backplate'
+    bl_idname = 'octane.modify_backplate'
+    bl_options = {'REGISTER', 'UNDO'}
+   
+    backplate_color: FloatVectorProperty(
+        name="Color",
+        size=4,
+        default = (1, 1, 1, 1),
+        min = 0,
+        max = 1,
+        subtype="COLOR",
+        update=update_backplate)
+    
+    @classmethod
+    def poll(cls, context):
+        if(context.scene.world.use_nodes):
+            nodes = context.scene.world.node_tree.nodes
+            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            if(outNode):
+                if (outNode.inputs['Octane VisibleEnvironment'].is_linked):
+                    texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
+                    if (texenvNode.type == 'OCT_TEXTURE_ENVIRONMENT'):
+                        return not texenvNode.inputs['Texture'].is_linked
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+    
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, 'backplate_color')
+    
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        world = context.scene.world
+        nodes = world.node_tree.nodes
+        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+        texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
+        self.backplate_color = texenvNode.inputs['Texture'].default_value
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 classes = (
     OctaneAssignUniversal,
@@ -515,7 +573,8 @@ classes = (
     OctaneOpenCompositor,
     OctaneToggleClayMode,
     OctaneAddBackplate,
-    OctaneRemoveBackplate
+    OctaneRemoveBackplate,
+    OctaneModifyBackplate
 )
 
 def register_operators():
