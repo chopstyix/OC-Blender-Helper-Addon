@@ -404,6 +404,95 @@ class OctaneOpenCompositor(Operator):
         bpy.context.space_data.show_backdrop = True
         return {'FINISHED'}
 
+class OctaneToggleClayMode(Operator):
+    bl_label = 'Claymode'
+    bl_idname = 'octane.toggle_claymode'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(context.scene.octane, 'clay_mode', text='')
+        col.operator('octane.add_backplate')
+        col.operator('octane.remove_backplate')
+
+    def execute(self, context):
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self) 
+
+class OctaneAddBackplate(Operator):
+    bl_label = 'Add Backplate'
+    bl_idname = 'octane.add_backplate'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    backplate_color: FloatVectorProperty(
+        name="Color",
+        size=4,
+        default = (1, 1, 1, 1),
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+    
+    @classmethod
+    def poll(cls, context):
+        if(context.scene.world.use_nodes):
+            nodes = context.scene.world.node_tree.nodes
+            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            if(outNode):
+                return (not outNode.inputs['Octane VisibleEnvironment'].is_linked)
+            else:
+                return False
+        else:
+            return False
+    
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, 'backplate_color')
+    
+    def execute(self, context):
+        world = context.scene.world
+        nodes = world.node_tree.nodes
+        texenvNode = nodes.new('ShaderNodeOctTextureEnvironment')
+        texenvNode.location = (10, 0)
+        texenvNode.inputs['Texture'].default_value = self.backplate_color
+        texenvNode.inputs['Visable env Backplate'].default_value = True
+        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+        world.node_tree.links.new(texenvNode.outputs[0], outNode.inputs['Octane VisibleEnvironment'])
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneRemoveBackplate(Operator):
+    bl_label = 'Remove Backplate'
+    bl_idname = 'octane.remove_backplate'
+    bl_options = {'REGISTER', 'UNDO'}
+   
+    @classmethod
+    def poll(cls, context):
+        if(context.scene.world.use_nodes):
+            nodes = context.scene.world.node_tree.nodes
+            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            if(outNode):
+                return (outNode.inputs['Octane VisibleEnvironment'].is_linked)
+            else:
+                return False
+        else:
+            return False
+    
+    def execute(self, context):
+        world = context.scene.world
+        nodes = world.node_tree.nodes
+        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+        link = outNode.inputs['Octane VisibleEnvironment'].links[0]
+        nodes.remove(link.from_node)
+        return {'FINISHED'}
+
 classes = (
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
@@ -423,7 +512,10 @@ classes = (
     OctaneSetupHDRIEnv,
     OctaneSetRenderID,
     OctaneTransformHDRIEnv,
-    OctaneOpenCompositor
+    OctaneOpenCompositor,
+    OctaneToggleClayMode,
+    OctaneAddBackplate,
+    OctaneRemoveBackplate
 )
 
 def register_operators():

@@ -87,6 +87,9 @@ class OctaneEnvironmentMenu(Menu):
         layout = self.layout
         layout.operator('octane.setup_hdri', text='Setup Texture Environment', icon='WORLD')
         layout.operator('octane.transform_hdri', icon='FILE_3D')
+        layout.separator()
+        layout.operator('octane.add_backplate', icon='ADD')
+        layout.operator('octane.remove_backplate', icon='REMOVE')
 
 class OctaneRenderMenu(Menu):
     bl_label = 'Render'
@@ -94,9 +97,10 @@ class OctaneRenderMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('octane.set_renderid', icon='FILE_IMAGE')
+        layout.operator('octane.toggle_claymode', icon='SCULPTMODE_HLT')
         layout.separator()
         layout.operator('octane.open_compositor', icon='NODE_COMPOSITING')
+        layout.operator('octane.set_renderid', icon='FILE_IMAGE')
 
 # Register and Unregister
 classes = (
