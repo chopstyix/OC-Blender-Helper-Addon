@@ -421,8 +421,10 @@ class OctaneToggleClayMode(Operator):
         layout = self.layout
         col = layout.column()
         col.prop(context.scene.octane, 'clay_mode', text='')
+        col.separator()
         col.operator('octane.add_backplate')
         col.operator('octane.remove_backplate')
+        col.operator('octane.modify_backplate')
 
     def execute(self, context):
         return {'FINISHED'}
