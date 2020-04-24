@@ -41,6 +41,7 @@ class VIEW3D_MT_object_octane(Menu):
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
         layout.menu(OctaneEnvironmentMenu.bl_idname, icon='LIGHT_SUN')
         layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
+        layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
 
 class VIEW3D_MT_edit_mesh_octane(Menu):
     bl_label = 'Octane'
@@ -111,7 +112,18 @@ class OctaneRenderMenu(Menu):
         layout.operator('octane.set_renderid', icon='FILE_IMAGE')
         layout.separator()
         layout.operator('octane.open_compositor', icon='NODE_COMPOSITING')
-        
+
+class OctaneInfoMenu(Menu):
+    bl_label = 'Info'
+    bl_idname = 'OCTANE_MT_info'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator('wm.url_open', icon='URL', text='Wiki & Downloads').url = 'https://github.com/Yichen-Dou/OC-Blender-Helper-Addon'
+        layout.operator('wm.url_open', icon='URL', text='Otoy Documents').url = 'https://docs.otoy.com'
+        layout.operator('wm.url_open', icon='URL', text='Otoy Forum').url = 'https://render.otoy.com/forum/viewforum.php?f=32'
+        layout.operator('wm.url_open', icon='URL', text='Facebook Group').url = 'https://www.facebook.com/groups/500738480259364'
+        layout.operator('wm.url_open', icon='URL', text='HDRIHaven').url = 'https://hdrihaven.com/hdris/'
 
 # Register and Unregister
 classes = (
@@ -119,7 +131,8 @@ classes = (
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
     OctaneEnvironmentMenu,
-    OctaneRenderMenu
+    OctaneRenderMenu,
+    OctaneInfoMenu
 )
 
 def object_menu_func(self, context):
