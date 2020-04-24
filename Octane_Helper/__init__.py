@@ -133,6 +133,9 @@ class OctaneInfoMenu(Menu):
         layout.separator()
 
         layout.label(text='Resources')
+        layout.operator('wm.url_open', icon='URL', text='ArtStation').url = 'https://www.artstation.com/'
+        layout.operator('wm.url_open', icon='URL', text='Pinterest').url = 'https://www.pinterest.com/'
+        layout.operator('wm.url_open', icon='URL', text='Behance').url = 'https://www.behance.net/'
         layout.operator('wm.url_open', icon='URL', text='HDRIHaven').url = 'https://hdrihaven.com/hdris/'
         layout.operator('wm.url_open', icon='URL', text='CC0 Textures').url = 'https://cc0textures.com/'
         layout.separator()
