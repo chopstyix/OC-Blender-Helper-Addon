@@ -4,7 +4,7 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * OctaneRender™ for Blender 2019 and later
-* Current version **v1.4.0**
+* Current version **v1.5.0**
   * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
 
 ## Features
@@ -21,7 +21,6 @@ A helper addon for Octane Blender edition
 * We can search a material and assign it to all selected objects or faces
 * We can copy an active material from an object/face and paste it to all other selected objects/faces
 * Support emissive material
-
 * Setup texture environment in one click
 
   * Overwrite option
@@ -31,14 +30,13 @@ A helper addon for Octane Blender edition
     * Adds a 3D transform node to the environment texture
   * Backplate and backplate color option
     * Replace visible environment with a RGB color
-
 * Transform existing texture environment dynamically
 
   * Make sure you have a 3D transform node connected to the graph
-
 * Support changing the backplate
 * Support basic render settings for quick access
 * Set specific render layer id to all selected objects
+* Support color and uv grid materials
 
 ## Installation
 
