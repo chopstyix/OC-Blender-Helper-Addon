@@ -392,6 +392,7 @@ class OctaneSetRenderID(Operator):
     def execute(self, context):
         for obj in context.selected_objects:
             obj.octane.render_layer_id = self.rid
+            obj.data.update()
         return {'FINISHED'}
     
     def invoke(self, context, event):
