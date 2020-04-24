@@ -52,9 +52,6 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* UV grid and Color grid material
-* PBR Material
-* SSS Material
 * Medium environment
-* Menu to create octane-related objects 
-  * e.g. Directional light, backdrops
+* Lights manager
+* Cameras manager

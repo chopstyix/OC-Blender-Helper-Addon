@@ -73,6 +73,7 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_composite', icon='NODE_MATERIAL')
         layout.operator('octane.assign_hair', icon='NODE_MATERIAL')
         layout.separator()
+        layout.operator('octane.assign_sss', icon='RADIOBUT_ON')
         layout.operator('octane.assign_emissive', icon='LIGHT')
         layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
         layout.operator('octane.assign_uvgrid', icon='MESH_GRID')

@@ -3,6 +3,7 @@ from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import bmesh
 from math import pi
+import colorsys
 
 def get_enum_trs(self, context):
     world = context.scene.world
@@ -74,6 +75,14 @@ def create_world(name):
     world.use_nodes = True
     return world
 
+def get_bright_color(color):
+    hsv_color = colorsys.rgb_to_hsv(color[0], color[1], color[2])
+    return colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], 1.0) + (1.0,)
+
+def update_sss(self, context):
+    if(self.enable_geneate_transmission):
+        self.sss_transmission = get_bright_color(self.sss_albedo)
+
 # Operators
 class OctaneAssignUniversal(Operator):
     bl_label = 'Universal Material'
@@ -86,6 +95,102 @@ class OctaneAssignUniversal(Operator):
         # Assign materials to selected
         assign_material(context, mat)
         return {'FINISHED'}
+
+class OctaneAssignSSS(Operator):
+    bl_label = 'SSS Material'
+    bl_idname = 'octane.assign_sss'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    sss_albedo: FloatVectorProperty(
+        name="Albedo",
+        default = (0.035, 0.062, 0.085, 1.0),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR",
+        update=update_sss)
+    
+    sss_transmission: FloatVectorProperty(
+        name="Transmission",
+        default = get_bright_color((0.035, 0.062, 0.085, 1.0)),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+    
+    sss_absorption: FloatVectorProperty(
+        name="Absorption",
+        default = (0, 0, 0, 1),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+    
+    sss_scattering: FloatVectorProperty(
+        name="Scattering",
+        default = (0, 0, 0, 1),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+
+    sss_density: FloatProperty(
+        name="Density",
+        default=5.0,
+        min=0.001,
+        step=10, 
+        precision=3)
+
+    enable_geneate_transmission: BoolProperty(
+        default=False,
+        update=update_sss)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        col.prop(self, 'sss_albedo', text='Albedo')
+        col.prop(self, 'enable_geneate_transmission', text='Generate Transmission from Albedo')
+        col = layout.column()
+        col.enabled = (not self.enable_geneate_transmission)
+        col.prop(self, 'sss_transmission', text='Transmission')
+        col = layout.column()
+        col.prop(self, 'sss_absorption', text='Absorption')
+        col.prop(self, 'sss_scattering', text='Scattering')
+        col.separator()
+        col.prop(self, 'sss_density', text='Density')
+    
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Universal', 'ShaderNodeOctUniversalMat')
+        nodes = mat.node_tree.nodes
+        # Diffuse Color
+        diffuseNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+        diffuseNode.location = (-210, 300)
+        diffuseNode.name = 'DiffuseColor'
+        diffuseNode.inputs['Color'].default_value = self.sss_albedo
+        # Transmission Color
+        transmissionNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+        transmissionNode.location = (-210, 400)
+        transmissionNode.name = 'TransmissionColor'
+        transmissionNode.inputs['Color'].default_value = self.sss_transmission
+        # Scatter Medium
+        scatterNode = nodes.new('ShaderNodeOctScatteringMedium')
+        scatterNode.location = (-210, -500)
+        scatterNode.name = 'ScatterMedium'
+        scatterNode.inputs['Density'].default_value = self.sss_density
+        scatterNode.inputs['Absorption Tex'].default_value = self.sss_absorption
+        scatterNode.inputs['Scattering Tex'].default_value = self.sss_scattering
+        # Connections
+        mat.node_tree.links.new(scatterNode.outputs[0], nodes[1].inputs['Medium'])
+        mat.node_tree.links.new(transmissionNode.outputs[0], nodes[1].inputs['Transmission'])
+        mat.node_tree.links.new(diffuseNode.outputs[0], nodes[1].inputs['Albedo color'])
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 class OctaneAssignDiffuse(Operator):
     bl_label = 'Diffuse Material'
@@ -139,6 +244,7 @@ class OctaneAssignEmissive(Operator):
         # Assign materials to selected
         assign_material(context, mat)
         return {'FINISHED'}
+    
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -1078,6 +1184,7 @@ classes = (
     OctaneAssignLayered,
     OctaneAssignComposite,
     OctaneAssignHair,
+    OctaneAssignSSS,
     OctaneCopyMat,
     OctanePasteMat,
     OctaneSetupHDRIEnv,
