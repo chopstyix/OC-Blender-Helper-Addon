@@ -73,11 +73,14 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_hair', icon='NODE_MATERIAL')
         layout.separator()
         layout.operator('octane.assign_emissive', icon='LIGHT')
+        layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
+        layout.operator('octane.assign_uvgrid', icon='MESH_GRID')
         layout.separator()
         layout.operator('octane.copy_mat', icon='COPYDOWN')
         layout.operator('octane.paste_mat', icon='PASTEDOWN')
         layout.separator()
         layout.prop(context.scene, 'is_smooth')
+        layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'
@@ -139,7 +142,7 @@ def register():
     register_operators()
     bpy.types.Material.copied_mat = None
     bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
-    bpy.types.Scene.is_smooth = BoolProperty(name='Enable Smooth', default=True)
+    bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)

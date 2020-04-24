@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import bmesh
+from math import pi
 
 def get_enum_trs(self, context):
     world = context.scene.world
@@ -138,6 +139,72 @@ class OctaneAssignEmissive(Operator):
         # Assign materials to selected
         assign_material(context, mat)
         return {'FINISHED'}
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneAssignColorgrid(Operator):
+    bl_label = 'Color Grid Material'
+    bl_idname = 'octane.assign_colorgrid'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    resolutions: EnumProperty(items=[
+        ('1024', '1024x1024', ''),
+        ('2048', '2048x2048', ''),
+        ('4096', '4096x4096', ''),
+    ], name='Resolution', default='1024')
+
+    def execute(self, context):
+        imgName = 'COLOR_GRID_' + self.resolutions
+        # Create material
+        mat = create_material(context, 'OC_Colorgrid', 'ShaderNodeOctDiffuseMat')
+        nodes = mat.node_tree.nodes
+        imgNode = nodes.new('ShaderNodeOctImageTex')
+        imgNode.location = (-210, 300)
+        if(imgName not in bpy.data.images):
+            img = bpy.data.images.new(imgName, int(self.resolutions), int(self.resolutions))
+            img.generated_type = 'COLOR_GRID'
+            imgNode.image = img
+        else:
+            imgNode.image = bpy.data.images[imgName]
+        mat.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Diffuse'])
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneAssignUVgrid(Operator):
+    bl_label = 'UV Grid Material'
+    bl_idname = 'octane.assign_uvgrid'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    resolutions: EnumProperty(items=[
+        ('1024', '1024x1024', ''),
+        ('2048', '2048x2048', ''),
+        ('4096', '4096x4096', ''),
+    ], name='Resolution', default='1024')
+
+    def execute(self, context):
+        imgName = 'UV_GRID_' + self.resolutions
+        # Create material
+        mat = create_material(context, 'OC_UVgrid', 'ShaderNodeOctDiffuseMat')
+        nodes = mat.node_tree.nodes
+        imgNode = nodes.new('ShaderNodeOctImageTex')
+        imgNode.location = (-210, 300)
+        if(imgName not in bpy.data.images):
+            img = bpy.data.images.new(imgName, int(self.resolutions), int(self.resolutions))
+            img.generated_type = 'UV_GRID'
+            imgNode.image = img
+        else:
+            imgNode.image = bpy.data.images[imgName]
+        mat.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Diffuse'])
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -975,10 +1042,32 @@ class OctaneManageLayers(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+class OctaneAutosmooth(Operator):
+    bl_label = 'Mesh Autosmooth'
+    bl_idname = 'octane.autosmooth'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    autosmooth_value: IntProperty(default=0, min=-180, max=180, subtype='ANGLE', name='Value')
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            obj.data.use_auto_smooth = True
+            obj.data.auto_smooth_angle = (pi * self.autosmooth_value / 180)
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        if(context.active_object):
+            if(context.active_object.type == 'MESH'):
+                self.autosmooth_value = (context.active_object.data.auto_smooth_angle * 180 / pi)
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 classes = (
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
     OctaneAssignEmissive,
+    OctaneAssignColorgrid,
+    OctaneAssignUVgrid,
     OctaneAssignGlossy,
     OctaneAssignSpecular,
     OctaneAssignMix,
@@ -1003,7 +1092,8 @@ classes = (
     OctaneManageImager,
     OctaneManageDenoiser,
     OctaneManageLayers,
-    OctaneManagePasses
+    OctaneManagePasses,
+    OctaneAutosmooth
 )
 
 def register_operators():
