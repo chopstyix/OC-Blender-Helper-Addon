@@ -119,11 +119,30 @@ class OctaneInfoMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('wm.url_open', icon='URL', text='Wiki & Downloads').url = 'https://github.com/Yichen-Dou/OC-Blender-Helper-Addon'
-        layout.operator('wm.url_open', icon='URL', text='Otoy Documents').url = 'https://docs.otoy.com'
-        layout.operator('wm.url_open', icon='URL', text='Otoy Forum').url = 'https://render.otoy.com/forum/viewforum.php?f=32'
+
+        layout.label(text='Otoy')
+        layout.operator('wm.url_open', icon='URL', text='Documents').url = 'https://docs.otoy.com'
+        layout.operator('wm.url_open', icon='URL', text='Forum').url = 'https://render.otoy.com/forum/viewforum.php?f=32'
+        layout.operator('wm.url_open', icon='URL', text='Releases').url = 'https://render.otoy.com/forum/viewforum.php?f=113'
+        layout.operator('wm.url_open', icon='URL', text='Bug Reports').url = 'https://render.otoy.com/forum/viewforum.php?f=114'
+        layout.operator('wm.url_open', icon='URL', text='User Requests').url = 'https://render.otoy.com/forum/viewforum.php?f=115'
+        layout.separator()
+
+        layout.label(text='Communication')
         layout.operator('wm.url_open', icon='URL', text='Facebook Group').url = 'https://www.facebook.com/groups/500738480259364'
+        layout.separator()
+
+        layout.label(text='Resources')
         layout.operator('wm.url_open', icon='URL', text='HDRIHaven').url = 'https://hdrihaven.com/hdris/'
+        layout.operator('wm.url_open', icon='URL', text='CC0 Textures').url = 'https://cc0textures.com/'
+        layout.separator()
+
+        layout.label(text='Plugin')
+        layout.operator('wm.url_open', icon='URL', text='Wiki').url = 'https://github.com/Yichen-Dou/OC-Blender-Helper-Addon'
+        layout.operator('wm.url_open', icon='URL', text='Downloads').url = 'https://github.com/Yichen-Dou/OC-Blender-Helper-Addon/releases'
+        layout.separator()
+        
+        layout.label(text='Ver.{}.{}.{}'.format(bl_info['version'][0], bl_info['version'][1], bl_info['version'][2]))
 
 # Register and Unregister
 classes = (
