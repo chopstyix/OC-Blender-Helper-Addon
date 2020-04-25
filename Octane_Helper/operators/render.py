@@ -464,7 +464,7 @@ class OctaneCamerasManager(Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'cameras', text='')
+        layout.prop(self, 'cameras', text='Camera')
         layout.use_property_split = True
         if(self.cameras != 'None' and self.cameras != None and self.cameras != ''):
             cam = context.scene.objects[self.cameras].data

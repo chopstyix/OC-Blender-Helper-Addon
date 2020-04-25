@@ -42,7 +42,7 @@ def get_enum_emissive_materials(self, context):
     index = context.scene.oc_lights_index
     # Return None if no object taged as light
     if(len(lights)==0): return [('None', 'None', '')]
-    obj = context.scene.objects[lights[index].name]
+    obj = lights[index].obj
     result = []
 
     if(obj.type == 'LIGHT'):
@@ -76,7 +76,7 @@ def refresh_lights_list(context):
         if 'oc_light' in obj:
             if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
                 light = context.scene.oc_lights.add()
-                light.name = obj.name
+                light.obj = obj
                 light.tag = obj['oc_light']
                 if(light.tag == 'Mesh'):
                     light.icon = 'LIGHTPROBE_CUBEMAP'
@@ -385,7 +385,7 @@ class OctaneLightsManager(Operator):
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
         layout.prop(self, 'emissive_materials', text='')
         if(self.emissive_materials!='None' and self.emissive_materials!='' and self.emissive_materials!=None):
-            obj = context.scene.objects[lights[index].name]
+            obj = lights[index].obj
             if(obj.type=='LIGHT'):
                 nodes = obj.data.node_tree.nodes
             else:

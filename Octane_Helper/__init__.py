@@ -16,7 +16,7 @@
 
 import bpy
 from bpy.types import PropertyGroup, Menu, UIList
-from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionProperty
+from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionProperty, PointerProperty
 from . icons import register_icons, unregister_icons, get_icon
 from . operators import register_operators, unregister_operators, assign_material
 
@@ -155,9 +155,9 @@ class OctaneInfoMenu(Menu):
         layout.label(text='Ver.{}.{}.{}'.format(bl_info['version'][0], bl_info['version'][1], bl_info['version'][2]))
 
 class OctaneLightListItem(PropertyGroup):
-    name: StringProperty(
-        name="Material", 
-        default="Unknown"
+    obj: PointerProperty(
+        name="Object",
+        type=bpy.types.Object
     )
     tag: StringProperty(
         name="Tag", 
@@ -171,10 +171,10 @@ class OctaneLightListItem(PropertyGroup):
 class OCTANE_UL_light_list(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
-            layout.label(text=item.name, icon=item.icon)
+            layout.prop(item.obj, 'name', text='', emboss=False, icon=item.icon)
         elif self.layout_type in {'GRID'}: 
             layout.alignment = 'CENTER' 
-            layout.label(text="")
+            layout.label(text="", icon=item.icon)
 
 # Register and Unregister
 classes = (
