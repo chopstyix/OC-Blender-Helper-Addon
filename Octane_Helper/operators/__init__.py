@@ -1230,7 +1230,7 @@ class OctaneLightsManger(Operator):
                     prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
                     prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
                     prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
-                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission'):
+                if(node.bl_idname=='ShaderNodeOctTextureEmission'):
                     prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
                     prop_node_attribute(node, layout, 'Keep instance power', 'Keep instance power')
                     prop_node_attribute(node, layout, 'Double-sided', 'Double-sided')
