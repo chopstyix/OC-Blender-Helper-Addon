@@ -70,6 +70,11 @@ def assign_material(context, mat):
                         face.material_index = len(obj.material_slots) - 1
                 obj.data.update()
 
+def assign_oclight(context):
+    for obj in context.selected_objects:
+        if('oc_light' not in obj):
+            obj['oc_light'] = 'Mesh'
+
 def create_world(name):
     world = bpy.data.worlds.new(name)
     world.use_nodes = True
@@ -243,6 +248,7 @@ class OctaneAssignEmissive(Operator):
         mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         # Assign materials to selected
         assign_material(context, mat)
+        assign_oclight(context)
         return {'FINISHED'}
     
     def invoke(self, context, event):
@@ -1168,6 +1174,131 @@ class OctaneAutosmooth(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+def get_enum_emissive_materials(self, context):
+    lights = context.scene.oc_lights
+    index = context.scene.oc_lights_index
+    if(len(lights)>0):
+        obj = context.scene.objects[lights[index].name]
+        result = []
+        for slot in obj.material_slots:
+            for node in slot.material.node_tree.nodes:
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                    result.append(slot.material)
+        return [(mat.name, mat.name, '') for mat in result]
+    else:
+        return [('None', 'None', '')]
+
+
+def prop_node_attribute(node, layout, attribute, text):
+    if(not node.inputs[attribute].is_linked):
+        layout.prop(node.inputs[attribute], 'default_value', text=text)
+
+class OctaneLightsManger(Operator):
+    bl_label = 'Lights Manager'
+    bl_idname = 'octane.lights_manager'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    emissive_materials: EnumProperty(
+        name='Emissive Materials',
+        items=get_enum_emissive_materials
+    )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
+        layout.prop(self, 'emissive_materials', text='')
+        if(self.emissive_materials!='None' or self.emissive_materials!=''):
+            mat = bpy.data.materials[self.emissive_materials]
+            for node in mat.node_tree.nodes:
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                    if(node.inputs['Texture'].is_linked):
+                        if(node.inputs['Texture'].links[0].from_node.bl_idname=='ShaderNodeOctRGBSpectrumTex'):
+                            layout.prop(node.inputs['Texture'].links[0].from_node.inputs['Color'], 'default_value', text='Color')
+                    else:
+                        layout.prop(node.inputs['Texture'], 'default_value', text='Texture')
+                    prop_node_attribute(node, layout, 'Power', 'Power')
+                    prop_node_attribute(node, layout, 'Ligth pass ID', 'Ligth pass ID')
+                    prop_node_attribute(node, layout, 'Cast shadows', 'Cast shadows')
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission'):
+                    prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
+                    prop_node_attribute(node, layout, 'Keep instance power', 'Keep instance power')
+                    prop_node_attribute(node, layout, 'Double-sided', 'Double-sided')
+                    prop_node_attribute(node, layout, 'Temperature', 'Temperature')
+                    prop_node_attribute(node, layout, 'Normalize', 'Normalize')
+                    prop_node_attribute(node, layout, 'Distribution', 'Distribution')
+                    prop_node_attribute(node, layout, 'Sampling Rate', 'Sampling Rate')
+                    prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
+                    prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
+                    prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission'):
+                    prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
+                    prop_node_attribute(node, layout, 'Keep instance power', 'Keep instance power')
+                    prop_node_attribute(node, layout, 'Double-sided', 'Double-sided')
+                    prop_node_attribute(node, layout, 'Distribution', 'Distribution')
+                    prop_node_attribute(node, layout, 'Sampling Rate', 'Sampling Rate')
+                    prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
+                    prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
+                    prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
+
+    def execute(self, context):
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        context.scene.oc_lights.clear()
+        for obj in context.scene.objects:
+            if 'oc_light' in obj:
+                light = context.scene.oc_lights.add()
+                light.name = obj.name
+                light.tag = obj['oc_light']
+                if(light.tag == 'Point'):
+                    light.icon = 'LIGHT_POINT'
+                elif(light.tag == 'Mesh'):
+                    light.icon = 'LIGHTPROBE_CUBEMAP'
+                elif(light.tag == 'Area'):
+                    light.icon = 'LIGHT_AREA'
+                elif(light.tag == 'Spot'):
+                    light.icon = 'LIGHT_SPOT'
+                elif(light.tag == 'Toon'):
+                    light.icon = 'LIGHT_HEMI'
+                else:
+                    light.icon = 'QUESTION'
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneSetLight(Operator):
+    bl_label = 'Mark as a Light Source'
+    bl_idname = 'octane.set_light'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    light_type: EnumProperty(items=[
+        ('None', 'None', ''),
+        ('Point', 'Point', ''),
+        ('Mesh', 'Mesh', ''),
+        ('Area', 'Area', ''),
+        ('Spot', 'Spot', ''),
+        ('Toon', 'Toon', ''),
+    ], name='Type', default='None')
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, 'light_type', text='')
+    
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if(self.light_type != 'None'):
+                obj['oc_light'] = self.light_type
+            else:
+                if('oc_light' in obj):
+                    del obj['oc_light']
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        if 'oc_light' in context.active_object:
+            self.light_type = context.active_object['oc_light']
+
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 classes = (
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
@@ -1200,7 +1331,9 @@ classes = (
     OctaneManageDenoiser,
     OctaneManageLayers,
     OctaneManagePasses,
-    OctaneAutosmooth
+    OctaneAutosmooth,
+    OctaneLightsManger,
+    OctaneSetLight
 )
 
 def register_operators():

@@ -15,8 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import bpy
-from bpy.types import Menu
-from bpy.props import BoolProperty, StringProperty
+from bpy.types import PropertyGroup, Menu, UIList
+from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionProperty
 from . icons import register_icons, unregister_icons, get_icon
 from . operators import register_operators, unregister_operators, assign_material
 
@@ -93,6 +93,9 @@ class OctaneEnvironmentMenu(Menu):
         layout.operator('octane.setup_hdri', text='Setup Texture Environment', icon='WORLD')
         layout.operator('octane.transform_hdri', icon='FILE_3D')
         layout.separator()
+        layout.operator('octane.lights_manager', icon='OUTLINER_OB_LIGHT')
+        layout.operator('octane.set_light', icon='LIGHT')
+        layout.separator()
         layout.operator('octane.add_backplate', icon='ADD')
         layout.operator('octane.remove_backplate', icon='REMOVE')
         layout.operator('octane.modify_backplate', icon='MODIFIER_DATA')
@@ -148,6 +151,28 @@ class OctaneInfoMenu(Menu):
         
         layout.label(text='Ver.{}.{}.{}'.format(bl_info['version'][0], bl_info['version'][1], bl_info['version'][2]))
 
+class OctaneLightListItem(PropertyGroup):
+    name: StringProperty(
+        name="Material", 
+        default="Unknown"
+    )
+    tag: StringProperty(
+        name="Tag", 
+        default="Unknown"
+    )
+    icon: StringProperty(
+        name="Icon", 
+        default="Unknown"
+    )
+
+class OCTANE_UL_light_list(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            layout.label(text=item.name, icon=item.icon)
+        elif self.layout_type in {'GRID'}: 
+            layout.alignment = 'CENTER' 
+            layout.label(text="")
+
 # Register and Unregister
 classes = (
     VIEW3D_MT_object_octane,
@@ -155,7 +180,9 @@ classes = (
     OctaneMaterialsMenu,
     OctaneEnvironmentMenu,
     OctaneRenderMenu,
-    OctaneInfoMenu
+    OctaneInfoMenu,
+    OctaneLightListItem,
+    OCTANE_UL_light_list
 )
 
 def object_menu_func(self, context):
@@ -176,17 +203,24 @@ def selected_mat_update(self, context):
 def register():
     register_icons()
     register_operators()
+    for cls in classes:
+        bpy.utils.register_class(cls)
     bpy.types.Material.copied_mat = None
     bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
     bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    bpy.types.Scene.oc_lights = CollectionProperty(type=OctaneLightListItem)
+    bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 
 def unregister():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(edit_menu_func)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)
+    del bpy.types.Scene.oc_lights_index
+    del bpy.types.Scene.oc_lights
+    del bpy.types.Scene.is_smooth
+    del bpy.types.Scene.selected_mat
+    del bpy.types.Material.copied_mat
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)
     unregister_operators()
