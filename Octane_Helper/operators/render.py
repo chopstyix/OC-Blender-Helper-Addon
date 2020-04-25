@@ -688,11 +688,12 @@ class OctaneCamerasManager(Operator):
             elif(self.octane_cam_settings == 'Denoiser'):
                 view_layer = context.window.view_layer
                 box = layout.box()
-                box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
+                box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager))
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Denoiser (Perspective)')
-                box.prop(oct_cam, 'enable_denoising', text='Enable Camera Denosier')
-                box.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
+                sub = box.column(align=True)
+                sub.prop(oct_cam, 'enable_denoising', text='Enable Camera Denosier')
+                sub.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
                 box.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
                 box.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
                 box = layout.box()
