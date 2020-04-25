@@ -96,8 +96,8 @@ class OctaneSetupHDRIEnv(Operator):
 
     filepath: StringProperty(subtype="FILE_PATH")
     filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
-    enable_overwrite: BoolProperty(
-        name="Overwrite",
+    enable_override: BoolProperty(
+        name="Override Camera Settings",
         default=True)
     enable_backplate: BoolProperty(
         name="Backplate",
@@ -134,11 +134,11 @@ class OctaneSetupHDRIEnv(Operator):
             world.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Texture'])
             context.scene.world = world
             # Setting up the octane
-            if self.enable_overwrite:
-                context.scene.display_settings.display_device = 'None'
-                context.scene.view_settings.exposure = 0
-                context.scene.view_settings.gamma = 1
-                context.scene.octane.hdr_tonemap_preview_enable = True
+            context.scene.display_settings.display_device = 'None'
+            context.scene.view_settings.exposure = 0
+            context.scene.view_settings.gamma = 1
+            context.scene.octane.hdr_tonemap_preview_enable = True
+            if self.enable_override:
                 context.scene.octane.use_preview_setting_for_camera_imager = True
         return {'FINISHED'}
     
