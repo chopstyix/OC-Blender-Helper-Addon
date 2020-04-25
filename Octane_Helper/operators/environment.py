@@ -71,6 +71,7 @@ def prop_node_attribute(node, layout, attribute, text):
 
 def refresh_lights_list(context):
     context.scene.oc_lights.clear()
+    context.scene.oc_lights_index = 0
     for obj in context.scene.objects:
         if 'oc_light' in obj:
             if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
