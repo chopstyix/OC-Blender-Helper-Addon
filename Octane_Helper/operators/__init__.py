@@ -94,6 +94,7 @@ def get_enum_emissive_materials(self, context):
     if(len(lights)>0):
         obj = context.scene.objects[lights[index].name]
         result = []
+        if(len(obj.material_slots)==0): return [('None', 'None', '')]
         for slot in obj.material_slots:
             for node in slot.material.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
@@ -1321,6 +1322,11 @@ class OctaneSetLight(Operator):
         ('Spot', 'Spot', ''),
         ('Toon', 'Toon', ''),
     ], name='Type', default='None')
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return (obj is not None)
 
     def draw(self, context):
         layout = self.layout
