@@ -12,7 +12,7 @@ def get_enum_cameras(self, context):
 
 # Classes
 class OctaneManageImager(Operator):
-    bl_label = 'Imager (Preview)'
+    bl_label = 'Imager (Perspective)'
     bl_idname = 'octane.manage_imager'
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -20,9 +20,9 @@ class OctaneManageImager(Operator):
         oct_cam = context.scene.oct_view_cam
         layout = self.layout
         col = layout.column(align=True)
-        col.prop(context.scene.octane, "hdr_tonemap_preview_enable", text="Enable Camera Imager")
-        col.prop(context.scene.octane, "use_preview_setting_for_camera_imager")
-        col.operator(OctaneCamerasManager.bl_idname, text='Open Imager (Render) Settings for Cameras')
+        col.prop(context.scene.octane, "hdr_tonemap_preview_enable", text="Enable Perspective Imager")
+        col.prop(context.scene.octane, "use_preview_setting_for_camera_imager", text='Override Camera Settings')
+        col.operator(OctaneCamerasManager.bl_idname, text='Open Imager (Camera)').octane_cam_settings = 'Imager'
 
         col = layout.column(align=True)
         col.enabled = (context.scene.octane.hdr_tonemap_preview_enable)
@@ -59,7 +59,7 @@ class OctaneManageImager(Operator):
         return wm.invoke_props_dialog(self)
 
 class OctaneManagePostprocess(Operator):
-    bl_label = 'Post Processing'
+    bl_label = 'PostProcess (Perspective)'
     bl_idname = 'octane.manage_postprocess'
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -67,15 +67,17 @@ class OctaneManagePostprocess(Operator):
         oct_cam = context.scene.oct_view_cam
         layout = self.layout
         col = layout.column(align=True)
-        col.prop(context.scene.oct_view_cam, "postprocess", text="Enable Postprocess")
-        col.prop(context.scene.octane, "use_preview_post_process_setting")
+        col.prop(context.scene.oct_view_cam, "postprocess", text="Enable Perspective Postprocess")
+        col.prop(context.scene.octane, "use_preview_post_process_setting", text='Override Camera Settings')
+        col.operator(OctaneCamerasManager.bl_idname, text='Open PostProcess (Camera)').octane_cam_settings = 'PostProcess'
+
         col = layout.column(align=True)
-        col.enabled = (context.scene.oct_view_cam.postprocess and context.scene.octane.use_preview_post_process_setting)
+        col.enabled = (context.scene.oct_view_cam.postprocess)
         col.prop(oct_cam, "cut_off")
         col.prop(oct_cam, "bloom_power")
         col.prop(oct_cam, "glare_power")
         col = layout.column(align=True)
-        col.enabled = (context.scene.oct_view_cam.postprocess and context.scene.octane.use_preview_post_process_setting)
+        col.enabled = (context.scene.oct_view_cam.postprocess)
         col.prop(oct_cam, "glare_ray_count")
         col.prop(oct_cam, "glare_angle")
         col.prop(oct_cam, "glare_blur")
@@ -90,7 +92,7 @@ class OctaneManagePostprocess(Operator):
         return wm.invoke_props_dialog(self)
 
 class OctaneManageDenoiser(Operator):
-    bl_label = 'AI Denoiser'
+    bl_label = 'AI Denoiser (Perspective)'
     bl_idname = 'octane.manage_denoiser'
     bl_options = {'REGISTER', 'UNDO'}
     
@@ -101,6 +103,8 @@ class OctaneManageDenoiser(Operator):
         col = layout.column(align=True)
         col.prop(oct_cam, 'enable_denoising', text='Enable Denosier')
         col.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
+        col.prop(context.scene.octane, "use_preview_setting_for_camera_imager", text='Override Camera Settings')
+        col.operator(OctaneCamerasManager.bl_idname, text='Open Denosier (Camera)').octane_cam_settings = 'Denoiser'
         
         col = layout.column(align=True)
         col.enabled = (oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
@@ -446,12 +450,14 @@ class OctaneCamerasManager(Operator):
     octane_cam_settings: EnumProperty(
         name='Octane',
         items=[
-            ('Imager', 'Imager (Render)', ''),
+            ('Imager', 'Imager (Camera)', ''),
+            ('PostProcess', 'PostProcess (Camera)', ''),
             ('Depth of field', 'Depth of field', ''),
             ('Distortion', 'Distortion', ''),
             ('Stereo', 'Stereo', ''),
             ('Baking', 'Baking', ''),
-            ('OSL Camera', 'OSL Camera', '')
+            ('OSL Camera', 'OSL Camera', ''),
+            ('Denoiser', 'Denoiser (Camera)', '')
         ],
         default='Imager'
     )
@@ -534,9 +540,13 @@ class OctaneCamerasManager(Operator):
 
             if(self.octane_cam_settings == 'Imager'):
                 box = layout.box()
+                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                if(context.scene.octane.use_preview_setting_for_camera_imager):
+                    box.label(text='Settings are controlled by Imager (Perspective)')
                 sub = box.column(align=True)
                 sub.prop(context.scene.octane, "hdr_tonemap_render_enable", text="Enable Camera Imager")
-                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Preview)').camera = self.cameras
+                sub.operator(OctaneManageImager.bl_idname, text='Open Imager (Perspective)')
+                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.cameras
 
                 sub = box.row()
                 sub.enabled = context.scene.octane.hdr_tonemap_render_enable
@@ -564,6 +574,27 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "disable_partial_alpha")
                 #sub.prop(oct_cam, "custom_lut")
                 #sub.prop(oct_cam, "lut_strength")
+            elif(self.octane_cam_settings == 'PostProcess'):
+                box = layout.box()
+                box.enabled = (not context.scene.octane.use_preview_post_process_setting)
+                if(context.scene.octane.use_preview_post_process_setting):
+                    box.label(text='Settings are controlled by PostProcess (Perspective)')
+                sub = box.column(align=True)
+                sub.prop(oct_cam, "postprocess", text="Enable PostProcess")
+                sub.operator(OctaneManagePostprocess.bl_idname, text='Open PostProcess (Perspective)')
+                sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.cameras
+
+                sub = box.column(align=True)
+                sub.prop(oct_cam, "cut_off")
+                sub.prop(oct_cam, "bloom_power")
+                sub.prop(oct_cam, "glare_power")
+                sub = box.column(align=True)
+                sub.prop(oct_cam, "glare_ray_count")
+                sub.prop(oct_cam, "glare_angle")
+                sub.prop(oct_cam, "glare_blur")
+                sub.prop(oct_cam, "spectral_intencity")
+                sub.prop(oct_cam, "spectral_shift")
+
             elif(self.octane_cam_settings == 'Depth of field'):
                 box = layout.box()
                 sub = box.column(align=True)
@@ -654,6 +685,32 @@ class OctaneCamerasManager(Operator):
                 sub = col.row(align = True)        
                 sub.prop_search(oct_cam.osl_camera_node_collections, "osl_camera_node", oct_cam.osl_camera_node_collections, "osl_camera_nodes")        
                 sub.operator('update.osl_camera_nodes', text = 'Update')
+            elif(self.octane_cam_settings == 'Denoiser'):
+                box = layout.box()
+                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                if(context.scene.octane.use_preview_setting_for_camera_imager):
+                    box.label(text='Settings are controlled by Denoiser (Perspective)')
+                box.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
+                box.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
+                box = layout.box()
+                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                box.label(text="Spectral AI Denoiser:")
+                sub = box.column(align=True)
+                sub.prop(oct_cam, 'enable_denoising')
+                sub.prop(oct_cam, 'denoise_volumes')
+                sub.prop(oct_cam, 'denoise_on_completion')
+                sub.prop(oct_cam, 'min_denoiser_samples')
+                sub.prop(oct_cam, 'max_denoiser_interval')
+                sub.prop(oct_cam, 'denoiser_blend')
+                box = layout.box()
+                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                box.label(text="AI Up-Sampler:")
+                sub = box.column(align=True)
+                sub.prop(oct_cam.ai_up_sampler, 'sample_mode')
+                sub.prop(oct_cam.ai_up_sampler, 'enable_ai_up_sampling')
+                sub.prop(oct_cam.ai_up_sampler, 'up_sampling_on_completion')
+                sub.prop(oct_cam.ai_up_sampler, 'min_up_sampler_samples')
+                sub.prop(oct_cam.ai_up_sampler, 'max_up_sampler_interval')
 
     def execute(self, context):
         return {'FINISHED'}
@@ -692,5 +749,57 @@ class OctaneCopyCameraSettings(Operator):
         oct_view.premultiplied_alpha = oct_cam.premultiplied_alpha
         oct_view.neutral_response = oct_cam.neutral_response
         oct_view.disable_partial_alpha = oct_cam.disable_partial_alpha
+
+        return {'FINISHED'}
+
+class OctaneCopyPostProcessSettings(Operator):
+    bl_label = 'Copy PostProcess Settings'
+    bl_idname = 'octane.copy_post_settings'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    camera: StringProperty(
+        default='Unknown'
+    )
+
+    def execute(self, context):
+        oct_view = context.scene.oct_view_cam
+        oct_cam = context.scene.objects[self.camera].data.octane
+
+        oct_view.cut_off = oct_cam.cut_off
+        oct_view.denoiser_blend = oct_cam.denoiser_blend
+        oct_view.glare_power = oct_cam.glare_power
+        oct_view.glare_ray_count = oct_cam.glare_ray_count
+        oct_view.glare_angle = oct_cam.glare_angle
+        oct_view.denoiser_blend = oct_cam.denoiser_blend
+        oct_view.spectral_intencity = oct_cam.spectral_intencity
+        oct_view.denoiser_blend = oct_cam.denoiser_blend
+
+        return {'FINISHED'}
+
+class OctaneCopyDenosierSettings(Operator):
+    bl_label = 'Copy Denosier Settings'
+    bl_idname = 'octane.copy_denosier_settings'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    camera: StringProperty(
+        default='Unknown'
+    )
+
+    def execute(self, context):
+        oct_view = context.scene.oct_view_cam
+        oct_cam = context.scene.objects[self.camera].data.octane
+
+        oct_view.enable_denoising = oct_cam.enable_denoising
+        oct_view.denoise_volumes = oct_cam.denoise_volumes
+        oct_view.denoise_on_completion = oct_cam.denoise_on_completion
+        oct_view.min_denoiser_samples = oct_cam.min_denoiser_samples
+        oct_view.max_denoiser_interval = oct_cam.max_denoiser_interval
+        oct_view.denoiser_blend = oct_cam.denoiser_blend
+
+        oct_view.ai_up_sampler.sample_mode = oct_cam.ai_up_sampler.sample_mode
+        oct_view.ai_up_sampler.enable_ai_up_sampling = oct_cam.ai_up_sampler.enable_ai_up_sampling
+        oct_view.ai_up_sampler.up_sampling_on_completion = oct_cam.ai_up_sampler.up_sampling_on_completion
+        oct_view.ai_up_sampler.min_up_sampler_samples = oct_cam.ai_up_sampler.min_up_sampler_samples
+        oct_view.ai_up_sampler.max_up_sampler_interval = oct_cam.ai_up_sampler.max_up_sampler_interval
 
         return {'FINISHED'}
