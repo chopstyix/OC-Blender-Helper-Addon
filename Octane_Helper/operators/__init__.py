@@ -70,10 +70,10 @@ def assign_material(context, mat):
                         face.material_index = len(obj.material_slots) - 1
                 obj.data.update()
 
-def assign_oclight(context):
+def assign_oclight(context, type):
     for obj in context.selected_objects:
         if('oc_light' not in obj):
-            obj['oc_light'] = 'Mesh'
+            obj['oc_light'] = type
 
 def create_world(name):
     world = bpy.data.worlds.new(name)
@@ -232,6 +232,15 @@ class OctaneAssignEmissive(Operator):
     emission_surface_brightness: BoolProperty(
         name="Surface Brightness",
         default=True)
+    
+    light_type: EnumProperty(items=[
+        ('None', 'None', ''),
+        ('Point', 'Point', ''),
+        ('Mesh', 'Mesh', ''),
+        ('Area', 'Area', ''),
+        ('Spot', 'Spot', ''),
+        ('Toon', 'Toon', ''),
+    ], name='Mark as', default='Mesh')
 
     def execute(self, context):
         # Create material
@@ -248,7 +257,7 @@ class OctaneAssignEmissive(Operator):
         mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         # Assign materials to selected
         assign_material(context, mat)
-        assign_oclight(context)
+        assign_oclight(context, self.light_type)
         return {'FINISHED'}
     
     def invoke(self, context, event):
@@ -441,16 +450,49 @@ class OctaneAssignHair(Operator):
         assign_material(context, mat)
         return {'FINISHED'}
 
+class OctaneRenameMat(Operator):
+    bl_label = 'Rename'
+    bl_idname = 'octane.rename_mat'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    name: StringProperty(
+        name='Name',
+        default='Unknown'
+    )
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if(obj is not None):
+            if(obj.type == 'MESH'):
+                return (len(obj.material_slots)>=1)
+        return False
+    def execute(self, context):
+        obj = context.active_object
+        obj.active_material.name = self.name
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        self.name = context.active_object.active_material.name
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 class OctaneCopyMat(Operator):
     bl_label = 'Copy'
     bl_idname = 'octane.copy_mat'
     bl_options = {'REGISTER', 'UNDO'}
 
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if(obj is not None):
+            if(obj.type == 'MESH'):
+                return (len(obj.material_slots)>=1)
+        return False
+
     def execute(self, context):
         obj = context.active_object
-        if(obj.type == 'MESH'):
-            if(len(obj.material_slots)>=1):
-                bpy.types.Material.copied_mat = obj.active_material
+        bpy.types.Material.copied_mat = obj.active_material
         return {'FINISHED'}
 
 class OctanePasteMat(Operator):
@@ -1316,6 +1358,7 @@ classes = (
     OctaneAssignComposite,
     OctaneAssignHair,
     OctaneAssignSSS,
+    OctaneRenameMat,
     OctaneCopyMat,
     OctanePasteMat,
     OctaneSetupHDRIEnv,
