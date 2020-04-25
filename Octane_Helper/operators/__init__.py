@@ -36,7 +36,7 @@ classes = (
     OctaneManageLayers,
     OctaneManagePasses,
     OctaneAutosmooth,
-    OctaneLightsManger,
+    OctaneLightsManager,
     OctaneSetLight
 )
 

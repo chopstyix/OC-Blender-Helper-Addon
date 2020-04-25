@@ -331,7 +331,7 @@ class OctaneModifyBackplate(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-class OctaneLightsManger(Operator):
+class OctaneLightsManager(Operator):
     bl_label = 'Lights Manager'
     bl_idname = 'octane.lights_manager'
     bl_options = {'REGISTER', 'UNDO'}
@@ -377,6 +377,7 @@ class OctaneLightsManger(Operator):
                     prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
                     prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
                     prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
+                break # There might be many Emissive textures in the material. Currently we only support one because the panel is too small
 
     def execute(self, context):
         return {'FINISHED'}
