@@ -98,7 +98,7 @@ class OctaneSetupHDRIEnv(Operator):
     filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
     enable_override: BoolProperty(
         name="Override Camera Settings",
-        default=True)
+        default=False)
     enable_backplate: BoolProperty(
         name="Backplate",
         default=False)
