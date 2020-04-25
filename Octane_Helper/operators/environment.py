@@ -44,20 +44,49 @@ def get_enum_emissive_materials(self, context):
     if(len(lights)==0): return [('None', 'None', '')]
     obj = context.scene.objects[lights[index].name]
     result = []
-    # Return None if no material found in the active light object
-    if(len(obj.material_slots)==0): return [('None', 'None', '')]
-    # Search materials in the active light object for emissive material
-    for slot in obj.material_slots:
-        for node in slot.material.node_tree.nodes:
+
+    if(obj.type == 'LIGHT'):
+        # Return None if Light is not using nodes
+        if(not obj.data.use_nodes): obj.data.use_nodes = True
+        # Search node in the active light object for emissive node
+        for node in obj.data.node_tree.nodes:
             if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
-                result.append(slot.material)
+                result.append(('Light', 'Light', ''))
+    elif(obj.type == 'MESH'):
+        # Return None if no material found in the active light object
+        if(len(obj.material_slots)==0): return [('None', 'None', '')]
+        # Search materials in the active light object for emissive material
+        for slot in obj.material_slots:
+            for node in slot.material.node_tree.nodes:
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                    result.append((slot.material.name, slot.material.name, ''))
+    
     # Return result if the emissive material exists otherwise return None
-    if(len(result)!=0): return [(mat.name, mat.name, '') for mat in result]
+    if(len(result)!=0): return result
     else: return [('None', 'None', '')]
 
 def prop_node_attribute(node, layout, attribute, text):
     if(not node.inputs[attribute].is_linked):
         layout.prop(node.inputs[attribute], 'default_value', text=text)
+
+def refresh_lights_list(context):
+    context.scene.oc_lights.clear()
+    for obj in context.scene.objects:
+        if 'oc_light' in obj:
+            if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
+                light = context.scene.oc_lights.add()
+                light.name = obj.name
+                light.tag = obj['oc_light']
+                if(light.tag == 'Mesh'):
+                    light.icon = 'LIGHTPROBE_CUBEMAP'
+                elif(light.tag == 'Sphere'):
+                    light.icon = 'LIGHT_POINT'
+                elif(light.tag == 'Area'):
+                    light.icon = 'LIGHT_AREA'
+                elif(light.tag == 'Toon'):
+                    light.icon = 'LIGHTPROBE_PLANAR'
+                else:
+                    light.icon = 'QUESTION'
 
 # Classes
 class OctaneSetupHDRIEnv(Operator):
@@ -343,12 +372,24 @@ class OctaneLightsManager(Operator):
     )
 
     def draw(self, context):
+        lights = context.scene.oc_lights
+        index = context.scene.oc_lights_index
         layout = self.layout
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.operator('octane.add_light_sphere', text='Sphere')
+        row.operator('octane.add_light_area', text='Area')
+        row.operator('octane.add_light_toon', text='Toon')
+
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
         layout.prop(self, 'emissive_materials', text='')
         if(self.emissive_materials!='None' and self.emissive_materials!='' and self.emissive_materials!=None):
-            mat = bpy.data.materials[self.emissive_materials]
-            for node in mat.node_tree.nodes:
+            obj = context.scene.objects[lights[index].name]
+            if(obj.type=='LIGHT'):
+                nodes = obj.data.node_tree.nodes
+            else:
+                nodes = bpy.data.materials[self.emissive_materials].node_tree.nodes
+            for node in nodes:
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                     if(node.inputs['Texture'].is_linked):
                         if(node.inputs['Texture'].links[0].from_node.bl_idname=='ShaderNodeOctRGBSpectrumTex'):
@@ -356,7 +397,7 @@ class OctaneLightsManager(Operator):
                     else:
                         layout.prop(node.inputs['Texture'], 'default_value', text='Texture')
                     prop_node_attribute(node, layout, 'Power', 'Power')
-                    prop_node_attribute(node, layout, 'Ligth pass ID', 'Ligth pass ID')
+                    #prop_node_attribute(node, layout, 'Light pass ID', 'Light pass ID')
                     prop_node_attribute(node, layout, 'Cast shadows', 'Cast shadows')
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission'):
                     prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
@@ -378,31 +419,12 @@ class OctaneLightsManager(Operator):
                     prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
                     prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
                     prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
-                break # There might be many Emissive textures in the material. Currently we only support one because the panel is too small
 
     def execute(self, context):
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        context.scene.oc_lights.clear()
-        for obj in context.scene.objects:
-            if 'oc_light' in obj:
-                if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
-                    light = context.scene.oc_lights.add()
-                    light.name = obj.name
-                    light.tag = obj['oc_light']
-                    if(light.tag == 'Point'):
-                        light.icon = 'LIGHT_POINT'
-                    elif(light.tag == 'Mesh'):
-                        light.icon = 'LIGHTPROBE_CUBEMAP'
-                    elif(light.tag == 'Area'):
-                        light.icon = 'LIGHT_AREA'
-                    elif(light.tag == 'Spot'):
-                        light.icon = 'LIGHT_SPOT'
-                    elif(light.tag == 'Toon'):
-                        light.icon = 'LIGHT_HEMI'
-                    else:
-                        light.icon = 'QUESTION'
+        refresh_lights_list(context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
@@ -413,10 +435,9 @@ class OctaneSetLight(Operator):
 
     light_type: EnumProperty(items=[
         ('None', 'None', ''),
-        ('Point', 'Point', ''),
         ('Mesh', 'Mesh', ''),
+        ('Sphere', 'Sphere', ''),
         ('Area', 'Area', ''),
-        ('Spot', 'Spot', ''),
         ('Toon', 'Toon', ''),
     ], name='Type', default='None')
 
@@ -444,3 +465,36 @@ class OctaneSetLight(Operator):
 
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
+
+class OctaneAddLightSphere(Operator):
+    bl_label = 'Add a sphere light'
+    bl_idname = 'octane.add_light_sphere'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.object.light_add(type='SPHERE', location=(0, 0, 0))
+        context.active_object['oc_light'] = 'Sphere'
+        refresh_lights_list(context)
+        return {'FINISHED'}
+
+class OctaneAddLightArea(Operator):
+    bl_label = 'Add a area light'
+    bl_idname = 'octane.add_light_area'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.object.light_add(type='AREA', location=(0, 0, 0))
+        context.active_object['oc_light'] = 'Area'
+        refresh_lights_list(context)
+        return {'FINISHED'}
+
+class OctaneAddLightToon(Operator):
+    bl_label = 'Add a toon light'
+    bl_idname = 'octane.add_light_toon'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
+        context.active_object['oc_light'] = 'Point'
+        refresh_lights_list(context)
+        return {'FINISHED'}
