@@ -630,6 +630,11 @@ class OctaneSetRenderID(Operator):
         default = 1
     )
 
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return (obj is not None)
+
     def execute(self, context):
         for obj in context.selected_objects:
             obj.octane.render_layer_id = self.rid
