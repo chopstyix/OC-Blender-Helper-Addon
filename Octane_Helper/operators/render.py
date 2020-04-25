@@ -101,7 +101,7 @@ class OctaneManageDenoiser(Operator):
         view_layer = context.window.view_layer
         layout = self.layout
         col = layout.column(align=True)
-        col.prop(oct_cam, 'enable_denoising', text='Enable Denosier')
+        col.prop(oct_cam, 'enable_denoising', text='Enable Perspective Denosier')
         col.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
         col.prop(context.scene.octane, "use_preview_setting_for_camera_imager", text='Override Camera Settings')
         col.operator(OctaneCamerasManager.bl_idname, text='Open Denosier (Camera)').octane_cam_settings = 'Denoiser'
@@ -686,24 +686,26 @@ class OctaneCamerasManager(Operator):
                 sub.prop_search(oct_cam.osl_camera_node_collections, "osl_camera_node", oct_cam.osl_camera_node_collections, "osl_camera_nodes")        
                 sub.operator('update.osl_camera_nodes', text = 'Update')
             elif(self.octane_cam_settings == 'Denoiser'):
+                view_layer = context.window.view_layer
                 box = layout.box()
-                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Denoiser (Perspective)')
+                box.prop(oct_cam, 'enable_denoising', text='Enable Camera Denosier')
+                box.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
                 box.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
                 box.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
                 box = layout.box()
-                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 box.label(text="Spectral AI Denoiser:")
                 sub = box.column(align=True)
-                sub.prop(oct_cam, 'enable_denoising')
                 sub.prop(oct_cam, 'denoise_volumes')
                 sub.prop(oct_cam, 'denoise_on_completion')
                 sub.prop(oct_cam, 'min_denoiser_samples')
                 sub.prop(oct_cam, 'max_denoiser_interval')
                 sub.prop(oct_cam, 'denoiser_blend')
                 box = layout.box()
-                box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
+                box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 box.label(text="AI Up-Sampler:")
                 sub = box.column(align=True)
                 sub.prop(oct_cam.ai_up_sampler, 'sample_mode')
