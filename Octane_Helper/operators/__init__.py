@@ -88,6 +88,25 @@ def update_sss(self, context):
     if(self.enable_geneate_transmission):
         self.sss_transmission = get_bright_color(self.sss_albedo)
 
+def get_enum_emissive_materials(self, context):
+    lights = context.scene.oc_lights
+    index = context.scene.oc_lights_index
+    if(len(lights)>0):
+        obj = context.scene.objects[lights[index].name]
+        result = []
+        for slot in obj.material_slots:
+            for node in slot.material.node_tree.nodes:
+                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                    result.append(slot.material)
+        return [(mat.name, mat.name, '') for mat in result]
+    else:
+        return [('None', 'None', '')]
+
+
+def prop_node_attribute(node, layout, attribute, text):
+    if(not node.inputs[attribute].is_linked):
+        layout.prop(node.inputs[attribute], 'default_value', text=text)
+
 # Operators
 class OctaneAssignUniversal(Operator):
     bl_label = 'Universal Material'
@@ -1216,25 +1235,6 @@ class OctaneAutosmooth(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-def get_enum_emissive_materials(self, context):
-    lights = context.scene.oc_lights
-    index = context.scene.oc_lights_index
-    if(len(lights)>0):
-        obj = context.scene.objects[lights[index].name]
-        result = []
-        for slot in obj.material_slots:
-            for node in slot.material.node_tree.nodes:
-                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
-                    result.append(slot.material)
-        return [(mat.name, mat.name, '') for mat in result]
-    else:
-        return [('None', 'None', '')]
-
-
-def prop_node_attribute(node, layout, attribute, text):
-    if(not node.inputs[attribute].is_linked):
-        layout.prop(node.inputs[attribute], 'default_value', text=text)
-
 class OctaneLightsManger(Operator):
     bl_label = 'Lights Manager'
     bl_idname = 'octane.lights_manager'
@@ -1249,7 +1249,7 @@ class OctaneLightsManger(Operator):
         layout = self.layout
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
         layout.prop(self, 'emissive_materials', text='')
-        if(self.emissive_materials!='None' or self.emissive_materials!=''):
+        if(self.emissive_materials!='None' and self.emissive_materials!='' and self.emissive_materials!=None):
             mat = bpy.data.materials[self.emissive_materials]
             for node in mat.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
@@ -1289,21 +1289,22 @@ class OctaneLightsManger(Operator):
         context.scene.oc_lights.clear()
         for obj in context.scene.objects:
             if 'oc_light' in obj:
-                light = context.scene.oc_lights.add()
-                light.name = obj.name
-                light.tag = obj['oc_light']
-                if(light.tag == 'Point'):
-                    light.icon = 'LIGHT_POINT'
-                elif(light.tag == 'Mesh'):
-                    light.icon = 'LIGHTPROBE_CUBEMAP'
-                elif(light.tag == 'Area'):
-                    light.icon = 'LIGHT_AREA'
-                elif(light.tag == 'Spot'):
-                    light.icon = 'LIGHT_SPOT'
-                elif(light.tag == 'Toon'):
-                    light.icon = 'LIGHT_HEMI'
-                else:
-                    light.icon = 'QUESTION'
+                if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
+                    light = context.scene.oc_lights.add()
+                    light.name = obj.name
+                    light.tag = obj['oc_light']
+                    if(light.tag == 'Point'):
+                        light.icon = 'LIGHT_POINT'
+                    elif(light.tag == 'Mesh'):
+                        light.icon = 'LIGHTPROBE_CUBEMAP'
+                    elif(light.tag == 'Area'):
+                        light.icon = 'LIGHT_AREA'
+                    elif(light.tag == 'Spot'):
+                        light.icon = 'LIGHT_SPOT'
+                    elif(light.tag == 'Toon'):
+                        light.icon = 'LIGHT_HEMI'
+                    else:
+                        light.icon = 'QUESTION'
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
