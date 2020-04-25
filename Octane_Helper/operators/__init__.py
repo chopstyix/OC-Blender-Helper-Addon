@@ -37,7 +37,9 @@ classes = (
     OctaneManagePasses,
     OctaneAutosmooth,
     OctaneLightsManager,
-    OctaneSetLight
+    OctaneSetLight,
+    OctaneCamerasManager,
+    OctaneCopyCameraSettings
 )
 
 def register_operators():

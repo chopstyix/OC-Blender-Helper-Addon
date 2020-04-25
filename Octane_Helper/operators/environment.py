@@ -59,6 +59,7 @@ def prop_node_attribute(node, layout, attribute, text):
     if(not node.inputs[attribute].is_linked):
         layout.prop(node.inputs[attribute], 'default_value', text=text)
 
+# Classes
 class OctaneSetupHDRIEnv(Operator):
     bl_label = 'Setup'
     bl_idname = 'octane.setup_hdri'

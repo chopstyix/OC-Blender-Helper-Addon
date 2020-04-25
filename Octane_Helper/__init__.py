@@ -114,6 +114,8 @@ class OctaneRenderMenu(Menu):
         layout.operator('octane.manage_render_layers', icon='RENDERLAYERS')
         layout.operator('octane.toggle_claymode', icon='SCULPTMODE_HLT')
         layout.separator()
+        layout.operator('octane.cameras_manager', icon='VIEW_CAMERA')
+        layout.separator()
         layout.operator('octane.set_renderid', icon='FILE_IMAGE')
         layout.separator()
         layout.operator('octane.open_compositor', icon='NODE_COMPOSITING')
