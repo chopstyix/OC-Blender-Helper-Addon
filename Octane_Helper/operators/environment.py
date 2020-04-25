@@ -40,17 +40,20 @@ def update_backplate(self, context):
 def get_enum_emissive_materials(self, context):
     lights = context.scene.oc_lights
     index = context.scene.oc_lights_index
-    if(len(lights)>0):
-        obj = context.scene.objects[lights[index].name]
-        result = []
-        if(len(obj.material_slots)==0): return [('None', 'None', '')]
-        for slot in obj.material_slots:
-            for node in slot.material.node_tree.nodes:
-                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
-                    result.append(slot.material)
-        return [(mat.name, mat.name, '') for mat in result]
-    else:
-        return [('None', 'None', '')]
+    # Return None if no object taged as light
+    if(len(lights)==0): return [('None', 'None', '')]
+    obj = context.scene.objects[lights[index].name]
+    result = []
+    # Return None if no material found in the active light object
+    if(len(obj.material_slots)==0): return [('None', 'None', '')]
+    # Search materials in the active light object for emissive material
+    for slot in obj.material_slots:
+        for node in slot.material.node_tree.nodes:
+            if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                result.append(slot.material)
+    # Return result if the emissive material exists otherwise return None
+    if(len(result)!=0): return [(mat.name, mat.name, '') for mat in result]
+    else: return [('None', 'None', '')]
 
 def prop_node_attribute(node, layout, attribute, text):
     if(not node.inputs[attribute].is_linked):
