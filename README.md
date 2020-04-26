@@ -1,6 +1,16 @@
 # OC-Blender-Helper-Addon
 A helper addon for Octane Blender edition
 
+
+
+> The reason I develop this addon is for speeding up user workflow, so users can access basic functions provided by Octane very quickly and newcomers can know where to start. The materials and nodes setup are pretty raw and treat it as a starting point
+
+> I welcome issue reports, please let me know where to promote and fix
+
+> Glhf
+
+
+
 ## Versions
 
 * OctaneRender™ for Blender 2019 and later
@@ -29,4 +39,5 @@ A helper addon for Octane Blender edition
 
 * Medium environment
 * Different types of lights
-* Cameras manager
+* Open specific material in separate window
+* A fake IPR ?
