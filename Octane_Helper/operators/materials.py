@@ -7,8 +7,9 @@ import colorsys
 def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
+    ntree = mat.node_tree
+    outNode = ntree.get_output_node('octane')
     nodes = mat.node_tree.nodes
-    outNode = nodes[0]
     oldMainMat = nodes[1]
     mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location

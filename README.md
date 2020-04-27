@@ -42,7 +42,6 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* Presets
+* Worlds Manager
 * Medium environment
 * Different types of lights
-* A fake IPR ?

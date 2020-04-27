@@ -16,7 +16,7 @@
 
 import bpy
 from bpy.types import PropertyGroup, Menu, UIList
-from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionProperty, PointerProperty
+from bpy.props import BoolProperty, StringProperty, IntProperty, CollectionProperty, PointerProperty, EnumProperty
 from . icons import register_icons, unregister_icons, get_icon
 from . operators import register_operators, unregister_operators, assign_material
 
@@ -92,7 +92,7 @@ class OctaneEnvironmentMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('octane.setup_hdri', text='Setup Texture Environment', icon='WORLD')
+        layout.operator('octane.environments_manager', icon='WORLD')
         layout.operator('octane.transform_hdri', icon='FILE_3D')
         layout.separator()
         layout.operator('octane.lights_manager', icon='OUTLINER_OB_LIGHT')
@@ -172,6 +172,11 @@ class OctaneLightListItem(PropertyGroup):
         default="Unknown"
     )
 
+class OctaneWorldListItem(PropertyGroup):
+    node: StringProperty(
+        name="Node"
+    )
+
 class OCTANE_UL_light_list(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
         if self.layout_type in {'DEFAULT', 'COMPACT'}:
@@ -179,6 +184,27 @@ class OCTANE_UL_light_list(UIList):
         elif self.layout_type in {'GRID'}: 
             layout.alignment = 'CENTER' 
             layout.label(text="", icon=item.icon)
+
+class OCTANE_UL_world_list(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+
+        if self.layout_type in {'DEFAULT', 'COMPACT'}:
+            ''' Due to restrictions of Blender. Cannot rename node for now
+            if(item.node not in ntree.nodes):
+                layout.prop(ntree.get_output_node('octane'), 'name', emboss=False, icon='NODE', text='')
+                refresh_worlds_list(context)
+            else:
+                layout.prop(ntree.nodes[item.node], 'name', emboss=False, icon='NODE', text='')
+            '''
+            if(ntree.nodes[item.node].is_active_output):
+                layout.label(text=item.node, icon='NODE_SEL')
+            else:
+                layout.label(text=item.node, icon='NODE')
+        elif self.layout_type in {'GRID'}: 
+            layout.alignment = 'CENTER' 
+            layout.label(text="", icon='NODE')
 
 # Register and Unregister
 classes = (
@@ -189,7 +215,9 @@ classes = (
     OctaneRenderMenu,
     OctaneInfoMenu,
     OctaneLightListItem,
-    OCTANE_UL_light_list
+    OCTANE_UL_light_list,
+    OctaneWorldListItem,
+    OCTANE_UL_world_list
 )
 
 def object_menu_func(self, context):
@@ -223,6 +251,8 @@ def register():
     bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
     bpy.types.Scene.oc_lights = CollectionProperty(type=OctaneLightListItem)
     bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)
+    bpy.types.Scene.oc_worlds = CollectionProperty(type=OctaneWorldListItem)
+    bpy.types.Scene.oc_worlds_index = IntProperty(name='World', default=0)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 

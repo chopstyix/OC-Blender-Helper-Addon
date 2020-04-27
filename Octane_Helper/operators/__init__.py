@@ -22,7 +22,7 @@ classes = (
     OctaneRenameMat,
     OctaneCopyMat,
     OctanePasteMat,
-    OctaneSetupHDRIEnv,
+    OctaneAddTexEnv,
     OctaneChangeRenderID,
     OctaneTransformHDRIEnv,
     OctaneOpenCompositor,
@@ -47,7 +47,12 @@ classes = (
     OctaneAddLightToonPoint,
     OctaneAddLightToonSpot,
     OctaneChangeObjProperties,
-    OctaneCopyObjProperties
+    OctaneCopyObjProperties,
+    OctaneEnvironmentsManager,
+    OctaneAddEnvironmentPreset,
+    OctaneRemoveEnvironmentPreset,
+    OctaneActivateEnvironment,
+    OctaneRenameEnvironment
 )
 
 def register_operators():

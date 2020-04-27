@@ -1,11 +1,18 @@
 import bpy
 from bpy.types import Operator
+from bl_operators.presets import AddPresetBase
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
+import os
 
-def create_world(name):
-    world = bpy.data.worlds.new(name)
+def create_world_output(context, name):
+    world = context.scene.world
     world.use_nodes = True
-    return world
+    outNode = world.node_tree.nodes.new('ShaderNodeOutputWorld')
+    outNode.name = name
+    ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
+    
+    outNode.location = (300, min(ys)-600)
+    return outNode
 
 def get_enum_trs(self, context):
     world = context.scene.world
@@ -91,14 +98,27 @@ def refresh_lights_list(context):
                 else:
                     light.icon = 'QUESTION'
 
+def get_enum_env_presets(self, context):
+    presets = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+    if not os.path.isdir(presets):
+        os.makedirs(presets)
+    files = os.listdir(presets)
+    if(len(files)==0):
+        return [('None', 'None', '')]
+    return [(file[:-6], file[:-6], '') for file in files]
+
 # Classes
-class OctaneSetupHDRIEnv(Operator):
-    bl_label = 'Setup'
-    bl_idname = 'octane.setup_hdri'
+class OctaneAddTexEnv(Operator):
+    bl_label = 'Add a texture environment'
+    bl_idname = 'octane.add_tex_env'
     bl_options = {'REGISTER', 'UNDO'}
 
     filepath: StringProperty(subtype="FILE_PATH")
     filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+    name: StringProperty(
+        name='Name',
+        default='OC_Environment'
+    )
     enable_override: BoolProperty(
         name="Override Camera Settings",
         default=False)
@@ -115,27 +135,29 @@ class OctaneSetupHDRIEnv(Operator):
 
     def execute(self, context):
         if self.filepath != '':
-            world = create_world('OC_Environment')
-            ntree = world.node_tree
+            ntree = context.scene.world.node_tree
+            outNode = create_world_output(context, self.name)
+            texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
+            texenvNode.location = (outNode.location.x - 200, outNode.location.y)
             imgNode = ntree.nodes.new('ShaderNodeOctImageTex')
-            imgNode.location = (-210, 300)
+            imgNode.location = (texenvNode.location.x - 250, outNode.location.y)
             imgNode.inputs['Gamma'].default_value = 1
             imgNode.image = bpy.data.images.load(self.filepath)
             sphereNode = ntree.nodes.new('ShaderNodeOctSphericalProjection')
-            sphereNode.location = (-410, 100)
+            sphereNode.location = (imgNode.location.x - 200, outNode.location.y)
             transNode = ntree.nodes.new('ShaderNodeOct3DTransform')
-            transNode.location = (-610, 100)
-            transNode.name = 'Texture_3D_Transform'
+            transNode.location = (sphereNode.location.x-200, outNode.location.y)
+            transNode.name = '3D_Transform'
             if(self.enable_backplate):
-                texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
-                texenvNode.location = (10, 0)
-                texenvNode.inputs['Texture'].default_value = self.backplate_color
-                texenvNode.inputs['Visable env Backplate'].default_value = True
-                ntree.links.new(texenvNode.outputs[0], ntree.nodes[0].inputs['Octane VisibleEnvironment'])
+                texvisNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
+                texvisNode.location = (texenvNode.location.x, texenvNode.location.y-300)
+                texvisNode.inputs['Texture'].default_value = self.backplate_color
+                texvisNode.inputs['Visable env Backplate'].default_value = True
+                ntree.links.new(texvisNode.outputs[0], outNode.inputs['Octane VisibleEnvironment'])
             ntree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
             ntree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
-            ntree.links.new(imgNode.outputs[0], ntree.nodes[1].inputs['Texture'])
-            context.scene.world = world
+            ntree.links.new(imgNode.outputs[0], texenvNode.inputs['Texture'])
+            ntree.links.new(texenvNode.outputs[0], outNode.inputs['Octane Environment'])
             # Setting up the octane
             context.scene.display_settings.display_device = 'None'
             context.scene.view_settings.exposure = 0
@@ -478,3 +500,169 @@ class OctaneAddLightToonSpot(Operator):
         context.active_object['oc_light'] = 'Spot Toon'
         refresh_lights_list(context)
         return {'FINISHED'}
+
+class OctaneAddEnvironmentPreset(Operator):
+    bl_label = 'Add an Environement Preset'
+    bl_idname = 'octane.add_env_preset'
+
+    save_name: StringProperty(name='Name', default='')
+    pack_images: BoolProperty(name='Pack images', default=False, description='This option may take long time to process. Turn on only when you need to share presets across computers')
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)
+        col.prop(self, 'save_name')
+        col = layout.column(align=True)
+        col.prop(self, 'pack_images')
+
+    def execute(self, context):
+        # Create a Blend file
+        if(self.save_name==''): 
+            self.report({'WARNING'}, 'The name should not be empty')
+            return {'CANCELLED'}
+        if(self.save_name=='None'): 
+            self.report({'WARNING'}, 'The name is invalid')
+            return {'CANCELLED'}
+        presets_dir = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+        files = os.listdir(presets_dir)
+        if(len([file for file in files if (file[:-6]==self.save_name)])):
+            self.report({'WARNING'}, 'The name has beed used, try another one')
+            return {'CANCELLED'}
+        save_file = os.path.join(presets_dir, self.save_name + '.blend')
+
+        # Save required data to the file
+        # For iterable object, use '*items' instead if 'items'
+        data_blocks = {
+            bpy.context.scene.world
+        }
+        nodes = bpy.context.scene.world.node_tree.nodes
+        if(self.pack_images):
+            [node.image.pack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]   
+        bpy.data.libraries.write(save_file, data_blocks, compress=True)
+        if(self.pack_images):
+            [node.image.unpack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]
+        
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneRemoveEnvironmentPreset(Operator):
+    bl_label = 'Remove an Environement Preset'
+    bl_idname = 'octane.remove_env_preset'
+
+    preset_name: StringProperty(default='')
+
+    def execute(self, context):
+        if(self.preset_name!='None'):
+            presets_dir = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+            os.remove(os.path.join(presets_dir, self.preset_name + '.blend'))
+        return {'FINISHED'}
+
+def update_enum_env_presets(self, context):
+    # Load libraries from file and prop existing worlds
+    # Set selected out active
+    pass
+
+def refresh_worlds_list(context):
+    context.scene.oc_worlds.clear()
+    context.scene.oc_worlds_index = 0
+    
+    ntree = context.scene.world.node_tree
+    index = 0
+    for node in ntree.nodes:
+        if(node.bl_idname=='ShaderNodeOutputWorld'):
+            world = context.scene.oc_worlds.add()
+            world.node = node.name
+            if(node.is_active_output):
+                context.scene.oc_worlds_index = index
+            index += 1
+
+class OctaneActivateEnvironment(Operator):
+    bl_label = 'Activate an environment'
+    bl_idname = 'octane.activate_env'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+        
+        ntree.get_output_node('octane').is_active_output = False
+        ntree.nodes[context.scene.oc_worlds[index].node].is_active_output = True
+        return {'FINISHED'}
+
+class OctaneRenameEnvironment(Operator):
+    bl_label = 'Rename an environment'
+    bl_idname = 'octane.rename_env'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    name: StringProperty(name='Name', default='')
+
+    def execute(self, context):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+        ntree.nodes[context.scene.oc_worlds[index].node].name = self.name
+        refresh_worlds_list(context)
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+        self.name = context.scene.oc_worlds[index].node
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneEnvironmentsManager(Operator):
+    bl_label = 'Environments manager'
+    bl_idname = 'octane.environments_manager'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    preset: EnumProperty(name='Presets', items=get_enum_env_presets, update=update_enum_env_presets)
+
+    category: EnumProperty(
+        name='Category', 
+        items=[
+            ('Environment', 'Environment', ''),
+            ('Visible Environment', 'Visible Environment', ''),
+        ])
+
+    def draw(self, context):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+        layout = self.layout
+        
+        # Draw Presets
+        row = layout.row(align=True)
+        row.prop(self, 'preset', text='')
+        row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
+        row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE').preset_name = self.preset
+        
+        # Draw Worlds
+        row = layout.row(align=True)
+        row.template_list('OCTANE_UL_world_list', '', context.scene, 'oc_worlds', context.scene, 'oc_worlds_index')
+        sub = row.column(align=True)
+        sub.operator(OctaneAddTexEnv.bl_idname, text='', icon='IMAGE_PLANE')
+        
+        # Draw nodes view
+        if(len(context.scene.oc_worlds)!=0):
+            rootNode = ntree.nodes[context.scene.oc_worlds[index].node]
+            split = layout.split(factor=0.5)
+            b_split = split.split(factor=0.5, align=True)
+            b_split.operator(OctaneActivateEnvironment.bl_idname, text='Activate')
+            b_split.operator(OctaneRenameEnvironment.bl_idname, text='Rename')
+            split.prop(self, 'category', text='')
+            if(self.category == 'Environment'):
+                layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane Environment'])
+            elif(self.category == 'Visible Environment'):
+                layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane VisibleEnvironment'])
+        else:
+            layout.label(text='No World Output found')
+    
+    def execute(self, context):
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        refresh_worlds_list(context)
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
