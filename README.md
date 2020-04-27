@@ -37,7 +37,10 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
+* Presets
+* Octane object properties
 * Medium environment
 * Different types of lights
+* Object properties panel
 * Open specific material in separate window
 * A fake IPR ?

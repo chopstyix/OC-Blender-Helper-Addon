@@ -1,6 +1,7 @@
 import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
+from bpy_extras.node_utils import find_node_input
 
 def create_world(name):
     world = bpy.data.worlds.new(name)
@@ -37,7 +38,7 @@ def update_backplate(self, context):
     texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
     texenvNode.inputs['Texture'].default_value = self.backplate_color
 
-def get_enum_emissive_materials(self, context):
+def get_enum_emissive_material(self, context):
     lights = context.scene.oc_lights
     index = context.scene.oc_lights_index
     # Return None if no object taged as light
@@ -84,8 +85,10 @@ def refresh_lights_list(context):
                     light.icon = 'LIGHT_POINT'
                 elif(light.tag == 'Area'):
                     light.icon = 'LIGHT_AREA'
-                elif(light.tag == 'Toon'):
+                elif(light.tag == 'Toon Point'):
                     light.icon = 'LIGHTPROBE_PLANAR'
+                elif(light.tag == 'Toon Spot'):
+                    light.icon = 'LIGHT_SPOT'
                 else:
                     light.icon = 'QUESTION'
 
@@ -367,9 +370,9 @@ class OctaneLightsManager(Operator):
     bl_idname = 'octane.lights_manager'
     bl_options = {'REGISTER', 'UNDO'}
 
-    emissive_materials: EnumProperty(
-        name='Emissive Materials',
-        items=get_enum_emissive_materials
+    emissive_material: EnumProperty(
+        name='Emissive Material',
+        items=get_enum_emissive_material
     )
 
     def draw(self, context):
@@ -380,46 +383,27 @@ class OctaneLightsManager(Operator):
         row = col.row(align=True)
         row.operator('octane.add_light_sphere', text='Sphere')
         row.operator('octane.add_light_area', text='Area')
-        row.operator('octane.add_light_toon', text='Toon')
+        row = col.row(align=True)
+        row.operator('octane.add_light_toon_point', text='Point (Toon)')
+        row.operator('octane.add_light_toon_spot', text='Spot (Toon)')
 
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
-        layout.prop(self, 'emissive_materials', text='')
-        if(self.emissive_materials!='None' and self.emissive_materials!='' and self.emissive_materials!=None):
+        layout.prop(self, 'emissive_material', text='')
+        if(self.emissive_material!='None' and self.emissive_material!='' and self.emissive_material!=None):
             obj = lights[index].obj
             if(obj.type=='LIGHT'):
-                nodes = obj.data.node_tree.nodes
+                ntree = obj.data.node_tree
             else:
-                nodes = bpy.data.materials[self.emissive_materials].node_tree.nodes
-            for node in nodes:
-                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
-                    if(node.inputs['Texture'].is_linked):
-                        if(node.inputs['Texture'].links[0].from_node.bl_idname=='ShaderNodeOctRGBSpectrumTex'):
-                            layout.prop(node.inputs['Texture'].links[0].from_node.inputs['Color'], 'default_value', text='Color')
-                    else:
-                        layout.prop(node.inputs['Texture'], 'default_value', text='Texture')
-                    prop_node_attribute(node, layout, 'Power', 'Power')
-                    #prop_node_attribute(node, layout, 'Light pass ID', 'Light pass ID')
-                    prop_node_attribute(node, layout, 'Cast shadows', 'Cast shadows')
-                if(node.bl_idname=='ShaderNodeOctBlackBodyEmission'):
-                    prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
-                    prop_node_attribute(node, layout, 'Keep instance power', 'Keep instance power')
-                    prop_node_attribute(node, layout, 'Double-sided', 'Double-sided')
-                    prop_node_attribute(node, layout, 'Temperature', 'Temperature')
-                    prop_node_attribute(node, layout, 'Normalize', 'Normalize')
-                    prop_node_attribute(node, layout, 'Distribution', 'Distribution')
-                    prop_node_attribute(node, layout, 'Sampling Rate', 'Sampling Rate')
-                    prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
-                    prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
-                    prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
-                if(node.bl_idname=='ShaderNodeOctTextureEmission'):
-                    prop_node_attribute(node, layout, 'Surface brightness', 'Surface brightness')
-                    prop_node_attribute(node, layout, 'Keep instance power', 'Keep instance power')
-                    prop_node_attribute(node, layout, 'Double-sided', 'Double-sided')
-                    prop_node_attribute(node, layout, 'Distribution', 'Distribution')
-                    prop_node_attribute(node, layout, 'Sampling Rate', 'Sampling Rate')
-                    prop_node_attribute(node, layout, 'Visible on diffuse', 'Visible on diffuse')
-                    prop_node_attribute(node, layout, 'Visible on specular', 'Visible on specular')
-                    prop_node_attribute(node, layout, 'Transparent emission', 'Transparent emission')
+                ntree = bpy.data.materials[self.emissive_material].node_tree
+            
+            outNode = ntree.get_output_node('octane')
+            if(outNode.inputs['Surface'].is_linked):
+                if(outNode.inputs['Surface'].links[0].from_node.bl_idname=='ShaderNodeOctDiffuseMat'):
+                    rootNode = outNode.inputs['Surface'].links[0].from_node
+                    layout.template_node_view(ntree, rootNode, rootNode.inputs['Emission'])
+                else:
+                    rootNode = outNode
+                    layout.template_node_view(ntree, rootNode, rootNode.inputs['Surface'])
 
     def execute(self, context):
         return {'FINISHED'}
@@ -439,7 +423,8 @@ class OctaneSetLight(Operator):
         ('Mesh', 'Mesh', ''),
         ('Sphere', 'Sphere', ''),
         ('Area', 'Area', ''),
-        ('Toon', 'Toon', ''),
+        ('Point Toon', 'Point(Toon)', ''),
+        ('Spot Toon', 'Spot (Toon)', '')
     ], name='Type', default='None')
 
     @classmethod
@@ -489,13 +474,24 @@ class OctaneAddLightArea(Operator):
         refresh_lights_list(context)
         return {'FINISHED'}
 
-class OctaneAddLightToon(Operator):
-    bl_label = 'Add a toon light'
-    bl_idname = 'octane.add_light_toon'
+class OctaneAddLightToonPoint(Operator):
+    bl_label = 'Add a point toon light'
+    bl_idname = 'octane.add_light_toon_point'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
-        context.active_object['oc_light'] = 'Point'
+        context.active_object['oc_light'] = 'Point Toon'
+        refresh_lights_list(context)
+        return {'FINISHED'}
+
+class OctaneAddLightToonSpot(Operator):
+    bl_label = 'Add a spot toon light'
+    bl_idname = 'octane.add_light_toon_spot'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.object.light_add(type='SUN', location=(0, 0, 0))
+        context.active_object['oc_light'] = 'Spot Toon'
         refresh_lights_list(context)
         return {'FINISHED'}

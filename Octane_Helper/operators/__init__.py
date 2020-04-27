@@ -44,7 +44,8 @@ classes = (
     OctaneCopyDenosierSettings,
     OctaneAddLightSphere,
     OctaneAddLightArea,
-    OctaneAddLightToon
+    OctaneAddLightToonPoint,
+    OctaneAddLightToonSpot
 )
 
 def register_operators():
