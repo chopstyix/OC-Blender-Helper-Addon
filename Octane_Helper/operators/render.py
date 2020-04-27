@@ -541,13 +541,16 @@ class OctaneCamerasManager(Operator):
 
             if(self.octane_cam_settings == 'Imager'):
                 box = layout.box()
+                sub = box.column(align=True)
+                sub.operator(OctaneManageImager.bl_idname, text='Open Imager (Perspective)')
+                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.cameras
+                box = layout.box()
                 box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Imager (Perspective)')
                 sub = box.column(align=True)
                 sub.prop(context.scene.octane, "hdr_tonemap_render_enable", text="Enable Camera Imager")
-                sub.operator(OctaneManageImager.bl_idname, text='Open Imager (Perspective)')
-                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.cameras
+                
 
                 sub = box.row()
                 sub.enabled = context.scene.octane.hdr_tonemap_render_enable
@@ -577,19 +580,23 @@ class OctaneCamerasManager(Operator):
                 #sub.prop(oct_cam, "lut_strength")
             elif(self.octane_cam_settings == 'PostProcess'):
                 box = layout.box()
+                sub = box.column(align=True)
+                sub.operator(OctaneManagePostprocess.bl_idname, text='Open PostProcess (Perspective)')
+                sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.cameras
+                box = layout.box()
                 box.enabled = (not context.scene.octane.use_preview_post_process_setting)
                 if(context.scene.octane.use_preview_post_process_setting):
                     box.label(text='Settings are controlled by PostProcess (Perspective)')
                 sub = box.column(align=True)
                 sub.prop(oct_cam, "postprocess", text="Enable PostProcess")
-                sub.operator(OctaneManagePostprocess.bl_idname, text='Open PostProcess (Perspective)')
-                sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.cameras
-
+                
                 sub = box.column(align=True)
+                sub.active = oct_cam.postprocess
                 sub.prop(oct_cam, "cut_off")
                 sub.prop(oct_cam, "bloom_power")
                 sub.prop(oct_cam, "glare_power")
                 sub = box.column(align=True)
+                sub.active = oct_cam.postprocess
                 sub.prop(oct_cam, "glare_ray_count")
                 sub.prop(oct_cam, "glare_angle")
                 sub.prop(oct_cam, "glare_blur")
@@ -689,14 +696,16 @@ class OctaneCamerasManager(Operator):
             elif(self.octane_cam_settings == 'Denoiser'):
                 view_layer = context.window.view_layer
                 box = layout.box()
+                sub = box.column(align=True)
+                sub.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
+                sub.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
+                box = layout.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager))
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Denoiser (Perspective)')
                 sub = box.column(align=True)
                 sub.prop(oct_cam, 'enable_denoising', text='Enable Camera Denosier')
                 sub.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
-                box.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
-                box.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
                 box = layout.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 box.label(text="Spectral AI Denoiser:")
@@ -720,7 +729,7 @@ class OctaneCamerasManager(Operator):
                 ob = context.scene.objects[self.cameras]
                 box = layout.box()
                 sub = box.column(align=True)
-                sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane')
+                sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane Kernel')
                 sub.prop(ob.octane, "use_motion_blur", text="Enable Camera Motion Blur")
                 box = layout.box()
                 box.enabled = (rd.use_motion_blur and ob.octane.use_motion_blur)
