@@ -844,6 +844,7 @@ class OctaneChangeObjProperties(Operator):
         octane_object = ob.octane
 
         layout.operator(OctaneCopyObjProperties.bl_idname, text='Copy settings to all selected objects')
+        layout.label(text='['+((ob.name[:16] + '..') if len(ob.name) > 16 else ob.name)+']')
 
         if ob and ob.type not in ('FONT',):
             layout.prop(octane_object, "object_mesh_type")

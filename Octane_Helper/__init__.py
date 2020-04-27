@@ -24,7 +24,7 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou",
-    "version": (1, 7, 2),
+    "version": (1, 8, 0),
     "blender": (2, 81, 0),
     "warning": "",
     "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
@@ -57,7 +57,6 @@ class OctaneMaterialsMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text='Select a Material to apply')
         layout.prop_search(context.scene, property='selected_mat', search_data=bpy.data, search_property='materials', text='', icon='MATERIAL')
         layout.separator()
         layout.operator('octane.assign_universal', icon='NODE_MATERIAL')
@@ -81,6 +80,8 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
         layout.operator('octane.copy_mat', icon='COPYDOWN')
         layout.operator('octane.paste_mat', icon='PASTEDOWN')
+        if(bpy.types.Material.copied_mat!=None):
+            layout.label(text='['+((bpy.types.Material.copied_mat.name[:16] + '..') if len(bpy.types.Material.copied_mat.name) > 16 else bpy.types.Material.copied_mat.name)+']')
         layout.separator()
         layout.prop(context.scene, 'is_smooth')
         layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
@@ -130,13 +131,15 @@ class OctaneInfoMenu(Menu):
 
         layout.label(text='Otoy')
         layout.operator('wm.url_open', icon='URL', text='Documents').url = 'https://docs.otoy.com'
-        layout.operator('wm.url_open', icon='URL', text='Forum').url = 'https://render.otoy.com/forum/viewforum.php?f=32'
+        layout.operator('wm.url_open', icon='URL', text='Forum').url = 'https://render.otoy.com/forum/index.php'
+        layout.operator('wm.url_open', icon='URL', text='General').url = 'https://render.otoy.com/forum/viewforum.php?f=9'
+        layout.operator('wm.url_open', icon='URL', text='Blender').url = 'https://render.otoy.com/forum/viewforum.php?f=32'
+        layout.separator()
+
+        layout.label(text='Connect')
         layout.operator('wm.url_open', icon='URL', text='Releases').url = 'https://render.otoy.com/forum/viewforum.php?f=113'
         layout.operator('wm.url_open', icon='URL', text='Bug Reports').url = 'https://render.otoy.com/forum/viewforum.php?f=114'
         layout.operator('wm.url_open', icon='URL', text='User Requests').url = 'https://render.otoy.com/forum/viewforum.php?f=115'
-        layout.separator()
-
-        layout.label(text='Communication')
         layout.operator('wm.url_open', icon='URL', text='Facebook Group').url = 'https://www.facebook.com/groups/500738480259364'
         layout.separator()
 
@@ -199,10 +202,16 @@ def edit_menu_func(self, context):
         self.layout.menu('VIEW3D_MT_edit_mesh_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
-def selected_mat_update(self, context):
-    if(context.scene.selected_mat!=''):
-        assign_material(context, bpy.data.materials[context.scene.selected_mat])
-        context.scene.selected_mat = ''
+def selected_mat_get(self):
+    context = bpy.context
+    if(context.active_object):
+        if(context.active_object.active_material):
+            return bpy.context.active_object.active_material.name
+    return ''
+
+def selected_mat_set(self, value):
+    if(value!=''):
+        assign_material(bpy.context, bpy.data.materials[value])
 
 def register():
     register_icons()
@@ -210,7 +219,7 @@ def register():
     for cls in classes:
         bpy.utils.register_class(cls)
     bpy.types.Material.copied_mat = None
-    bpy.types.Scene.selected_mat = StringProperty(default='', update=selected_mat_update)
+    bpy.types.Scene.selected_mat = StringProperty(default='', get=selected_mat_get, set=selected_mat_set)
     bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
     bpy.types.Scene.oc_lights = CollectionProperty(type=OctaneLightListItem)
     bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)

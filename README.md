@@ -14,7 +14,7 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * OctaneRender™ for Blender 2019 and later
-* Current version **v1.7.0**
+* Current version **v1.8.0**
   * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
 
 ## Features
@@ -35,12 +35,14 @@ A helper addon for Octane Blender edition
 * Make sure the Octane render is enabled, otherwise the menu will not show up
 * It works in either object mode or edit mode, but provides different functions
 
+## Issues
+
+* We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
+* Free tire users are currently using 2019 builds which does not include a sphere light. So please do not click the Add Sphere Light button for now
+
 ## WIP
 
 * Presets
-* Octane object properties
 * Medium environment
 * Different types of lights
-* Object properties panel
-* Open specific material in separate window
 * A fake IPR ?
