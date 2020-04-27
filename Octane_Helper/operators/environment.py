@@ -109,7 +109,7 @@ def get_enum_env_presets(self, context):
 
 # Classes
 class OctaneAddTexEnv(Operator):
-    bl_label = 'Add a texture environment'
+    bl_label = 'Setup Texture'
     bl_idname = 'octane.add_tex_env'
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -117,7 +117,7 @@ class OctaneAddTexEnv(Operator):
     filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
     name: StringProperty(
         name='Name',
-        default='OC_Environment'
+        default='OC_Tex_Env'
     )
     enable_override: BoolProperty(
         name="Override Camera Settings",
@@ -165,6 +165,7 @@ class OctaneAddTexEnv(Operator):
             context.scene.octane.hdr_tonemap_preview_enable = True
             if self.enable_override:
                 context.scene.octane.use_preview_setting_for_camera_imager = True
+            #refresh_worlds_list(context, -1)
         return {'FINISHED'}
     
     def invoke(self, context, event):
@@ -202,6 +203,27 @@ class OctaneTransformHDRIEnv(Operator):
         update_enum_trs(self, context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
+
+class OctaneAddSkyEnv(Operator):
+    bl_label = 'Setup Sky'
+    bl_idname = 'octane.add_tex_sky'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        ntree = context.scene.world.node_tree
+        outNode = create_world_output(context, 'OC_Sky_Env')
+        skyenvNode = ntree.nodes.new('ShaderNodeOctDaylightEnvironment')
+        skyenvNode.location = (outNode.location.x - 200, outNode.location.y)
+        ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
+        # Setting up the octane
+        context.scene.display_settings.display_device = 'None'
+        context.scene.view_settings.exposure = 0
+        context.scene.view_settings.gamma = 1
+        context.scene.octane.hdr_tonemap_preview_enable = True
+
+        refresh_worlds_list(context, -1)
+        
+        return {'FINISHED'}
 
 class OctaneOpenCompositor(Operator):
     bl_label = 'Open Compositor'
@@ -565,19 +587,24 @@ def update_enum_env_presets(self, context):
     # Set selected out active
     pass
 
-def refresh_worlds_list(context):
+def refresh_worlds_list(context, active_last=False):
     context.scene.oc_worlds.clear()
-    context.scene.oc_worlds_index = 0
     
     ntree = context.scene.world.node_tree
-    index = 0
+    count = 0
+    active = 0
     for node in ntree.nodes:
         if(node.bl_idname=='ShaderNodeOutputWorld'):
             world = context.scene.oc_worlds.add()
             world.node = node.name
             if(node.is_active_output):
-                context.scene.oc_worlds_index = index
-            index += 1
+                active = count
+            count += 1
+    
+    if(active_last):
+        context.scene.oc_worlds_index = len(context.scene.oc_worlds) - 1
+    else:
+        context.scene.oc_worlds_index = active
 
 class OctaneActivateEnvironment(Operator):
     bl_label = 'Activate an environment'
@@ -613,6 +640,30 @@ class OctaneRenameEnvironment(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+def remove_connected_nodes(ntree, node):
+    for input in node.inputs:
+        for link in input.links:
+            remove_connected_nodes(ntree, link.from_node)
+            ntree.nodes.remove(link.from_node)
+
+class OctaneDeleteEnvironment(Operator):
+    bl_label = 'Delete an environment'
+    bl_idname = 'octane.delete_env'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        ntree = context.scene.world.node_tree
+        index = context.scene.oc_worlds_index
+        outNode = ntree.nodes[context.scene.oc_worlds[index].node]
+
+        remove_connected_nodes(ntree, outNode)
+        ntree.nodes.remove(outNode)
+        
+        ntree.nodes.update()
+
+        refresh_worlds_list(context)
+        return {'FINISHED'}
+
 class OctaneEnvironmentsManager(Operator):
     bl_label = 'Environments manager'
     bl_idname = 'octane.environments_manager'
@@ -634,7 +685,7 @@ class OctaneEnvironmentsManager(Operator):
         
         # Draw Presets
         row = layout.row(align=True)
-        row.prop(self, 'preset', text='')
+        row.prop(self, 'preset', text='Presets')
         row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
         row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE').preset_name = self.preset
         
@@ -643,14 +694,21 @@ class OctaneEnvironmentsManager(Operator):
         row.template_list('OCTANE_UL_world_list', '', context.scene, 'oc_worlds', context.scene, 'oc_worlds_index')
         sub = row.column(align=True)
         sub.operator(OctaneAddTexEnv.bl_idname, text='', icon='IMAGE_PLANE')
+        sub.operator(OctaneAddSkyEnv.bl_idname, text='', icon='LIGHT_SUN')
         
         # Draw nodes view
         if(len(context.scene.oc_worlds)!=0):
             rootNode = ntree.nodes[context.scene.oc_worlds[index].node]
-            split = layout.split(factor=0.5)
-            b_split = split.split(factor=0.5, align=True)
-            b_split.operator(OctaneActivateEnvironment.bl_idname, text='Activate')
-            b_split.operator(OctaneRenameEnvironment.bl_idname, text='Rename')
+            split = layout.split(factor=0.6)
+            b_split = split.row(align=True)
+            row = b_split.row(align=True)
+            row.enabled = (not ntree.nodes[context.scene.oc_worlds[index].node].is_active_output)
+            row.operator(OctaneActivateEnvironment.bl_idname, text='Activate')
+            row = b_split.row(align=True)
+            row.operator(OctaneRenameEnvironment.bl_idname, text='Rename')
+            row = b_split.row(align=True)
+            row.operator(OctaneDeleteEnvironment.bl_idname, text='Delete')
+            
             split.prop(self, 'category', text='')
             if(self.category == 'Environment'):
                 layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane Environment'])

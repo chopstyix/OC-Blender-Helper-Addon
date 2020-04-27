@@ -39,7 +39,7 @@ class VIEW3D_MT_object_octane(Menu):
     def draw(self, context):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
-        layout.menu(OctaneEnvironmentMenu.bl_idname, icon='LIGHT_SUN')
+        layout.menu(OctaneEnvironmentMenu.bl_idname, icon='MAT_SPHERE_SKY')
         layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
         layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
 
