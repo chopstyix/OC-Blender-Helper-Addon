@@ -181,34 +181,6 @@ class OctaneTransformHDRIEnv(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-class OctaneSetRenderID(Operator):
-    bl_label = 'Set Render Layer ID'
-    bl_idname = 'octane.set_renderid'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    rid: IntProperty(
-        name = 'Render Layer ID',
-        min = 1,
-        max = 255,
-        step = 1,
-        default = 1
-    )
-
-    @classmethod
-    def poll(cls, context):
-        obj = context.active_object
-        return (obj is not None)
-
-    def execute(self, context):
-        for obj in context.selected_objects:
-            obj.octane.render_layer_id = self.rid
-            obj.data.update()
-        return {'FINISHED'}
-    
-    def invoke(self, context, event):
-        wm = context.window_manager
-        return wm.invoke_props_dialog(self)
-
 class OctaneOpenCompositor(Operator):
     bl_label = 'Open Compositor'
     bl_idname = 'octane.open_compositor'

@@ -116,7 +116,8 @@ class OctaneRenderMenu(Menu):
         layout.separator()
         layout.operator('octane.cameras_manager', icon='VIEW_CAMERA')
         layout.separator()
-        layout.operator('octane.set_renderid', icon='FILE_IMAGE')
+        layout.operator('octane.change_obj_props', icon='PROPERTIES')
+        layout.operator('octane.change_renderid', icon='FILE_IMAGE')
         layout.separator()
         layout.operator('octane.open_compositor', icon='NODE_COMPOSITING')
 

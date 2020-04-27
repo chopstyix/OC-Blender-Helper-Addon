@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import EnumProperty, StringProperty
+from bpy.props import EnumProperty, StringProperty, IntProperty
 
 def get_enum_cameras(self, context):
     result = []
@@ -156,7 +156,7 @@ class OctaneManagePasses(Operator):
         view_layer = context.view_layer
         octane_view_layer = view_layer.octane
 
-        layout.prop(self, 'passes')
+        layout.prop(self, 'passes', text='')
         layout.separator()
 
         if(self.passes == 'Beauty'):
@@ -806,3 +806,114 @@ class OctaneCopyDenosierSettings(Operator):
         oct_view.ai_up_sampler.max_up_sampler_interval = oct_cam.ai_up_sampler.max_up_sampler_interval
 
         return {'FINISHED'}
+
+class OctaneChangeObjProperties(Operator):
+    bl_label = 'Change Object Properties'
+    bl_idname = 'octane.change_obj_props'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return (obj is not None)
+
+    def draw(self, context):
+        layout = self.layout        
+        scene = context.scene
+        ob = context.active_object
+        octane_object = ob.octane
+
+        layout.operator(OctaneCopyObjProperties.bl_idname, text='Copy settings to all selected objects')
+
+        if ob and ob.type not in ('FONT',):
+            layout.prop(octane_object, "object_mesh_type")
+
+        box = layout.box()
+        box.label(text='Object layer')
+        sub = box.row(align=True)
+        sub.active = octane_object.render_layer_id != 0
+        sub.prop(octane_object, "render_layer_id")
+        sub = box.row(align=True)
+        sub.prop(octane_object, "general_visibility")
+        sub = box.row(align=True)        
+        sub.prop(octane_object, "camera_visibility")
+        sub.prop(octane_object, "shadow_visibility")
+        sub.prop(octane_object, "dirt_visibility")
+        split = box.split(factor=0.15)
+        split.use_property_split = False
+        split.label(text="Light pass mask")
+        row = split.row(align=True)       
+        row.prop(octane_object, "light_id_sunlight", text="S", toggle=True)
+        row.prop(octane_object, "light_id_env", text="E", toggle=True)
+        row.prop(octane_object, "light_id_pass_1", text="1", toggle=True)
+        row.prop(octane_object, "light_id_pass_2", text="2", toggle=True)
+        row.prop(octane_object, "light_id_pass_3", text="3", toggle=True)        
+        row.prop(octane_object, "light_id_pass_4", text="4", toggle=True)
+        row.prop(octane_object, "light_id_pass_5", text="5", toggle=True)
+        row.prop(octane_object, "light_id_pass_6", text="6", toggle=True)
+        row.prop(octane_object, "light_id_pass_7", text="7", toggle=True)
+        row.prop(octane_object, "light_id_pass_8", text="8", toggle=True)        
+        sub = layout.row(align=True)
+        sub.prop(octane_object, "random_color_seed")
+        sub = box.row(align=True)
+        sub.prop(octane_object, "color")
+
+        box = layout.box()
+        box.label(text='Baking settings')
+        sub = box.row(align=True)
+        sub.prop(octane_object, "baking_group_id")
+        sub = box.row(align=True)
+        sub.prop(octane_object, "baking_uv_transform_rz")        
+        sub = box.row(align=True)
+        sub.prop(octane_object, "baking_uv_transform_sx")
+        sub.prop(octane_object, "baking_uv_transform_sy")
+        sub = box.row(align=True)
+        sub.prop(octane_object, "baking_uv_transform_tx")
+        sub.prop(octane_object, "baking_uv_transform_ty")
+
+    def execute(self, context):
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+class OctaneCopyObjProperties(Operator):
+    bl_label = 'Copy object properties'
+    bl_idname = 'octane.copy_obj_properties'
+    bl_options = {'REGISTER', 'UNDO'}
+    def execute(self, context):
+        active_obj = context.active_object
+        copylist = ['baking_group_id', 'baking_uv_transform_rz', 'baking_uv_transform_sx', 'baking_uv_transform_sy', 'baking_uv_transform_tx', 'baking_uv_transform_ty', 'camera_visibility', 'color', 'dirt_visibility', 'general_visibility', 'light_id_env', 'light_id_pass_1', 'light_id_pass_2', 'light_id_pass_3', 'light_id_pass_4', 'light_id_pass_5', 'light_id_pass_6', 'light_id_pass_7', 'light_id_pass_8', 'light_id_sunlight', 'object_mesh_type', 'random_color_seed', 'render_layer_id', 'shadow_visibility']
+        for obj in context.selected_objects:
+            for item in copylist:
+                exec('obj.octane.{} = active_obj.octane.{}'.format(item, item))
+        return {'FINISHED'}
+
+class OctaneChangeRenderID(Operator):
+    bl_label = 'Change Render Layer ID'
+    bl_idname = 'octane.change_renderid'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    rid: IntProperty(
+        name = 'Render Layer ID',
+        min = 1,
+        max = 255,
+        step = 1,
+        default = 1
+    )
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        return (obj is not None)
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            obj.octane.render_layer_id = self.rid
+            obj.data.update()
+        return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
