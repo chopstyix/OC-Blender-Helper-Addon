@@ -393,9 +393,18 @@ class OctaneLightsManager(Operator):
             obj = lights[index].obj
             if(obj.type=='LIGHT'):
                 ntree = obj.data.node_tree
+                if(obj.data.type == 'SPHERE'):
+                    layout.prop(obj.data, 'sphere_radius', text='Radius')
+                elif(obj.data.type == 'AREA'):
+                    layout.prop(obj.data, 'shape', text='Shape')
+                    if obj.data.shape in {'SQUARE', 'DISK'}:
+                        layout.prop(obj.data, 'size', text='Size')
+                    elif obj.data.shape in {'RECTANGLE', 'ELLIPSE'}:
+                        layout.prop(obj.data, 'size', text='Size X')
+                        layout.prop(obj.data, 'size_y', text='Size Y')
             else:
                 ntree = bpy.data.materials[self.emissive_material].node_tree
-            
+
             outNode = ntree.get_output_node('octane')
             if(outNode.inputs['Surface'].is_linked):
                 if(outNode.inputs['Surface'].links[0].from_node.bl_idname=='ShaderNodeOctDiffuseMat'):
