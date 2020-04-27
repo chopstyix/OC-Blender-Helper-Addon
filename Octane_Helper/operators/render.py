@@ -452,12 +452,13 @@ class OctaneCamerasManager(Operator):
         items=[
             ('Imager', 'Imager (Camera)', ''),
             ('PostProcess', 'PostProcess (Camera)', ''),
+            ('Denoiser', 'Denoiser (Camera)', ''),
             ('Depth of field', 'Depth of field', ''),
             ('Distortion', 'Distortion', ''),
             ('Stereo', 'Stereo', ''),
             ('Baking', 'Baking', ''),
             ('OSL Camera', 'OSL Camera', ''),
-            ('Denoiser', 'Denoiser (Camera)', '')
+            ('Motion Blur', 'Motion Blur', '')
         ],
         default='Imager'
     )
@@ -714,6 +715,16 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam.ai_up_sampler, 'up_sampling_on_completion')
                 sub.prop(oct_cam.ai_up_sampler, 'min_up_sampler_samples')
                 sub.prop(oct_cam.ai_up_sampler, 'max_up_sampler_interval')
+            elif(self.octane_cam_settings == 'Motion Blur'):
+                rd = context.scene.render
+                ob = context.scene.objects[self.cameras]
+                box = layout.box()
+                sub = box.column(align=True)
+                sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane')
+                sub.prop(ob.octane, "use_motion_blur", text="Enable Camera Motion Blur")
+                box = layout.box()
+                box.enabled = (rd.use_motion_blur and ob.octane.use_motion_blur)
+                box.prop(ob.octane, "motion_steps", text="Steps")
 
     def execute(self, context):
         return {'FINISHED'}
