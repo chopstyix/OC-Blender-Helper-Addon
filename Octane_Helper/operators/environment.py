@@ -1,7 +1,6 @@
 import bpy
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
-from bpy_extras.node_utils import find_node_input
 
 def create_world(name):
     world = bpy.data.worlds.new(name)
@@ -33,8 +32,8 @@ def update_hdri_translation(self, context):
 
 def update_backplate(self, context):
     world = context.scene.world
-    nodes = world.node_tree.nodes
-    outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+    ntree = world.node_tree
+    outNode = ntree.get_output_node('octane')
     texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
     texenvNode.inputs['Texture'].default_value = self.backplate_color
 
@@ -117,25 +116,25 @@ class OctaneSetupHDRIEnv(Operator):
     def execute(self, context):
         if self.filepath != '':
             world = create_world('OC_Environment')
-            nodes = world.node_tree.nodes
-            imgNode = nodes.new('ShaderNodeOctImageTex')
+            ntree = world.node_tree
+            imgNode = ntree.nodes.new('ShaderNodeOctImageTex')
             imgNode.location = (-210, 300)
             imgNode.inputs['Gamma'].default_value = 1
             imgNode.image = bpy.data.images.load(self.filepath)
-            sphereNode = nodes.new('ShaderNodeOctSphericalProjection')
+            sphereNode = ntree.nodes.new('ShaderNodeOctSphericalProjection')
             sphereNode.location = (-410, 100)
-            transNode = nodes.new('ShaderNodeOct3DTransform')
+            transNode = ntree.nodes.new('ShaderNodeOct3DTransform')
             transNode.location = (-610, 100)
             transNode.name = 'Texture_3D_Transform'
             if(self.enable_backplate):
-                texenvNode = nodes.new('ShaderNodeOctTextureEnvironment')
+                texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
                 texenvNode.location = (10, 0)
                 texenvNode.inputs['Texture'].default_value = self.backplate_color
                 texenvNode.inputs['Visable env Backplate'].default_value = True
-                world.node_tree.links.new(texenvNode.outputs[0], nodes[0].inputs['Octane VisibleEnvironment'])
-            world.node_tree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
-            world.node_tree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
-            world.node_tree.links.new(imgNode.outputs[0], nodes[1].inputs['Texture'])
+                ntree.links.new(texenvNode.outputs[0], ntree.nodes[0].inputs['Octane VisibleEnvironment'])
+            ntree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
+            ntree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
+            ntree.links.new(imgNode.outputs[0], ntree.nodes[1].inputs['Texture'])
             context.scene.world = world
             # Setting up the octane
             context.scene.display_settings.display_device = 'None'
@@ -260,8 +259,9 @@ class OctaneAddBackplate(Operator):
     @classmethod
     def poll(cls, context):
         if(context.scene.world.use_nodes):
-            nodes = context.scene.world.node_tree.nodes
-            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            world = context.scene.world
+            ntree = world.node_tree
+            outNode = ntree.get_output_node('octane')
             if(outNode):
                 return (not outNode.inputs['Octane VisibleEnvironment'].is_linked)
             else:
@@ -276,13 +276,13 @@ class OctaneAddBackplate(Operator):
     
     def execute(self, context):
         world = context.scene.world
-        nodes = world.node_tree.nodes
-        texenvNode = nodes.new('ShaderNodeOctTextureEnvironment')
+        ntree = world.node_tree
+        texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
         texenvNode.location = (10, 0)
         texenvNode.inputs['Texture'].default_value = self.backplate_color
         texenvNode.inputs['Visable env Backplate'].default_value = True
-        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
-        world.node_tree.links.new(texenvNode.outputs[0], outNode.inputs['Octane VisibleEnvironment'])
+        outNode = ntree.get_output_node('octane')
+        ntree.links.new(texenvNode.outputs[0], outNode.inputs['Octane VisibleEnvironment'])
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -297,8 +297,9 @@ class OctaneRemoveBackplate(Operator):
     @classmethod
     def poll(cls, context):
         if(context.scene.world.use_nodes):
-            nodes = context.scene.world.node_tree.nodes
-            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            world = context.scene.world
+            ntree = world.node_tree
+            outNode = ntree.get_output_node('octane')
             if(outNode):
                 return (outNode.inputs['Octane VisibleEnvironment'].is_linked)
             else:
@@ -308,11 +309,11 @@ class OctaneRemoveBackplate(Operator):
     
     def execute(self, context):
         world = context.scene.world
-        nodes = world.node_tree.nodes
-        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+        ntree = world.node_tree
+        outNode = ntree.get_output_node('octane')
         link = outNode.inputs['Octane VisibleEnvironment'].links[0]
-        nodes.remove(link.from_node)
-        nodes.update()
+        ntree.nodes.remove(link.from_node)
+        ntree.nodes.update()
         return {'FINISHED'}
 
 class OctaneModifyBackplate(Operator):
@@ -332,8 +333,9 @@ class OctaneModifyBackplate(Operator):
     @classmethod
     def poll(cls, context):
         if(context.scene.world.use_nodes):
-            nodes = context.scene.world.node_tree.nodes
-            outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+            world = context.scene.world
+            ntree = world.node_tree
+            outNode = ntree.get_output_node('octane')
             if(outNode):
                 if (outNode.inputs['Octane VisibleEnvironment'].is_linked):
                     texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
@@ -358,8 +360,8 @@ class OctaneModifyBackplate(Operator):
 
     def invoke(self, context, event):
         world = context.scene.world
-        nodes = world.node_tree.nodes
-        outNode = [node for node in nodes if node.type=='OUTPUT_WORLD'][0]
+        ntree = world.node_tree
+        outNode = ntree.get_output_node('octane')
         texenvNode = outNode.inputs['Octane VisibleEnvironment'].links[0].from_node
         self.backplate_color = texenvNode.inputs['Texture'].default_value
         wm = context.window_manager
