@@ -11,7 +11,7 @@ def create_world_output(context, name):
     outNode.name = name
     ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
     
-    outNode.location = (300, min(ys)-600)
+    outNode.location = (300, min(ys)-800)
     return outNode
 
 def get_enum_trs(self, context):
@@ -237,6 +237,41 @@ class OctaneAddSkyEnv(Operator):
         outNode = create_world_output(context, 'OC_Sky_Env')
         skyenvNode = ntree.nodes.new('ShaderNodeOctDaylightEnvironment')
         skyenvNode.location = (outNode.location.x - 200, outNode.location.y)
+        ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
+        # Setting up the octane
+        context.scene.display_settings.display_device = 'None'
+        context.scene.view_settings.exposure = 0
+        context.scene.view_settings.gamma = 1
+        context.scene.octane.hdr_tonemap_preview_enable = True
+
+        refresh_worlds_list(context, True)
+        
+        return {'FINISHED'}
+
+class OctaneAddMedEnv(Operator):
+    bl_label = 'Setup Medium'
+    bl_idname = 'octane.add_med_env'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        ntree = context.scene.world.node_tree
+        outNode = create_world_output(context, 'OC_Med_Env')
+        skyenvNode = ntree.nodes.new('ShaderNodeOctDaylightEnvironment')
+        skyenvNode.location = (outNode.location.x - 200, outNode.location.y)
+        skyenvNode.inputs['Medium radius'].default_value = 100
+        mediumNode = ntree.nodes.new('ShaderNodeOctVolumeMedium')
+        mediumNode.location = (skyenvNode.location.x - 200, skyenvNode.location.y - 200)
+        mediumNode.inputs['Density'].default_value = 1.0
+        mediumNode.inputs['Invert abs.'].default_value = False
+        absFloatNode = ntree.nodes.new('ShaderNodeOctFloatTex')
+        absFloatNode.inputs['Value'].default_value = 0.0
+        absFloatNode.location = (mediumNode.location.x - 200, mediumNode.location.y - 100)
+        scatteringFloatNode = ntree.nodes.new('ShaderNodeOctFloatTex')
+        scatteringFloatNode.inputs['Value'].default_value = 0.5
+        scatteringFloatNode.location = (absFloatNode.location.x, absFloatNode.location.y - 100)
+        ntree.links.new(scatteringFloatNode.outputs[0], mediumNode.inputs['Scattering Tex'])
+        ntree.links.new(absFloatNode.outputs[0], mediumNode.inputs['Absorption Tex'])
+        ntree.links.new(mediumNode.outputs[0], skyenvNode.inputs['Medium'])
         ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
         # Setting up the octane
         context.scene.display_settings.display_device = 'None'
@@ -733,6 +768,7 @@ class OctaneEnvironmentsManager(Operator):
         sub = row.column(align=True)
         sub.operator(OctaneAddTexEnv.bl_idname, text='', icon='IMAGE_PLANE')
         sub.operator(OctaneAddSkyEnv.bl_idname, text='', icon='LIGHT_SUN')
+        sub.operator(OctaneAddMedEnv.bl_idname, text='', icon='GHOST_ENABLED')
         
         # Draw nodes view
         if(len(context.scene.oc_worlds)!=0):

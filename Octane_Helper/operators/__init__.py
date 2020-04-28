@@ -24,6 +24,7 @@ classes = (
     OctanePasteMat,
     OctaneAddTexEnv,
     OctaneAddSkyEnv,
+    OctaneAddMedEnv,
     OctaneChangeRenderID,
     OctaneTransformHDRIEnv,
     OctaneOpenCompositor,
