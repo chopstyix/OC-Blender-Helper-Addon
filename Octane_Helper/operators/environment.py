@@ -99,14 +99,35 @@ def refresh_lights_list(context):
                     light.icon = 'QUESTION'
 
 def get_enum_env_presets(self, context):
+    # Called at any time
+    result = [
+        ('None', 'None', '')
+    ]
     presets = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
     if not os.path.isdir(presets):
         os.makedirs(presets)
     files = os.listdir(presets)
     if(len(files)==0):
         return [('None', 'None', '')]
-    return [(file[:-6], file[:-6], '') for file in files]
+    [result.append((file[:-6], file[:-6], '')) for file in files]
+    return result
 
+def update_enum_env_presets(self, context):
+    # Called when switching presets
+    if(self.preset != context.scene.selected_env_preset):
+        print('test')
+        self.preset = context.scene.selected_env_preset
+
+    if(self.preset!='None'):
+        prev_worlds = [world.name for world in bpy.data.worlds]
+        presets = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+        filepath = os.path.join(presets, self.preset+'.blend')
+        with bpy.data.libraries.load(filepath) as (data_from, data_to):
+            data_to.worlds = data_from.worlds
+        curr_worlds = [world.name for world in bpy.data.worlds]
+        context.scene.world = bpy.data.worlds[list(set(curr_worlds)-set(prev_worlds))[0]]
+        refresh_worlds_list(context)
+        
 # Classes
 class OctaneAddTexEnv(Operator):
     bl_label = 'Setup Texture'
@@ -545,6 +566,7 @@ class OctaneAddEnvironmentPreset(Operator):
         if(self.save_name=='None'): 
             self.report({'WARNING'}, 'The name is invalid')
             return {'CANCELLED'}
+
         presets_dir = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
         files = os.listdir(presets_dir)
         if(len([file for file in files if (file[:-6]==self.save_name)])):
@@ -563,7 +585,8 @@ class OctaneAddEnvironmentPreset(Operator):
         bpy.data.libraries.write(save_file, data_blocks, compress=True)
         if(self.pack_images):
             [node.image.unpack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]
-        
+
+        context.scene.selected_env_preset = self.save_name
         return {'FINISHED'}
 
     def invoke(self, context, event):
@@ -577,15 +600,11 @@ class OctaneRemoveEnvironmentPreset(Operator):
     preset_name: StringProperty(default='')
 
     def execute(self, context):
-        if(self.preset_name!='None'):
+        if(self.preset_name!='None' and self.preset_name!=None):
             presets_dir = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
             os.remove(os.path.join(presets_dir, self.preset_name + '.blend'))
+            context.scene.selected_env_preset = 'None'
         return {'FINISHED'}
-
-def update_enum_env_presets(self, context):
-    # Load libraries from file and prop existing worlds
-    # Set selected out active
-    pass
 
 def refresh_worlds_list(context, active_last=False):
     context.scene.oc_worlds.clear()
@@ -615,8 +634,14 @@ class OctaneActivateEnvironment(Operator):
         ntree = context.scene.world.node_tree
         index = context.scene.oc_worlds_index
         
-        ntree.get_output_node('octane').is_active_output = False
+        if(len([node for node in ntree.nodes if node.bl_idname == 'ShaderNodeOutputWorld'])):
+            prev_out = ntree.get_output_node('octane')
+            prev_out.is_active_output = False
+        
         ntree.nodes[context.scene.oc_worlds[index].node].is_active_output = True
+
+        refresh_worlds_list(context)
+
         return {'FINISHED'}
 
 class OctaneRenameEnvironment(Operator):
@@ -682,7 +707,7 @@ class OctaneEnvironmentsManager(Operator):
         ntree = context.scene.world.node_tree
         index = context.scene.oc_worlds_index
         layout = self.layout
-        
+
         # Draw Presets
         row = layout.row(align=True)
         row.prop(self, 'preset', text='Presets')

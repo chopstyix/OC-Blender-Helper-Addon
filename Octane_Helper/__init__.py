@@ -248,6 +248,7 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Material.copied_mat = None
     bpy.types.Scene.selected_mat = StringProperty(default='', get=selected_mat_get, set=selected_mat_set)
+    bpy.types.Scene.selected_env_preset = StringProperty(default='None')
     bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
     bpy.types.Scene.oc_lights = CollectionProperty(type=OctaneLightListItem)
     bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)
@@ -262,6 +263,7 @@ def unregister():
     del bpy.types.Scene.oc_lights_index
     del bpy.types.Scene.oc_lights
     del bpy.types.Scene.is_smooth
+    del bpy.types.Scene.selected_env_preset
     del bpy.types.Scene.selected_mat
     del bpy.types.Material.copied_mat
     for cls in reversed(classes):
