@@ -42,6 +42,4 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* Worlds Manager
-* Medium environment
-* Different types of lights
+* Bug fixes on presets management
