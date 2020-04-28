@@ -188,7 +188,7 @@ class OctaneAddTexEnv(Operator):
             context.scene.octane.hdr_tonemap_preview_enable = True
             if self.enable_override:
                 context.scene.octane.use_preview_setting_for_camera_imager = True
-            #refresh_worlds_list(context, -1)
+            refresh_worlds_list(context, True)
         return {'FINISHED'}
     
     def invoke(self, context, event):
@@ -244,7 +244,7 @@ class OctaneAddSkyEnv(Operator):
         context.scene.view_settings.gamma = 1
         context.scene.octane.hdr_tonemap_preview_enable = True
 
-        refresh_worlds_list(context, -1)
+        refresh_worlds_list(context, True)
         
         return {'FINISHED'}
 
@@ -627,6 +627,7 @@ def refresh_worlds_list(context, active_last=False):
     
     if(active_last):
         context.scene.oc_worlds_index = len(context.scene.oc_worlds) - 1
+        bpy.ops.octane.activate_env()
     else:
         context.scene.oc_worlds_index = active
 
