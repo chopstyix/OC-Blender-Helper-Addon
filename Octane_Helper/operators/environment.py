@@ -98,6 +98,7 @@ def refresh_lights_list(context):
                 else:
                     light.icon = 'QUESTION'
 
+'''
 def get_enum_env_presets(self, context):
     # Called at any time
     result = [
@@ -112,11 +113,11 @@ def get_enum_env_presets(self, context):
     [result.append((file[:-6], file[:-6], '')) for file in files]
     return result
 
+
 def update_enum_env_presets(self, context):
     # Called when switching presets
     if(self.preset != context.scene.selected_env_preset):
-        print('test')
-        self.preset = context.scene.selected_env_preset
+        context.scene.selected_env_preset = self.preset
 
     if(self.preset!='None'):
         prev_worlds = [world.name for world in bpy.data.worlds]
@@ -127,7 +128,8 @@ def update_enum_env_presets(self, context):
         curr_worlds = [world.name for world in bpy.data.worlds]
         context.scene.world = bpy.data.worlds[list(set(curr_worlds)-set(prev_worlds))[0]]
         refresh_worlds_list(context)
-        
+'''
+
 # Classes
 class OctaneAddTexEnv(Operator):
     bl_label = 'Setup Texture'
@@ -314,8 +316,9 @@ class OctaneAddBackplate(Operator):
     def execute(self, context):
         world = context.scene.world
         ntree = world.node_tree
+        outNode = ntree.get_output_node('octane')
         texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
-        texenvNode.location = (10, 0)
+        texenvNode.location = (outNode.location.x, outNode.location.y-200)
         texenvNode.inputs['Texture'].default_value = self.backplate_color
         texenvNode.inputs['Visable env Backplate'].default_value = True
         outNode = ntree.get_output_node('octane')
@@ -544,6 +547,7 @@ class OctaneAddLightToonSpot(Operator):
         refresh_lights_list(context)
         return {'FINISHED'}
 
+'''
 class OctaneAddEnvironmentPreset(Operator):
     bl_label = 'Add an Environement Preset'
     bl_idname = 'octane.add_env_preset'
@@ -605,6 +609,7 @@ class OctaneRemoveEnvironmentPreset(Operator):
             os.remove(os.path.join(presets_dir, self.preset_name + '.blend'))
             context.scene.selected_env_preset = 'None'
         return {'FINISHED'}
+'''
 
 def refresh_worlds_list(context, active_last=False):
     context.scene.oc_worlds.clear()
@@ -634,10 +639,12 @@ class OctaneActivateEnvironment(Operator):
         ntree = context.scene.world.node_tree
         index = context.scene.oc_worlds_index
         
-        if(len([node for node in ntree.nodes if node.bl_idname == 'ShaderNodeOutputWorld'])):
-            prev_out = ntree.get_output_node('octane')
-            prev_out.is_active_output = False
-        
+        outNodes = [node for node in ntree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
+
+        if(len(outNodes)):
+            for outNode in outNodes:
+                outNode.is_active_output = False
+
         ntree.nodes[context.scene.oc_worlds[index].node].is_active_output = True
 
         refresh_worlds_list(context)
@@ -694,7 +701,7 @@ class OctaneEnvironmentsManager(Operator):
     bl_idname = 'octane.environments_manager'
     bl_options = {'REGISTER', 'UNDO'}
 
-    preset: EnumProperty(name='Presets', items=get_enum_env_presets, update=update_enum_env_presets)
+    #preset: EnumProperty(name='Presets', items=get_enum_env_presets, update=update_enum_env_presets)
 
     category: EnumProperty(
         name='Category', 
@@ -708,11 +715,16 @@ class OctaneEnvironmentsManager(Operator):
         index = context.scene.oc_worlds_index
         layout = self.layout
 
+        #if(self.preset != context.scene.selected_env_preset):
+        #    if(self.preset==''):
+        #        self.preset = 'None'
+        #    self.preset = context.scene.selected_env_preset
+
         # Draw Presets
-        row = layout.row(align=True)
-        row.prop(self, 'preset', text='Presets')
-        row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
-        row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE').preset_name = self.preset
+        #row = layout.row(align=True)
+        #row.prop(self, 'preset', text='Presets')
+        #row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
+        #row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE').preset_name = self.preset
         
         # Draw Worlds
         row = layout.row(align=True)
@@ -746,6 +758,7 @@ class OctaneEnvironmentsManager(Operator):
         return {'FINISHED'}
     
     def invoke(self, context, event):
+        #self.preset = context.scene.selected_env_preset
         refresh_worlds_list(context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)

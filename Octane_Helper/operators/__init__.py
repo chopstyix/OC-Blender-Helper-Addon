@@ -50,8 +50,8 @@ classes = (
     OctaneChangeObjProperties,
     OctaneCopyObjProperties,
     OctaneEnvironmentsManager,
-    OctaneAddEnvironmentPreset,
-    OctaneRemoveEnvironmentPreset,
+    #OctaneAddEnvironmentPreset,
+    #OctaneRemoveEnvironmentPreset,
     OctaneActivateEnvironment,
     OctaneRenameEnvironment,
     OctaneDeleteEnvironment
