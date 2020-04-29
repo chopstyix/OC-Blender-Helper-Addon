@@ -1,6 +1,9 @@
 from .materials import *
-from .environment import *
+from .environments import *
+from .backplates import *
+from .lights import *
 from .render import *
+from .windows import *
 
 classes = (
     OctaneAssignUniversal,
