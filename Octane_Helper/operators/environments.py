@@ -65,7 +65,7 @@ def remove_connected_nodes(ntree, node):
 class OctaneEnvironmentsManager(Operator):
     bl_label = 'Environments manager'
     bl_idname = 'octane.environments_manager'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     #preset: EnumProperty(name='Presets', items=get_enum_env_presets, update=update_enum_env_presets)
 
@@ -81,17 +81,6 @@ class OctaneEnvironmentsManager(Operator):
         index = context.scene.oc_worlds_index
         layout = self.layout
 
-        #if(self.preset != context.scene.selected_env_preset):
-        #    if(self.preset==''):
-        #        self.preset = 'None'
-        #    self.preset = context.scene.selected_env_preset
-
-        # Draw Presets
-        #row = layout.row(align=True)
-        #row.prop(self, 'preset', text='Presets')
-        #row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
-        #row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE').preset_name = self.preset
-        
         # Draw Worlds
         row = layout.row(align=True)
         row.template_list('OCTANE_UL_world_list', '', context.scene, 'oc_worlds', context.scene, 'oc_worlds_index')
@@ -125,7 +114,6 @@ class OctaneEnvironmentsManager(Operator):
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        #self.preset = context.scene.selected_env_preset
         refresh_worlds_list(context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)

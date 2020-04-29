@@ -1,3 +1,27 @@
+
+import bpy
+from bpy.types import Operator
+
+def refresh_presets_list(context):
+    pass
+
+# Classes
+class OctanePresetsManager(Operator):
+    bl_label = 'Presets manager'
+    bl_idname = 'octane.presets_manager'
+    bl_options = {'REGISTER'}
+
+    def draw(self, context):
+        pass
+    
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        refresh_presets_list(context)
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 '''
 def get_enum_env_presets(self, context):
     # Called at any time

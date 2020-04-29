@@ -440,7 +440,7 @@ class OctaneManageLayers(Operator):
 class OctaneCamerasManager(Operator):
     bl_label = 'Cameras Manager'
     bl_idname = 'octane.cameras_manager'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     cameras: EnumProperty(
         name='Cameras',

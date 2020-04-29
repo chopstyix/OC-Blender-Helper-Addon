@@ -61,7 +61,7 @@ def refresh_lights_list(context, active_last=False):
 class OctaneLightsManager(Operator):
     bl_label = 'Lights Manager'
     bl_idname = 'octane.lights_manager'
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'REGISTER'}
 
     emissive_material: EnumProperty(
         name='Emissive Material',
