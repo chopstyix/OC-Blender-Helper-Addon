@@ -91,6 +91,8 @@ def refresh_lights_list(context):
                     light.icon = 'LIGHT_POINT'
                 elif(light.tag == 'Area'):
                     light.icon = 'LIGHT_AREA'
+                elif(light.tag == 'Spot'):
+                    light.icon = 'LIGHT_SPOT'
                 elif(light.tag == 'Toon Point'):
                     light.icon = 'LIGHTPROBE_PLANAR'
                 elif(light.tag == 'Toon Spot'):
@@ -267,7 +269,7 @@ class OctaneAddMedEnv(Operator):
         absFloatNode.inputs['Value'].default_value = 0.0
         absFloatNode.location = (mediumNode.location.x - 200, mediumNode.location.y - 100)
         scatteringFloatNode = ntree.nodes.new('ShaderNodeOctFloatTex')
-        scatteringFloatNode.inputs['Value'].default_value = 0.5
+        scatteringFloatNode.inputs['Value'].default_value = 0.1
         scatteringFloatNode.location = (absFloatNode.location.x, absFloatNode.location.y - 100)
         ntree.links.new(scatteringFloatNode.outputs[0], mediumNode.inputs['Scattering Tex'])
         ntree.links.new(absFloatNode.outputs[0], mediumNode.inputs['Absorption Tex'])
@@ -504,14 +506,16 @@ class OctaneSetLight(Operator):
     bl_idname = 'octane.set_light'
     bl_options = {'REGISTER', 'UNDO'}
 
-    light_type: EnumProperty(items=[
+    types = [
         ('None', 'None', ''),
         ('Mesh', 'Mesh', ''),
         ('Sphere', 'Sphere', ''),
         ('Area', 'Area', ''),
+        ('Spot', 'Spot', ''),
         ('Point Toon', 'Point(Toon)', ''),
         ('Spot Toon', 'Spot (Toon)', '')
-    ], name='Type', default='None')
+    ]
+    light_type: EnumProperty(items=types, name='Type', default='None')
 
     @classmethod
     def poll(cls, context):
@@ -533,7 +537,10 @@ class OctaneSetLight(Operator):
     
     def invoke(self, context, event):
         if 'oc_light' in context.active_object:
-            self.light_type = context.active_object['oc_light']
+            if(context.active_object['oc_light'] in [item[0] for item in self.types]):
+                self.light_type = context.active_object['oc_light']
+            else:
+                self.light_type = 'None'
 
         wm = context.window_manager
         return wm.invoke_props_dialog(self)

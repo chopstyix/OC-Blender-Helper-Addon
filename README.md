@@ -42,4 +42,5 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
+* IES, Point and Directional
 * Bug fixes on presets management

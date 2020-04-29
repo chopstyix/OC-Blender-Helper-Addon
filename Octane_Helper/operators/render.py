@@ -623,6 +623,8 @@ class OctaneCamerasManager(Operator):
             elif(self.octane_cam_settings == 'Distortion'):
                 box = layout.box()
                 sub = box.column(align=True)
+                sub.label(text='Settings for different Camera lens type')
+                sub = box.column(align=True)
                 sub.active = (cam.type == 'PANO')
                 sub.prop(oct_cam, "pan_mode")
                 sub.prop(oct_cam, "fov_x")
