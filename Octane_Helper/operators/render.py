@@ -460,7 +460,7 @@ class OctaneCamerasManager(Operator):
             ('OSL Camera', 'OSL Camera', ''),
             ('Motion Blur', 'Motion Blur', '')
         ],
-        default='Imager'
+        default='Depth of field'
     )
 
     def draw(self, context):
