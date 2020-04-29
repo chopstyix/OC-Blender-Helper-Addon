@@ -46,6 +46,7 @@ classes = (
     OctaneCopyDenosierSettings,
     OctaneAddLightSphere,
     OctaneAddLightArea,
+    OctaneAddLightSpot,
     OctaneAddLightToonPoint,
     OctaneAddLightToonSpot,
     OctaneChangeObjProperties,

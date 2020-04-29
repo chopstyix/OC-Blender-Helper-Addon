@@ -2,6 +2,7 @@ import bpy
 from bpy.types import Operator
 from bl_operators.presets import AddPresetBase
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
+from .. assets import load_objects
 import os
 
 def create_world_output(context, name):
@@ -76,7 +77,7 @@ def prop_node_attribute(node, layout, attribute, text):
     if(not node.inputs[attribute].is_linked):
         layout.prop(node.inputs[attribute], 'default_value', text=text)
 
-def refresh_lights_list(context):
+def refresh_lights_list(context, active_last=False):
     context.scene.oc_lights.clear()
     context.scene.oc_lights_index = 0
     for obj in context.scene.objects:
@@ -92,13 +93,41 @@ def refresh_lights_list(context):
                 elif(light.tag == 'Area'):
                     light.icon = 'LIGHT_AREA'
                 elif(light.tag == 'Spot'):
-                    light.icon = 'LIGHT_SPOT'
-                elif(light.tag == 'Toon Point'):
+                    light.icon = 'MESH_CYLINDER'
+                elif(light.tag == 'Point Toon'):
                     light.icon = 'LIGHTPROBE_PLANAR'
-                elif(light.tag == 'Toon Spot'):
+                elif(light.tag == 'Spot Toon'):
                     light.icon = 'LIGHT_SPOT'
                 else:
                     light.icon = 'QUESTION'
+    if(active_last):
+        context.scene.oc_lights_index = len(context.scene.oc_lights) - 1
+
+def refresh_worlds_list(context, active_last=False):
+    context.scene.oc_worlds.clear()
+    
+    ntree = context.scene.world.node_tree
+    count = 0
+    active = 0
+    for node in ntree.nodes:
+        if(node.bl_idname=='ShaderNodeOutputWorld'):
+            world = context.scene.oc_worlds.add()
+            world.node = node.name
+            if(node.is_active_output):
+                active = count
+            count += 1
+    
+    if(active_last):
+        context.scene.oc_worlds_index = len(context.scene.oc_worlds) - 1
+        bpy.ops.octane.activate_env()
+    else:
+        context.scene.oc_worlds_index = active
+
+def remove_connected_nodes(ntree, node):
+    for input in node.inputs:
+        for link in input.links:
+            remove_connected_nodes(ntree, link.from_node)
+            ntree.nodes.remove(link.from_node)
 
 '''
 def get_enum_env_presets(self, context):
@@ -460,14 +489,15 @@ class OctaneLightsManager(Operator):
         layout = self.layout
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.operator('octane.add_light_sphere', text='Sphere')
-        row.operator('octane.add_light_area', text='Area')
+        row.operator('octane.add_light_sphere', text='Sphere', icon='LIGHT_POINT')
+        row.operator('octane.add_light_area', text='Area', icon='LIGHT_AREA')
+        row.operator('octane.add_light_spot', text='Spot', icon='LIGHT_SPOT')
         row = col.row(align=True)
-        row.operator('octane.add_light_toon_point', text='Point (Toon)')
-        row.operator('octane.add_light_toon_spot', text='Spot (Toon)')
+        row.operator('octane.add_light_toon_point', text='Point (Toon)', icon='LIGHTPROBE_PLANAR')
+        row.operator('octane.add_light_toon_spot', text='Spot (Toon)', icon='LIGHT_SPOT')
 
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
-        layout.prop(self, 'emissive_material', text='')
+        layout.prop(self, 'emissive_material', text='Materials')
         if(self.emissive_material!='None' and self.emissive_material!='' and self.emissive_material!=None):
             obj = lights[index].obj
             if(obj.type=='LIGHT'):
@@ -553,7 +583,7 @@ class OctaneAddLightSphere(Operator):
     def execute(self, context):
         bpy.ops.object.light_add(type='SPHERE', location=(0, 0, 0))
         context.active_object['oc_light'] = 'Sphere'
-        refresh_lights_list(context)
+        refresh_lights_list(context, True)
         return {'FINISHED'}
 
 class OctaneAddLightArea(Operator):
@@ -564,7 +594,19 @@ class OctaneAddLightArea(Operator):
     def execute(self, context):
         bpy.ops.object.light_add(type='AREA', location=(0, 0, 0))
         context.active_object['oc_light'] = 'Area'
-        refresh_lights_list(context)
+        refresh_lights_list(context, True)
+        return {'FINISHED'}
+
+class OctaneAddLightSpot(Operator):
+    bl_label = 'Add a spot light (fake)'
+    bl_idname = 'octane.add_light_spot'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        objs = load_objects('Spot')
+        for obj in objs:
+            obj['oc_light'] = 'Spot'
+        refresh_lights_list(context, True)
         return {'FINISHED'}
 
 class OctaneAddLightToonPoint(Operator):
@@ -575,7 +617,8 @@ class OctaneAddLightToonPoint(Operator):
     def execute(self, context):
         bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
         context.active_object['oc_light'] = 'Point Toon'
-        refresh_lights_list(context)
+        context.active_object.name = 'Point_Toon' + context.active_object.name[5:]
+        refresh_lights_list(context, True)
         return {'FINISHED'}
 
 class OctaneAddLightToonSpot(Operator):
@@ -586,7 +629,8 @@ class OctaneAddLightToonSpot(Operator):
     def execute(self, context):
         bpy.ops.object.light_add(type='SUN', location=(0, 0, 0))
         context.active_object['oc_light'] = 'Spot Toon'
-        refresh_lights_list(context)
+        context.active_object.name = 'Spot_Toon' + context.active_object.name[3:]
+        refresh_lights_list(context, True)
         return {'FINISHED'}
 
 '''
@@ -653,26 +697,6 @@ class OctaneRemoveEnvironmentPreset(Operator):
         return {'FINISHED'}
 '''
 
-def refresh_worlds_list(context, active_last=False):
-    context.scene.oc_worlds.clear()
-    
-    ntree = context.scene.world.node_tree
-    count = 0
-    active = 0
-    for node in ntree.nodes:
-        if(node.bl_idname=='ShaderNodeOutputWorld'):
-            world = context.scene.oc_worlds.add()
-            world.node = node.name
-            if(node.is_active_output):
-                active = count
-            count += 1
-    
-    if(active_last):
-        context.scene.oc_worlds_index = len(context.scene.oc_worlds) - 1
-        bpy.ops.octane.activate_env()
-    else:
-        context.scene.oc_worlds_index = active
-
 class OctaneActivateEnvironment(Operator):
     bl_label = 'Activate an environment'
     bl_idname = 'octane.activate_env'
@@ -714,12 +738,6 @@ class OctaneRenameEnvironment(Operator):
         self.name = context.scene.oc_worlds[index].node
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
-
-def remove_connected_nodes(ntree, node):
-    for input in node.inputs:
-        for link in input.links:
-            remove_connected_nodes(ntree, link.from_node)
-            ntree.nodes.remove(link.from_node)
 
 class OctaneDeleteEnvironment(Operator):
     bl_label = 'Delete an environment'
