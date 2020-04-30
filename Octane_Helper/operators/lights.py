@@ -79,7 +79,7 @@ class OctaneLightsManager(Operator):
         row.operator('octane.add_light_spot', text='Spot', icon='LIGHT_SPOT')
         row = col.row(align=True)
         row.operator('octane.add_light_toon_point', text='Point (Toon)', icon='LIGHTPROBE_PLANAR')
-        row.operator('octane.add_light_toon_spot', text='Spot (Toon)', icon='LIGHT_SPOT')
+        row.operator('octane.add_light_toon_spot', text='Directional (Toon)', icon='LIGHT_SPOT')
 
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
         layout.prop(self, 'emissive_material', text='Materials')

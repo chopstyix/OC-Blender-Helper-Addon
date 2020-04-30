@@ -84,6 +84,10 @@ def append_env_nodes(ntree_to, rootNodes, offset_y):
         root_new.name = rootNode.name
         root_new.location.x = rootNode.location.x
         root_new.location.y = rootNode.location.y + offset_y - 800
+
+        if(rootNode.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex']):
+            root_new.image = rootNode.image
+
         for input in rootNode.inputs:
             if(not input.is_linked):
                 if('default_value' in dir(input)):
@@ -115,11 +119,14 @@ class OctaneEnvironmentsManager(Operator):
         layout = self.layout
 
         # Draw presets
-        row = layout.row(align=True)
+        split=layout.split(factor=0.65, align=True)
+        row = split.row(align=True)
         row.prop(context.scene, 'oc_env_preset', text='Preset')
-        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='EXPERIMENTAL')
+        row = split.row(align=True)
         row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
         row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE')
+        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='Load', icon='EXPERIMENTAL')
+        layout.separator()
 
         # Draw Worlds
         row = layout.row(align=True)
@@ -174,6 +181,7 @@ class OctaneAppendEnvironmentPreset(Operator):
             prev_worlds = [world.name for world in bpy.data.worlds]
             path = os.path.join(env_path, context.scene.oc_env_preset + '.blend')
             with bpy.data.libraries.load(path) as (data_from, data_to):
+                data_to.images = data_from.images
                 data_to.worlds = data_from.worlds
             curr_worlds = [world.name for world in bpy.data.worlds]
             added_world = bpy.data.worlds[list(set(curr_worlds)-set(prev_worlds))[0]]
@@ -222,16 +230,19 @@ class OctaneAddEnvironmentPreset(Operator):
 
         # Save required data to the file
         # For iterable object, use '*items' instead if 'items'
-        data_blocks = {
-            bpy.context.scene.world
-        }
+        data_blocks = set({})
         nodes = bpy.context.scene.world.node_tree.nodes
+
+        image_list = [node.image for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]
         if(self.pack_images):
-            [node.image.pack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]   
+            for image in image_list:
+                image.pack()
+        data_blocks.add(bpy.context.scene.world)
+        nodes.update()
         bpy.data.libraries.write(save_file, data_blocks, compress=True)
         if(self.pack_images):
-            [node.image.unpack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]
-
+            for image in image_list:
+                image.unpack(method='USE_ORIGINAL')
         context.scene.oc_env_preset = self.save_name
         return {'FINISHED'}
     
@@ -313,6 +324,8 @@ class OctaneDeleteEnvironment(Operator):
         ntree.nodes.update()
 
         refresh_worlds_list(context)
+        context.scene.oc_worlds_index = len(context.scene.oc_worlds) - 1
+
         return {'FINISHED'}
 
 class OctaneAddSkyEnv(Operator):
