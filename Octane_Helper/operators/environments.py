@@ -250,6 +250,8 @@ class OctaneRemoveEnvironmentPreset(Operator):
         
         os.remove(os.path.join(env_path, context.scene.oc_env_preset + '.blend'))
 
+        context.scene.oc_env_preset = 'Default'
+
         return {'FINISHED'}
 
 class OctaneActivateEnvironment(Operator):
