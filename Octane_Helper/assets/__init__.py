@@ -14,3 +14,27 @@ def save_objects(name, objects):
         *objects
     }
     bpy.data.libraries.write(path, data_blocks, compress=True)
+
+
+
+'''
+def save_preset(name, presets):
+    path = os.path.join(bpy.utils.preset_paths('octane')[0], 'presets', name + '.blend')
+    data_blocks = {}
+    if 'Kernel' in presets:
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+        bpy.context.active_object.name = 'OC_Preset_Kernel'
+        data_blocks.add(bpy.context.scene.oct_view_cam)
+        data_blocks.add(bpy.context.active_object)
+    if 'Environment' in presets:
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+        bpy.context.active_object.name = 'OC_Preset_Environment'
+        data_blocks.add(bpy.context.scene.world)
+        data_blocks.add(bpy.context.active_object)
+    if 'Imager' in presets:
+        bpy.ops.object.empty_add(type='PLAIN_AXES', location=(0, 0, 0))
+        bpy.context.active_object.name = 'OC_Preset_Imager'
+        data_blocks.add(bpy.context.scene)
+        data_blocks.add(bpy.context.active_object)
+    bpy.data.libraries.write(path, data_blocks, compress=True)
+'''

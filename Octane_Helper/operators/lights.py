@@ -50,7 +50,7 @@ def refresh_lights_list(context, active_last=False):
                     light.icon = 'MESH_CYLINDER'
                 elif(light.tag == 'Point Toon'):
                     light.icon = 'LIGHTPROBE_PLANAR'
-                elif(light.tag == 'Spot Toon'):
+                elif(light.tag == 'Directional Toon'):
                     light.icon = 'LIGHT_SPOT'
                 else:
                     light.icon = 'QUESTION'
@@ -127,8 +127,8 @@ class OctaneSetLight(Operator):
         ('Sphere', 'Sphere', ''),
         ('Area', 'Area', ''),
         ('Spot', 'Spot', ''),
-        ('Point Toon', 'Point(Toon)', ''),
-        ('Spot Toon', 'Spot (Toon)', '')
+        ('Point Toon', 'Point Toon', ''),
+        ('Directional Toon', 'Directional Toon', '')
     ]
     light_type: EnumProperty(items=types, name='Type', default='None')
 
@@ -207,13 +207,13 @@ class OctaneAddLightToonPoint(Operator):
         return {'FINISHED'}
 
 class OctaneAddLightToonSpot(Operator):
-    bl_label = 'Add a spot toon light'
+    bl_label = 'Add a directional toon light'
     bl_idname = 'octane.add_light_toon_spot'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
         bpy.ops.object.light_add(type='SUN', location=(0, 0, 0))
-        context.active_object['oc_light'] = 'Spot Toon'
-        context.active_object.name = 'Spot_Toon' + context.active_object.name[3:]
+        context.active_object['oc_light'] = 'Directional Toon'
+        context.active_object.name = 'Directional_Toon' + context.active_object.name[3:]
         refresh_lights_list(context, True)
         return {'FINISHED'}

@@ -59,7 +59,14 @@ classes = (
     OctaneActivateEnvironment,
     OctaneRenameEnvironment,
     OctaneDeleteEnvironment,
-    OctanePresetsManager
+    OctanePresetsManager,
+    OctaneAddPreset,
+    OctaneLoadPresetKernel,
+    OctaneLoadPresetEnvironment,
+    OctaneLoadPresetImager,
+    OctaneLoadPresetAll,
+    OctaneRenamePreset,
+    OctaneDeletePreset
 )
 
 def register_operators():

@@ -53,6 +53,17 @@ def update_sss(self, context):
     if(self.enable_geneate_transmission):
         self.sss_transmission = get_bright_color(self.sss_albedo)
 
+def selected_mat_get(self):
+    context = bpy.context
+    if(context.active_object):
+        if(context.active_object.active_material):
+            return bpy.context.active_object.active_material.name
+    return ''
+
+def selected_mat_set(self, value):
+    if(value!=''):
+        assign_material(bpy.context, bpy.data.materials[value])
+
 # Assign Materials
 class OctaneAssignUniversal(Operator):
     bl_label = 'Universal Material'
