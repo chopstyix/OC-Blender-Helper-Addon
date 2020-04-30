@@ -55,9 +55,12 @@ classes = (
     OctaneChangeObjProperties,
     OctaneCopyObjProperties,
     OctaneEnvironmentsManager,
+    OctaneAppendEnvironmentPreset,
+    OctaneAddEnvironmentPreset,
+    OctaneRemoveEnvironmentPreset,
     OctaneActivateEnvironment,
     OctaneRenameEnvironment,
-    OctaneDeleteEnvironment,
+    OctaneDeleteEnvironment
 )
 
 def register_operators():

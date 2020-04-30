@@ -1,15 +1,24 @@
 import bpy 
 from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
+import os
+
+env_path = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+
+def get_y(world, type):
+    ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
+    if(type == 'Min'):
+        return min(ys)
+    elif(type == 'Max'):
+        return max(ys)
 
 def create_world_output(context, name):
     world = context.scene.world
     world.use_nodes = True
     outNode = world.node_tree.nodes.new('ShaderNodeOutputWorld')
     outNode.name = name
-    ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
     
-    outNode.location = (300, min(ys)-800)
+    outNode.location = (300, get_y(world, 'Min')-800)
     return outNode
 
 def get_enum_trs(self, context):
@@ -61,13 +70,39 @@ def remove_connected_nodes(ntree, node):
             remove_connected_nodes(ntree, link.from_node)
             ntree.nodes.remove(link.from_node)
 
+def get_enum_env_presets(self, context):
+    if not os.path.isdir(env_path):
+        os.makedirs(env_path)
+    presets = ['Default'] + [path[:-6] for path in os.listdir(env_path)]
+    return [(preset, preset, '') for preset in presets]
+
+def append_env_nodes(ntree_to, rootNodes, offset_y):
+    for rootNode in rootNodes:
+        root_new = ntree_to.nodes.new(rootNode.bl_idname)
+        root_new.location.x = rootNode.location.x
+        root_new.location.y = rootNode.location.y + offset_y - 800
+        for input in rootNode.inputs:
+            if(not input.is_linked):
+                if('default_value' in dir(input)):
+                    root_new.inputs[input.identifier].default_value = input.default_value
+            else:
+                linked_nodes = [link.from_node for link in input.links]
+                for linked_node in linked_nodes:
+                    sub = append_env_nodes(ntree_to, [linked_node], offset_y)
+                    ntree_to.links.new(sub.outputs[0], root_new.inputs[input.identifier])
+        if(len(rootNodes) == 0 or len(rootNodes) == 1):
+            return root_new
+
 # Classes
 class OctaneEnvironmentsManager(Operator):
     bl_label = 'Environments manager'
     bl_idname = 'octane.environments_manager'
     bl_options = {'REGISTER'}
 
-    #preset: EnumProperty(name='Presets', items=get_enum_env_presets, update=update_enum_env_presets)
+    preset: EnumProperty(
+        name='Presets', 
+        items=get_enum_env_presets
+    )
 
     category: EnumProperty(
         name='Category', 
@@ -80,6 +115,13 @@ class OctaneEnvironmentsManager(Operator):
         ntree = context.scene.world.node_tree
         index = context.scene.oc_worlds_index
         layout = self.layout
+
+        # Draw presets
+        row = layout.row(align=True)
+        row.prop(self, 'preset', text='Preset')
+        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='DOWNARROW_HLT').preset_name = self.preset
+        row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
+        row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE')
 
         # Draw Worlds
         row = layout.row(align=True)
@@ -114,9 +156,55 @@ class OctaneEnvironmentsManager(Operator):
         return {'FINISHED'}
     
     def invoke(self, context, event):
+        if(not context.scene.world):
+            world = bpy.data.worlds.new('World')
+            world.use_nodes = True
         refresh_worlds_list(context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
+
+class OctaneAppendEnvironmentPreset(Operator):
+    bl_label = 'Append env preset'
+    bl_idname = 'octane.append_env_preset'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    preset_name: StringProperty(name='Preset', default='Default')
+    
+    def execute(self, context):
+        if(self.preset_name!='Default'):
+            prev_worlds = [world.name for world in bpy.data.worlds]
+            path = os.path.join(env_path, self.preset_name + '.blend')
+            with bpy.data.libraries.load(path) as (data_from, data_to):
+                data_to.worlds = data_from.worlds
+            curr_worlds = [world.name for world in bpy.data.worlds]
+            added_world = bpy.data.worlds[list(set(curr_worlds)-set(prev_worlds))[0]]
+            
+            # Append nodes to the current world
+            ntree_from = added_world.node_tree
+            ntree_to = context.scene.world.node_tree
+            outNodes = [node for node in ntree_from.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
+            offset_y = get_y(context.scene.world, 'Min') - get_y(added_world, 'Max')
+            append_env_nodes(ntree_to, outNodes, offset_y)
+            
+            bpy.data.worlds.remove(added_world)
+            refresh_worlds_list(context)
+        return {'FINISHED'}
+
+class OctaneAddEnvironmentPreset(Operator):
+    bl_label = 'Add env preset'
+    bl_idname = 'octane.add_env_preset'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        return {'FINISHED'}
+
+class OctaneRemoveEnvironmentPreset(Operator):
+    bl_label = 'Remove env preset'
+    bl_idname = 'octane.remove_env_preset'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        return {'FINISHED'}
 
 class OctaneActivateEnvironment(Operator):
     bl_label = 'Activate an environment'
