@@ -185,10 +185,15 @@ class OctaneAssignDiffuse(Operator):
         assign_material(context, mat)
         return {'FINISHED'}
 
-class OctaneAssignEmissive(Operator):
-    bl_label = 'Emissive Material'
-    bl_idname = 'octane.assign_emissive'
+class OctaneAssignEmission(Operator):
+    bl_label = 'Setup'
+    bl_idname = 'octane.assign_emission'
     bl_options = {'REGISTER', 'UNDO'}
+
+    filepath: StringProperty(subtype="FILE_PATH")
+    filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+
+    emission_type: StringProperty(default='RGB')
 
     rgb_emission_color: FloatVectorProperty(
         name="Color",
@@ -209,36 +214,90 @@ class OctaneAssignEmissive(Operator):
         name="Surface Brightness",
         default=True)
     
+    emission_double: BoolProperty(
+        name="Double Sided",
+        default=False)
+    
     light_type: EnumProperty(items=[
         ('None', 'None', ''),
-        ('Point', 'Point', ''),
         ('Mesh', 'Mesh', ''),
+        ('Sphere', 'Sphere', ''),
         ('Area', 'Area', ''),
         ('Spot', 'Spot', ''),
-        ('Toon', 'Toon', ''),
-    ], name='Mark as', default='Mesh')
+        ('Point Toon', 'Point Toon', ''),
+        ('Directional Toon', 'Directional Toon', '')
+    ], name='Mark as', default='Mesh') 
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)
+        if(self.emission_type=='RGB' or self.emission_type=='IES'):
+            col.prop(self, 'rgb_emission_color')
+        col.prop(self, 'emission_power')
+        col.prop(self, 'emission_surface_brightness')
+        col.prop(self, 'emission_double')
+        col.prop(self, 'light_type')
 
     def execute(self, context):
         # Create material
         mat = create_material(context, 'OC_Emissive', 'ShaderNodeOctDiffuseMat')
         nodes = mat.node_tree.nodes
-        emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
-        emissionNode.location = (-210, 300)
-        emissionNode.inputs['Power'].default_value = self.emission_power
-        emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
-        rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
-        rgbNode.location = (-410, 300)
-        rgbNode.inputs['Color'].default_value = self.rgb_emission_color
-        mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
-        mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+
+        if(self.emission_type == 'RGB'):
+            emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+            emissionNode.location = (-210, 300)
+            emissionNode.inputs['Power'].default_value = self.emission_power
+            emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
+            rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+            rgbNode.location = (-410, 300)
+            rgbNode.inputs['Color'].default_value = self.rgb_emission_color
+            mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
+            mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+        elif(self.emission_type == 'TEX'):
+            emissionNode = nodes.new('ShaderNodeOctTextureEmission')
+            emissionNode.location = (-210, 300)
+            emissionNode.inputs['Power'].default_value = self.emission_power
+            emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
+            imgNode = nodes.new('ShaderNodeOctImageTex')
+            imgNode.location = (-460, 300)
+            imgNode.image = bpy.data.images.load(self.filepath)
+            mat.node_tree.links.new(imgNode.outputs[0], emissionNode.inputs['Texture'])
+            mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+        elif(self.emission_type == 'IES'):
+            emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+            emissionNode.location = (-210, 300)
+            emissionNode.inputs['Power'].default_value = self.emission_power
+            emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
+            emissionNode.inputs['Double-sided'].default_value = self.emission_double
+            rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+            rgbNode.location = (-410, 400)
+            rgbNode.inputs['Color'].default_value = self.rgb_emission_color
+            imgNode = nodes.new('ShaderNodeOctImageTex')
+            imgNode.location = (-460, 300)
+            imgNode.image = bpy.data.images.load(self.filepath)
+            projectNode = nodes.new('ShaderNodeOctPerspProjection')
+            projectNode.location = (-660, 250)
+            projectNode.coordinate_space_mode = 'OCT_POSITION_NORMAL'
+            mat.node_tree.links.new(projectNode.outputs[0], imgNode.inputs['Projection'])
+            mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
+            mat.node_tree.links.new(imgNode.outputs[0], emissionNode.inputs['Distribution'])
+            mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+
         # Assign materials to selected
         assign_material(context, mat)
         assign_oclight(context, self.light_type)
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        if(self.emission_type == 'RGB'):
+            wm = context.window_manager
+            return wm.invoke_props_dialog(self)
+        elif(self.emission_type == 'TEX'):
+            context.window_manager.fileselect_add(self)
+            return {"RUNNING_MODAL"}
+        elif(self.emission_type == 'IES'):
+            context.window_manager.fileselect_add(self)
+            return {"RUNNING_MODAL"}
 
 class OctaneAssignColorgrid(Operator):
     bl_label = 'Color Grid Material'

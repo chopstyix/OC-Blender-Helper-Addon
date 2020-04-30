@@ -8,7 +8,7 @@ from .windows import *
 classes = (
     OctaneAssignUniversal,
     OctaneAssignDiffuse,
-    OctaneAssignEmissive,
+    OctaneAssignEmission,
     OctaneAssignColorgrid,
     OctaneAssignUVgrid,
     OctaneAssignGlossy,
