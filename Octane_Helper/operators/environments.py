@@ -3,7 +3,8 @@ from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
 import os
 
-env_path = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
+presets_dir = bpy.utils.user_resource('SCRIPTS', 'presets')
+env_path = os.path.join(presets_dir, 'octane', 'environments')
 
 def get_y(world, type):
     if(not world.node_tree.get_output_node('octane')):
