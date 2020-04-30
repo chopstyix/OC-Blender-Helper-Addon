@@ -3,7 +3,6 @@ from bpy.props import IntProperty, BoolProperty, CollectionProperty, StringPrope
 from . context import *
 from . worlds import *
 from . lights import *
-from . presets import *
 from .. icons import get_icon
 from .. operators.materials import assign_material, selected_mat_get, selected_mat_set
 
@@ -27,9 +26,7 @@ classes = (
     OctaneLightListItem,
     OCTANE_UL_light_list,
     OctaneWorldListItem,
-    OCTANE_UL_world_list,
-    OctanePresetListItem,
-    OCTANE_UL_preset_list
+    OCTANE_UL_world_list
 )
 
 def register_menus():
@@ -42,8 +39,6 @@ def register_menus():
     bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)
     bpy.types.Scene.oc_worlds = CollectionProperty(type=OctaneWorldListItem)
     bpy.types.Scene.oc_worlds_index = IntProperty(name='World', default=0)
-    bpy.types.Scene.oc_presets = CollectionProperty(type=OctanePresetListItem)
-    bpy.types.Scene.oc_presets_index = IntProperty(name='Preset', default=0)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 

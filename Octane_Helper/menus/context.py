@@ -76,7 +76,6 @@ class OctaneRenderMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.operator('octane.presets_manager', icon='EXPERIMENTAL')
         layout.operator('octane.cameras_manager', icon='VIEW_CAMERA')
         layout.separator()
         layout.operator('octane.manage_imager', icon='IMAGE')
