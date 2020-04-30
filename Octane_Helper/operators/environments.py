@@ -117,7 +117,7 @@ class OctaneEnvironmentsManager(Operator):
         # Draw presets
         row = layout.row(align=True)
         row.prop(context.scene, 'oc_env_preset', text='Preset')
-        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='DOWNARROW_HLT')
+        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='EXPERIMENTAL')
         row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
         row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE')
 
