@@ -42,4 +42,4 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* None
+* Fire, Smoke materials
