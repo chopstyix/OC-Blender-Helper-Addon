@@ -25,6 +25,8 @@ class OctaneAddBackplate(Operator):
     
     @classmethod
     def poll(cls, context):
+        if(not context.scene.world):
+            return False
         if(context.scene.world.use_nodes):
             world = context.scene.world
             ntree = world.node_tree
@@ -64,6 +66,8 @@ class OctaneRemoveBackplate(Operator):
    
     @classmethod
     def poll(cls, context):
+        if(not context.scene.world):
+            return False
         if(context.scene.world.use_nodes):
             world = context.scene.world
             ntree = world.node_tree
@@ -100,6 +104,8 @@ class OctaneModifyBackplate(Operator):
     
     @classmethod
     def poll(cls, context):
+        if(not context.scene.world):
+            return False
         if(context.scene.world.use_nodes):
             world = context.scene.world
             ntree = world.node_tree

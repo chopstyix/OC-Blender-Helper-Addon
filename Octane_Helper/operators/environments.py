@@ -157,6 +157,7 @@ class OctaneEnvironmentsManager(Operator):
         if(not context.scene.world):
             world = bpy.data.worlds.new('World')
             world.use_nodes = True
+            context.scene.world = world
         if(context.scene.oc_env_preset == ''):
             context.scene.oc_env_preset = 'Default'
         refresh_worlds_list(context)
@@ -448,6 +449,8 @@ class OctaneTransformHDRIEnv(Operator):
     @classmethod
     def poll(cls, context):
         world = context.scene.world
+        if(not world):
+            return False
         if(len([node for node in world.node_tree.nodes if node.bl_idname=='ShaderNodeOct3DTransform'])):
             return True
         else:
