@@ -1,10 +1,11 @@
 import bpy
-from bpy.props import IntProperty, BoolProperty, CollectionProperty, StringProperty
+from bpy.props import IntProperty, BoolProperty, CollectionProperty, StringProperty, EnumProperty
 from . context import *
 from . worlds import *
 from . lights import *
 from .. icons import get_icon
 from .. operators.materials import assign_material, selected_mat_get, selected_mat_set
+from .. operators.environments import get_enum_env_presets
 
 def object_menu_func(self, context):
     if context.scene.render.engine == 'octane':
@@ -37,6 +38,7 @@ def register_menus():
     bpy.types.Scene.is_smooth = BoolProperty(name='Always smooth materials', default=True)
     bpy.types.Scene.oc_lights = CollectionProperty(type=OctaneLightListItem)
     bpy.types.Scene.oc_lights_index = IntProperty(name='Light', default=0)
+    bpy.types.Scene.oc_env_preset = EnumProperty(name='Presets', items=get_enum_env_presets)
     bpy.types.Scene.oc_worlds = CollectionProperty(type=OctaneWorldListItem)
     bpy.types.Scene.oc_worlds_index = IntProperty(name='World', default=0)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)

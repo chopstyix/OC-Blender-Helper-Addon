@@ -6,6 +6,8 @@ import os
 env_path = os.path.join(bpy.utils.preset_paths('octane')[0], 'environments')
 
 def get_y(world, type):
+    if(not world.node_tree.get_output_node('octane')):
+        return 0
     ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
     if(type == 'Min'):
         return min(ys)
@@ -79,6 +81,7 @@ def get_enum_env_presets(self, context):
 def append_env_nodes(ntree_to, rootNodes, offset_y):
     for rootNode in rootNodes:
         root_new = ntree_to.nodes.new(rootNode.bl_idname)
+        root_new.name = rootNode.name
         root_new.location.x = rootNode.location.x
         root_new.location.y = rootNode.location.y + offset_y - 800
         for input in rootNode.inputs:
@@ -99,11 +102,6 @@ class OctaneEnvironmentsManager(Operator):
     bl_idname = 'octane.environments_manager'
     bl_options = {'REGISTER'}
 
-    preset: EnumProperty(
-        name='Presets', 
-        items=get_enum_env_presets
-    )
-
     category: EnumProperty(
         name='Category', 
         items=[
@@ -118,8 +116,8 @@ class OctaneEnvironmentsManager(Operator):
 
         # Draw presets
         row = layout.row(align=True)
-        row.prop(self, 'preset', text='Preset')
-        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='DOWNARROW_HLT').preset_name = self.preset
+        row.prop(context.scene, 'oc_env_preset', text='Preset')
+        row.operator(OctaneAppendEnvironmentPreset.bl_idname, text='', icon='DOWNARROW_HLT')
         row.operator(OctaneAddEnvironmentPreset.bl_idname, text='', icon='ADD')
         row.operator(OctaneRemoveEnvironmentPreset.bl_idname, text='', icon='REMOVE')
 
@@ -159,6 +157,8 @@ class OctaneEnvironmentsManager(Operator):
         if(not context.scene.world):
             world = bpy.data.worlds.new('World')
             world.use_nodes = True
+        if(context.scene.oc_env_preset == ''):
+            context.scene.oc_env_preset = 'Default'
         refresh_worlds_list(context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -168,12 +168,10 @@ class OctaneAppendEnvironmentPreset(Operator):
     bl_idname = 'octane.append_env_preset'
     bl_options = {'REGISTER', 'UNDO'}
 
-    preset_name: StringProperty(name='Preset', default='Default')
-    
     def execute(self, context):
-        if(self.preset_name!='Default'):
+        if(context.scene.oc_env_preset !='Default'):
             prev_worlds = [world.name for world in bpy.data.worlds]
-            path = os.path.join(env_path, self.preset_name + '.blend')
+            path = os.path.join(env_path, context.scene.oc_env_preset + '.blend')
             with bpy.data.libraries.load(path) as (data_from, data_to):
                 data_to.worlds = data_from.worlds
             curr_worlds = [world.name for world in bpy.data.worlds]
@@ -195,15 +193,63 @@ class OctaneAddEnvironmentPreset(Operator):
     bl_idname = 'octane.add_env_preset'
     bl_options = {'REGISTER', 'UNDO'}
     
+    save_name: StringProperty(name='Name', default='')
+    pack_images: BoolProperty(name='Pack images', default=False, description='This option may take long time to process. Turn on only when you need to share presets across computers')
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text='This will save your world nodes to a file')
+        col = layout.column(align=True)
+        col.prop(self, 'save_name')
+        col.prop(self, 'pack_images')
+    
     def execute(self, context):
+        # Create a Blend file
+        if(self.save_name==''): 
+            self.report({'WARNING'}, 'The name should not be empty')
+            return {'CANCELLED'}
+        if(self.save_name=='Default'): 
+            self.report({'WARNING'}, 'The name is invalid')
+            return {'CANCELLED'}
+
+        files = os.listdir(env_path)
+        if(len([file for file in files if (file[:-6]==self.save_name)])):
+            self.report({'WARNING'}, 'The name has beed used, try another one')
+            return {'CANCELLED'}
+        
+        save_file = os.path.join(env_path, self.save_name + '.blend')
+
+        # Save required data to the file
+        # For iterable object, use '*items' instead if 'items'
+        data_blocks = {
+            bpy.context.scene.world
+        }
+        nodes = bpy.context.scene.world.node_tree.nodes
+        if(self.pack_images):
+            [node.image.pack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]   
+        bpy.data.libraries.write(save_file, data_blocks, compress=True)
+        if(self.pack_images):
+            [node.image.unpack() for node in nodes if (node.bl_idname in ['ShaderNodeOctImageTex', 'ShaderNodeOctImageTileTex', 'ShaderNodeOctFloatImageTex', 'ShaderNodeOctAlphaImageTex'] and node.image!=None)]
+
+        context.scene.oc_env_preset = self.save_name
         return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 class OctaneRemoveEnvironmentPreset(Operator):
     bl_label = 'Remove env preset'
     bl_idname = 'octane.remove_env_preset'
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     def execute(self, context):
+        if(context.scene.oc_env_preset == '' or context.scene.oc_env_preset == 'Default'):
+            self.report({'WARNING'}, 'Nothing is removed')
+            return {'CANCELLED'}
+        
+        os.remove(os.path.join(env_path, context.scene.oc_env_preset + '.blend'))
+
         return {'FINISHED'}
 
 class OctaneActivateEnvironment(Operator):
