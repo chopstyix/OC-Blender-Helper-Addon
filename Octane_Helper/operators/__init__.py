@@ -35,6 +35,7 @@ classes = (
     OctaneTransformHDRIEnv,
     OctaneOpenCompositor,
     OctaneOpenImagePainter,
+    OctaneOpenShaderEditor,
     OctaneToggleClayMode,
     OctaneAddBackplate,
     OctaneRemoveBackplate,

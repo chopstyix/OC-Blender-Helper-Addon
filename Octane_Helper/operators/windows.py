@@ -25,3 +25,14 @@ class OctaneOpenImagePainter(Operator):
         area.ui_type = 'VIEW'
         area.spaces[0].mode = 'PAINT'
         return {'FINISHED'}
+
+class OctaneOpenShaderEditor(Operator):
+    bl_label = 'Open Shader Editor'
+    bl_idname = 'octane.open_shader_editor'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+        area = bpy.context.window_manager.windows[-1].screen.areas[0]
+        area.ui_type = 'ShaderNodeTree'
+        return {'FINISHED'}

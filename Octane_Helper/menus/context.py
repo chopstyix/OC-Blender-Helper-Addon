@@ -49,6 +49,8 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
         layout.operator('octane.assign_fire', icon='FORCE_SMOKEFLOW')
         layout.separator()
+        layout.operator('octane.open_shader_editor', icon='NODETREE')
+        layout.separator()
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
         layout.operator('octane.copy_mat', icon='COPYDOWN')
         layout.operator('octane.paste_mat', icon='PASTEDOWN')
