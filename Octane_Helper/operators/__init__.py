@@ -60,7 +60,8 @@ classes = (
     OctaneRemoveEnvironmentPreset,
     OctaneActivateEnvironment,
     OctaneRenameEnvironment,
-    OctaneDeleteEnvironment
+    OctaneDeleteEnvironment,
+    OctaneUpdateDisplay
 )
 
 def register_operators():

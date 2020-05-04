@@ -64,6 +64,7 @@ class OctaneEnvironmentMenu(Menu):
         layout = self.layout
         layout.operator('octane.environments_manager', icon='WORLD')
         layout.operator('octane.transform_hdri', icon='FILE_3D')
+        layout.operator('octane.update_display', icon='LONGDISPLAY')
         layout.separator()
         layout.operator('octane.lights_manager', icon='OUTLINER_OB_LIGHT')
         layout.operator('octane.set_light', icon='LIGHT')

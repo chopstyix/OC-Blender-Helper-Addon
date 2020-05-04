@@ -482,3 +482,16 @@ class OctaneTransformHDRIEnv(Operator):
         update_enum_trs(self, context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
+
+class OctaneUpdateDisplay(Operator):
+    bl_label = 'Update Display Settings'
+    bl_idname = 'octane.update_display'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        context.scene.display_settings.display_device = 'None'
+        context.scene.view_settings.exposure = 0
+        context.scene.view_settings.gamma = 1
+        context.scene.octane.hdr_tonemap_preview_enable = True
+        self.report({'INFO'}, 'Color device is set to None, and Enabled perspective imager')
+        return {'FINISHED'}
