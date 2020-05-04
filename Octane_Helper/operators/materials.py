@@ -566,6 +566,18 @@ class OctaneAssignPattern(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
+class OctaneAssignFire(Operator):
+    bl_label = 'Fire Material'
+    bl_idname = 'octane.assign_fire'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
 # Rename, Copy and Paste materials
 class OctaneRenameMat(Operator):
     bl_label = 'Rename'

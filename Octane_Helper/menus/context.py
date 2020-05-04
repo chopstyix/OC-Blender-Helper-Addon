@@ -44,9 +44,10 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_emission', icon='LIGHT', text='Texture Emission Material').emission_type = 'TEX'
         layout.operator('octane.assign_emission', icon='LIGHT', text='IES Emission Material').emission_type = 'IES'
         layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
-        layout.operator('octane.assign_uvgrid', icon='MESH_GRID')
+        layout.operator('octane.assign_uvgrid', icon='LIGHTPROBE_GRID')
         layout.operator('octane.assign_sss', icon='SPHERECURVE')
         layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
+        layout.operator('octane.assign_fire', icon='FORCE_SMOKEFLOW')
         layout.separator()
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
         layout.operator('octane.copy_mat', icon='COPYDOWN')

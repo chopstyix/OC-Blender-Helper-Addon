@@ -136,6 +136,7 @@ class OctaneEnvironmentsManager(Operator):
         sub.operator(OctaneAddTexEnv.bl_idname, text='', icon='IMAGE_PLANE')
         sub.operator(OctaneAddSkyEnv.bl_idname, text='', icon='LIGHT_SUN')
         sub.operator(OctaneAddMedEnv.bl_idname, text='', icon='GHOST_ENABLED')
+        sub.operator(OctaneAddPaintEnv.bl_idname, text='', icon='TPAINT_HLT')
         
         # Draw nodes view
         if(len(context.scene.oc_worlds)!=0):
@@ -341,11 +342,7 @@ class OctaneAddSkyEnv(Operator):
         skyenvNode.location = (outNode.location.x - 200, outNode.location.y)
         ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
         # Setting up the octane
-        context.scene.display_settings.display_device = 'None'
-        context.scene.view_settings.exposure = 0
-        context.scene.view_settings.gamma = 1
-        context.scene.octane.hdr_tonemap_preview_enable = True
-
+        bpy.ops.octane.update_display()
         refresh_worlds_list(context, True)
         
         return {'FINISHED'}
@@ -376,11 +373,7 @@ class OctaneAddMedEnv(Operator):
         ntree.links.new(mediumNode.outputs[0], skyenvNode.inputs['Medium'])
         ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
         # Setting up the octane
-        context.scene.display_settings.display_device = 'None'
-        context.scene.view_settings.exposure = 0
-        context.scene.view_settings.gamma = 1
-        context.scene.octane.hdr_tonemap_preview_enable = True
-
+        bpy.ops.octane.update_display()
         refresh_worlds_list(context, True)
         
         return {'FINISHED'}
@@ -445,6 +438,41 @@ class OctaneAddTexEnv(Operator):
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
+
+class OctaneAddPaintEnv(Operator):
+    bl_label = 'Setup Paint'
+    bl_idname = 'octane.add_paint_env'
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    def execute(self, context):
+        # Create an image
+        bpy.ops.octane.open_image_painter()
+        img = bpy.data.images.new('OC_Paint_Env', 2048, 1024)
+        area = bpy.context.window_manager.windows[-1].screen.areas[0]
+        area.spaces[0].image = img
+        # Create node tree
+        ntree = context.scene.world.node_tree
+        outNode = create_world_output(context, 'OC_Paint_Env')
+        texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
+        texenvNode.location = (outNode.location.x - 200, outNode.location.y)
+        imgNode = ntree.nodes.new('ShaderNodeOctImageTex')
+        imgNode.location = (texenvNode.location.x - 250, outNode.location.y)
+        imgNode.inputs['Gamma'].default_value = 1
+        imgNode.image = img
+        sphereNode = ntree.nodes.new('ShaderNodeOctSphericalProjection')
+        sphereNode.location = (imgNode.location.x - 200, outNode.location.y)
+        transNode = ntree.nodes.new('ShaderNodeOct3DTransform')
+        transNode.location = (sphereNode.location.x-200, outNode.location.y)
+        transNode.name = '3D_Transform'
+        ntree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
+        ntree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
+        ntree.links.new(imgNode.outputs[0], texenvNode.inputs['Texture'])
+        ntree.links.new(texenvNode.outputs[0], outNode.inputs['Octane Environment'])
+        # Setting up the octane
+        bpy.ops.octane.update_display()
+        refresh_worlds_list(context, True)
+
+        return {'FINISHED'}
 
 class OctaneTransformHDRIEnv(Operator):
     bl_label = 'Transform Texture Environment'

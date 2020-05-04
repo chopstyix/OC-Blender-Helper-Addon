@@ -42,6 +42,5 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* Fire, Smoke materials
 * Paint Texture Environment
 * Bake
