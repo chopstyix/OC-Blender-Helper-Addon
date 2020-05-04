@@ -44,7 +44,4 @@ A helper addon for Octane Blender edition
 
 * Fire, Smoke materials
 * Paint Texture Environment
-* Auto-smooth feature update
-* Setup Color Devices and related settings
-* Pattern Material
 * Bake

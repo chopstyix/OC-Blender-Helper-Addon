@@ -22,6 +22,7 @@ classes = (
     OctaneAssignComposite,
     OctaneAssignHair,
     OctaneAssignSSS,
+    OctaneAssignPattern,
     OctaneRenameMat,
     OctaneCopyMat,
     OctanePasteMat,

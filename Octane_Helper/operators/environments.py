@@ -436,10 +436,7 @@ class OctaneAddTexEnv(Operator):
             ntree.links.new(imgNode.outputs[0], texenvNode.inputs['Texture'])
             ntree.links.new(texenvNode.outputs[0], outNode.inputs['Octane Environment'])
             # Setting up the octane
-            context.scene.display_settings.display_device = 'None'
-            context.scene.view_settings.exposure = 0
-            context.scene.view_settings.gamma = 1
-            context.scene.octane.hdr_tonemap_preview_enable = True
+            bpy.ops.octane.update_display()
             if self.enable_override:
                 context.scene.octane.use_preview_setting_for_camera_imager = True
             refresh_worlds_list(context, True)

@@ -46,6 +46,7 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
         layout.operator('octane.assign_uvgrid', icon='MESH_GRID')
         layout.operator('octane.assign_sss', icon='SPHERECURVE')
+        layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
         layout.separator()
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
         layout.operator('octane.copy_mat', icon='COPYDOWN')

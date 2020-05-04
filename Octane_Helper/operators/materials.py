@@ -77,6 +77,139 @@ class OctaneAssignUniversal(Operator):
         assign_material(context, mat)
         return {'FINISHED'}
 
+class OctaneAssignGlossy(Operator):
+    bl_label = 'Glossy Material'
+    bl_idname = 'octane.assign_glossy'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Glossy', 'ShaderNodeOctGlossyMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignSpecular(Operator):
+    bl_label = 'Specular Material'
+    bl_idname = 'octane.assign_specular'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Specular', 'ShaderNodeOctSpecularMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignDiffuse(Operator):
+    bl_label = 'Diffuse Material'
+    bl_idname = 'octane.assign_diffuse'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignMix(Operator):
+    bl_label = 'Mix Material'
+    bl_idname = 'octane.assign_mix'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Mix', 'ShaderNodeOctMixMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignPortal(Operator):
+    bl_label = 'Portal Material'
+    bl_idname = 'octane.assign_portal'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Portal', 'ShaderNodeOctPortalMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignShadowCatcher(Operator):
+    bl_label = 'ShadowCatcher Material'
+    bl_idname = 'octane.assign_shadowcatcher'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignToon(Operator):
+    bl_label = 'Toon Material'
+    bl_idname = 'octane.assign_toon'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Toon', 'ShaderNodeOctToonMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignMetal(Operator):
+    bl_label = 'Metal Material'
+    bl_idname = 'octane.assign_metal'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Metal', 'ShaderNodeOctMetalMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignLayered(Operator):
+    bl_label = 'Layered Material'
+    bl_idname = 'octane.assign_layered'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Layered', 'ShaderNodeOctLayeredMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignComposite(Operator):
+    bl_label = 'Composite Material'
+    bl_idname = 'octane.assign_composite'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Composite', 'ShaderNodeOctCompositeMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+class OctaneAssignHair(Operator):
+    bl_label = 'Hair Material'
+    bl_idname = 'octane.assign_hair'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Create material
+        mat = create_material(context, 'OC_Hair', 'ShaderNodeOctHairMat')
+        # Assign materials to selected
+        assign_material(context, mat)
+        return {'FINISHED'}
+
+# Special materials
 class OctaneAssignSSS(Operator):
     bl_label = 'SSS Material'
     bl_idname = 'octane.assign_sss'
@@ -142,7 +275,7 @@ class OctaneAssignSSS(Operator):
     
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Universal', 'ShaderNodeOctUniversalMat')
+        mat = create_material(context, 'OC_SSS', 'ShaderNodeOctUniversalMat')
         nodes = mat.node_tree.nodes
         # Diffuse Color
         diffuseNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
@@ -172,18 +305,6 @@ class OctaneAssignSSS(Operator):
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
-
-class OctaneAssignDiffuse(Operator):
-    bl_label = 'Diffuse Material'
-    bl_idname = 'octane.assign_diffuse'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
 
 class OctaneAssignEmission(Operator):
     bl_label = 'Setup'
@@ -365,125 +486,85 @@ class OctaneAssignUVgrid(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
-class OctaneAssignGlossy(Operator):
-    bl_label = 'Glossy Material'
-    bl_idname = 'octane.assign_glossy'
+class OctaneAssignPattern(Operator):
+    bl_label = 'Setup'
+    bl_idname = 'octane.assign_pattern'
     bl_options = {'REGISTER', 'UNDO'}
 
+    filepath: StringProperty(subtype="FILE_PATH")
+    filter_glob: StringProperty(default="*.hdr;*.png;*.jpeg;*.jpg;*.exr", options={"HIDDEN"})
+
+    material_type: EnumProperty(items=[
+        ('Diffuse', 'Diffuse', ''),
+        ('Universal', 'Universal', '')
+    ], default='Diffuse')
+    generate_subdiv: BoolProperty(name='Subdivision Modifier', default=False)
+    generate_shrinkwrap: BoolProperty(name='Shrinkwrap Modifier', default=False)
+    generate_displace: BoolProperty(name='Displace Modifier', default=False)
+
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)
+        col.prop(self, 'material_type', text='')
+        col.prop(self, 'generate_subdiv')
+        col.prop(self, 'generate_shrinkwrap')
+        col.prop(self, 'generate_displace')
+    
     def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Glossy', 'ShaderNodeOctGlossyMat')
-        # Assign materials to selected
-        assign_material(context, mat)
+        if(self.filepath != ''):
+            # Create material
+            mat = create_material(context, 'OC_Pattern', 'ShaderNodeOctMixMat')
+            nodes = mat.node_tree.nodes
+            correctNode = nodes.new('ShaderNodeOctColorCorrectTex')
+            correctNode.location = (-210, 300)
+            correctNode.inputs['Hue'].default_value = 0.0
+            correctNode.inputs['Saturation'].default_value = 0.0
+            correctNode.inputs['Gamma'].default_value = 0.0
+            correctNode.inputs['Contrast'].default_value = 1000
+            if(self.material_type == 'Diffuse'):
+                baseNode = nodes.new('ShaderNodeOctDiffuseMat')
+            else:
+                baseNode = nodes.new('ShaderNodeOctUniversalMat')
+            baseNode.location = (-210, 50)
+            baseNode.inputs['Smooth'].default_value = context.scene.is_smooth
+            transparentNode = nodes.new('ShaderNodeOctDiffuseMat')
+            transparentNode.location = (10, 50)
+            transparentNode.inputs['Opacity'].default_value = 0.0
+            imgNode = nodes.new('ShaderNodeOctImageTex')
+            imgNode.location = (-460, 300)
+            imgNode.image = bpy.data.images.load(self.filepath)
+            # Link nodes
+            mat.node_tree.links.new(imgNode.outputs[0], correctNode.inputs['Texture'])
+            if(self.material_type == 'Diffuse'):
+                mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Diffuse'])
+            else:
+                mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Albedo color'])
+            mat.node_tree.links.new(correctNode.outputs[0], nodes[1].inputs['Amount'])
+            mat.node_tree.links.new(baseNode.outputs[0], nodes[1].inputs['Material1'])
+            mat.node_tree.links.new(transparentNode.outputs[0], nodes[1].inputs['Material2'])
+            # Assign material to all selected objects
+            assign_material(context, mat)
+            # Add modifiers
+            if(self.generate_subdiv):
+                bpy.ops.object.modifier_add(type='SUBSURF')
+                context.active_object.modifiers["Subdivision"].subdivision_type = 'SIMPLE'
+                context.active_object.modifiers["Subdivision"].levels = 6
+                context.active_object.modifiers["Subdivision"].render_levels = 6
+            if(self.generate_shrinkwrap):
+                bpy.ops.object.modifier_add(type='SHRINKWRAP')
+                context.active_object.modifiers['Shrinkwrap'].wrap_method = 'PROJECT'
+            if(self.generate_displace):
+                bpy.ops.object.modifier_add(type='DISPLACE')
+                context.active_object.modifiers["Displace"].mid_level = 0
+                context.active_object.modifiers["Displace"].strength = 0.001
+            if(self.generate_subdiv or self.generate_shrinkwrap or self.generate_displace):
+                bpy.ops.object.make_links_data(type='MODIFIERS')
+
         return {'FINISHED'}
 
-class OctaneAssignSpecular(Operator):
-    bl_label = 'Specular Material'
-    bl_idname = 'octane.assign_specular'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Specular', 'ShaderNodeOctSpecularMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignMix(Operator):
-    bl_label = 'Mix Material'
-    bl_idname = 'octane.assign_mix'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Mix', 'ShaderNodeOctMixMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignPortal(Operator):
-    bl_label = 'Portal Material'
-    bl_idname = 'octane.assign_portal'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Portal', 'ShaderNodeOctPortalMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignShadowCatcher(Operator):
-    bl_label = 'ShadowCatcher Material'
-    bl_idname = 'octane.assign_shadowcatcher'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignToon(Operator):
-    bl_label = 'Toon Material'
-    bl_idname = 'octane.assign_toon'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Toon', 'ShaderNodeOctToonMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignMetal(Operator):
-    bl_label = 'Metal Material'
-    bl_idname = 'octane.assign_metal'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Metal', 'ShaderNodeOctMetalMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignLayered(Operator):
-    bl_label = 'Layered Material'
-    bl_idname = 'octane.assign_layered'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Layered', 'ShaderNodeOctLayeredMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignComposite(Operator):
-    bl_label = 'Composite Material'
-    bl_idname = 'octane.assign_composite'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Composite', 'ShaderNodeOctCompositeMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
-
-class OctaneAssignHair(Operator):
-    bl_label = 'Hair Material'
-    bl_idname = 'octane.assign_hair'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        # Create material
-        mat = create_material(context, 'OC_Hair', 'ShaderNodeOctHairMat')
-        # Assign materials to selected
-        assign_material(context, mat)
-        return {'FINISHED'}
+    def invoke(self, context, event):
+        context.window_manager.fileselect_add(self)
+        return {"RUNNING_MODAL"}
 
 # Rename, Copy and Paste materials
 class OctaneRenameMat(Operator):
