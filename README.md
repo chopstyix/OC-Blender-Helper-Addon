@@ -42,5 +42,4 @@ A helper addon for Octane Blender edition
 
 ## WIP
 
-* Paint Texture Environment
 * Bake

@@ -196,6 +196,7 @@ class OctaneAppendEnvironmentPreset(Operator):
             append_env_nodes(ntree_to, outNodes, offset_y)
             
             bpy.data.worlds.remove(added_world)
+            bpy.ops.octane.update_display()
             refresh_worlds_list(context)
         return {'FINISHED'}
 
