@@ -566,9 +566,9 @@ class OctaneAssignPattern(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
-class OctaneAssignFire(Operator):
-    bl_label = 'Fire Material'
-    bl_idname = 'octane.assign_fire'
+class OctaneAssignSmoke(Operator):
+    bl_label = 'Smoke Material'
+    bl_idname = 'octane.assign_smoke'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

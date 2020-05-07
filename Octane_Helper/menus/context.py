@@ -47,7 +47,7 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_uvgrid', icon='LIGHTPROBE_GRID')
         layout.operator('octane.assign_sss', icon='SPHERECURVE')
         layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
-        layout.operator('octane.assign_fire', icon='FORCE_SMOKEFLOW')
+        layout.operator('octane.assign_smoke', icon='FORCE_SMOKEFLOW')
         layout.separator()
         layout.operator('octane.open_shader_editor', icon='NODETREE')
         layout.separator()

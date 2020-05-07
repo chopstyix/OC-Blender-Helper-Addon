@@ -11,7 +11,7 @@ class OctaneOpenCompositor(Operator):
         area = bpy.context.window_manager.windows[-1].screen.areas[0]
         area.ui_type = 'CompositorNodeTree'
         bpy.context.scene.use_nodes = True
-        bpy.context.space_data.show_backdrop = True
+        area.spaces[0].show_backdrop = True
         return {'FINISHED'}
 
 class OctaneOpenImagePainter(Operator):
@@ -24,6 +24,7 @@ class OctaneOpenImagePainter(Operator):
         area = bpy.context.window_manager.windows[-1].screen.areas[0]
         area.ui_type = 'VIEW'
         area.spaces[0].mode = 'PAINT'
+        area.spaces[0].show_region_tool_header = True
         return {'FINISHED'}
 
 class OctaneOpenShaderEditor(Operator):

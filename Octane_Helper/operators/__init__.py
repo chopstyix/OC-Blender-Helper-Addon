@@ -23,7 +23,7 @@ classes = (
     OctaneAssignHair,
     OctaneAssignSSS,
     OctaneAssignPattern,
-    OctaneAssignFire,
+    OctaneAssignSmoke,
     OctaneRenameMat,
     OctaneCopyMat,
     OctanePasteMat,
