@@ -566,12 +566,124 @@ class OctaneAssignPattern(Operator):
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
 
-class OctaneAssignSmoke(Operator):
-    bl_label = 'Smoke Material'
-    bl_idname = 'octane.assign_smoke'
+class OctaneAssignFireSmoke(Operator):
+    bl_label = 'Fire and Smoke Material'
+    bl_idname = 'octane.assign_fire_smoke'
     bl_options = {'REGISTER', 'UNDO'}
 
+    mat_type: EnumProperty(items=[
+        ('Fire', 'Fire', ''),
+        ('Smoke', 'Smoke', '')
+    ], default='Fire')
+
+    fire_type: EnumProperty(items=[
+        ('Regular', 'Regular', ''),
+        ('Embergen', 'Embergen', '')
+    ], default='Regular')
+
+    smoke_color: FloatVectorProperty(
+        name="Smoke Color",
+        default = (0.129468, 0.129468, 0.129468, 1.000000),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+
+    fire_color: FloatVectorProperty(
+        name="Fire Color",
+        default = (1.000000, 0.483313, 0.082457, 1.000000),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+
+    fire_power: FloatProperty(
+        name="Fire Power", 
+        default=100, 
+        min=0.001,
+        step=10, 
+        precision=3)
+
+    density: FloatProperty(
+        name="Density", 
+        default=4, 
+        min=0.001,
+        step=10, 
+        precision=3)
+    
+    details: FloatProperty(
+        name="Details", 
+        default=0.2, 
+        min=0.001,
+        step=10, 
+        precision=3)
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, 'mat_type', text='')
+        col = layout.column(align=True)
+        col.prop(self, 'fire_type', text='Category')
+        col = layout.column(align=True)
+        col.prop(self, 'smoke_color')
+        if(self.mat_type == 'Fire'):
+            col.prop(self, 'fire_color')
+            col.prop(self, 'fire_power')
+        col = layout.column(align=True)
+        col.prop(self, 'density')
+        col.prop(self, 'details')
+
     def execute(self, context):
+        if(self.mat_type == 'Fire'):
+            mat = create_material(context, 'OC_Fire', 'ShaderNodeOctVolumeMedium')
+        else:
+            mat = create_material(context, 'OC_Smoke', 'ShaderNodeOctVolumeMedium')
+        nodes = mat.node_tree.nodes
+
+        nodes[1].inputs['Density'].default_value = self.density
+        nodes[1].inputs['Vol. step length'].default_value = self.details
+        nodes[1].inputs['Absorption Tex'].default_value = self.smoke_color
+        nodes[1].inputs['Scattering Tex'].default_value = (1.000000, 1.000000, 1.000000, 1.000000)
+
+        absRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
+        absColor1 = absRampNode.color_ramp.elements[0]
+        absColor1.color = (1.0, 1.0, 1.0, 1.0)
+        absColor1.position = 0.393 if(self.fire_type == 'Regular') else 0.607
+        absColor2 = absRampNode.color_ramp.elements[1]
+        absColor2.color = (0.0, 0.0, 0.0, 1.0)
+        absColor2.position = 0.671 if(self.fire_type == 'Regular') else 1.0
+        absRampNode.inputs['Max grid val.'].default_value = 1.0
+        absRampNode.location = (-210, 400)
+
+        sctRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
+        sctColor1 = sctRampNode.color_ramp.elements[0]
+        sctColor1.position = 0.407
+        sctColor2 = sctRampNode.color_ramp.elements[1]
+        sctColor2.position = 1.0
+        sctRampNode.inputs['Max grid val.'].default_value = 1.0
+        sctRampNode.location = (-210, 200)
+
+        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Abs. ramp'])
+        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scat. ramp'])
+
+        if(self.mat_type == 'Fire'):
+            emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex') 
+            emissionColor1 = emissionRampNode.color_ramp.elements[0]
+            emissionColor1.position = 0
+            emissionColor2 = emissionRampNode.color_ramp.elements[1]
+            emissionColor2.color = self.fire_color
+            emissionColor2.position = 0.550 if(self.fire_type == 'Regular') else 0.421
+            emissionRampNode.inputs['Max grid val.'].default_value = 8.0
+            emissionRampNode.color_ramp.octane_interpolation_type = 'OCTANE_INTERPOLATION_CUBIC'
+            emissionRampNode.location = (-210, 0)
+
+            emissionNode = nodes.new('ShaderNodeOctTextureEmission')
+            emissionNode.location = (-210, -200)
+
+            mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emiss. ramp'])
+            mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+
+        assign_material(context, mat)
+
         return {'FINISHED'}
 
     def invoke(self, context, event):
