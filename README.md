@@ -17,6 +17,11 @@ A helper addon for Octane Blender edition
 * Current version **v2.2.0**
   * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
 
+## Downloads
+
+[Link](https://github.com/Yichen-Dou/OC-Blender-Helper-Addon/releases)
+* The filename is "Octane_Helper.zip". Please do not install the zip from the downloaded repository
+
 ## Features
 
 * You can find them by yourself
