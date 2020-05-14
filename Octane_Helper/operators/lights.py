@@ -169,7 +169,7 @@ class OctaneAddLightSphere(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bpy.ops.object.light_add(type='SPHERE', location=(0, 0, 0))
+        bpy.ops.object.light_add(type='SPHERE')
         context.active_object['oc_light'] = 'Sphere'
         refresh_lights_list(context, True)
         return {'FINISHED'}
@@ -180,7 +180,7 @@ class OctaneAddLightArea(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bpy.ops.object.light_add(type='AREA', location=(0, 0, 0))
+        bpy.ops.object.light_add(type='AREA')
         context.active_object['oc_light'] = 'Area'
         refresh_lights_list(context, True)
         return {'FINISHED'}
@@ -203,7 +203,7 @@ class OctaneAddLightToonPoint(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bpy.ops.object.light_add(type='POINT', location=(0, 0, 0))
+        bpy.ops.object.light_add(type='POINT')
         context.active_object['oc_light'] = 'Point Toon'
         context.active_object.name = 'Point_Toon' + context.active_object.name[5:]
         refresh_lights_list(context, True)
@@ -215,7 +215,7 @@ class OctaneAddLightToonSpot(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        bpy.ops.object.light_add(type='SUN', location=(0, 0, 0))
+        bpy.ops.object.light_add(type='SUN')
         context.active_object['oc_light'] = 'Directional Toon'
         context.active_object.name = 'Directional_Toon' + context.active_object.name[3:]
         refresh_lights_list(context, True)
