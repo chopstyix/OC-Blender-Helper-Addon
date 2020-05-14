@@ -58,6 +58,7 @@ classes = (
     OctaneAddLightSpot,
     OctaneAddLightToonPoint,
     OctaneAddLightToonSpot,
+    OctaneSelectLights,
     OctaneChangeObjProperties,
     OctaneCopyObjProperties,
     OctaneEnvironmentsManager,

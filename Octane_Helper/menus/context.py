@@ -73,6 +73,7 @@ class OctaneEnvironmentMenu(Menu):
         layout.separator()
         layout.operator('octane.lights_manager', icon='OUTLINER_OB_LIGHT')
         layout.operator('octane.set_light', icon='LIGHT')
+        layout.operator('octane.select_lights', icon='LIGHT')
         layout.separator()
         layout.operator('octane.add_backplate', icon='ADD')
         layout.operator('octane.remove_backplate', icon='REMOVE')

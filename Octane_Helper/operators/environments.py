@@ -514,6 +514,13 @@ class OctaneUpdateDisplay(Operator):
     bl_idname = 'octane.update_display'
     bl_options = {'REGISTER', 'UNDO'}
 
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(context.scene.display_settings, 'display_device')
+        layout.prop(context.scene.view_settings, 'exposure')
+        layout.prop(context.scene.view_settings, 'gamma')
+        layout.prop(context.scene.octane, 'hdr_tonemap_preview_enable')
+
     def execute(self, context):
         context.scene.display_settings.display_device = 'None'
         context.scene.view_settings.exposure = 0

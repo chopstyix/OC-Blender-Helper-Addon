@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, IntProperty
 from .. assets import load_objects
 
 def get_enum_emissive_material(self, context):
@@ -31,9 +31,10 @@ def get_enum_emissive_material(self, context):
     if(len(result)!=0): return result
     else: return [('None', 'None', '')]
 
-def refresh_lights_list(context, active_last=False):
+def refresh_lights_list(context, active_last=False, active_current=False):
     context.scene.oc_lights.clear()
-    context.scene.oc_lights_index = 0
+    if(not active_current): 
+        context.scene.oc_lights_index = 0
     for obj in context.scene.objects:
         if 'oc_light' in obj:
             if(obj['oc_light']!='None' and obj['oc_light']!='' and obj['oc_light']!=None):
@@ -82,7 +83,9 @@ class OctaneLightsManager(Operator):
         row.operator('octane.add_light_toon_spot', text='Directional (Toon)', icon='LIGHT_SPOT')
 
         layout.template_list('OCTANE_UL_light_list', '', context.scene, 'oc_lights', context.scene, 'oc_lights_index')
-        layout.prop(self, 'emissive_material', text='Materials')
+        split = layout.split(factor = 0.2)
+        split.operator('octane.select_lights', text='Select').index = index
+        split.prop(self, 'emissive_material', text='')
         if(self.emissive_material!='None' and self.emissive_material!='' and self.emissive_material!=None):
             obj = lights[index].obj
             if(obj.type=='LIGHT'):
@@ -216,4 +219,32 @@ class OctaneAddLightToonSpot(Operator):
         context.active_object['oc_light'] = 'Directional Toon'
         context.active_object.name = 'Directional_Toon' + context.active_object.name[3:]
         refresh_lights_list(context, True)
+        return {'FINISHED'}
+
+class OctaneSelectLights(Operator):
+    bl_label = 'Select Lights'
+    bl_idname = 'octane.select_lights'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    index: IntProperty(name='Index', default=-1)
+    
+    def draw(self, context):
+        layout = self.layout
+        lights = context.scene.oc_lights
+        if(self.index == -1):
+            layout.label(text='All Lights')
+        elif(self.index >=len(lights)):
+            layout.label(text='Does not exist')
+        else:
+            layout.label(text='[{}/{}] {}'.format(self.index + 1, len(lights), lights[self.index].obj.name))
+        layout.prop(self, 'index')
+
+    def execute(self, context):
+        refresh_lights_list(context, active_current=True)
+        lights = context.scene.oc_lights
+        if(self.index == -1):
+            for light in lights:
+                light.obj.select = True
+        elif(self.index < len(lights)):
+            lights[self.index].obj.select = True
         return {'FINISHED'}

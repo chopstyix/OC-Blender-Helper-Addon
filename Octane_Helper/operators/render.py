@@ -934,7 +934,10 @@ class OctaneChangeRenderID(Operator):
     def execute(self, context):
         for obj in context.selected_objects:
             obj.octane.render_layer_id = self.rid
-            obj.data.update()
+            if(obj.type == 'MESH'):
+                obj.data.update()
+            elif(obj.type == 'LIGHT'):
+                obj.data.update_tag()
         return {'FINISHED'}
     
     def invoke(self, context, event):
