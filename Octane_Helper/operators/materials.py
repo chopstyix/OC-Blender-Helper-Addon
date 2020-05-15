@@ -765,17 +765,23 @@ class OctaneAutosmooth(Operator):
     bl_idname = 'octane.autosmooth'
     bl_options = {'REGISTER', 'UNDO'}
 
-    autosmooth_value: IntProperty(default=0, min=-180, max=180, subtype='ANGLE', name='Value')
+    enable_autosmooth: BoolProperty(default=True, name='Enable Autosmooth')
+    autosmooth_value: IntProperty(default=0, min=-180, max=180, subtype='ANGLE', name='Angle')
+
+    @classmethod
+    def poll(cls, context):
+        if(context.active_object):
+            if(context.active_object.type == 'MESH'):
+                return True
+        return False
 
     def execute(self, context):
         for obj in context.selected_objects:
-            obj.data.use_auto_smooth = True
+            obj.data.use_auto_smooth = self.enable_autosmooth
             obj.data.auto_smooth_angle = (pi * self.autosmooth_value / 180)
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        if(context.active_object):
-            if(context.active_object.type == 'MESH'):
-                self.autosmooth_value = (context.active_object.data.auto_smooth_angle * 180 / pi)
-        wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        self.enable_autosmooth = True
+        self.autosmooth_value = (context.active_object.data.auto_smooth_angle * 180 / pi)
+        return self.execute(context)
