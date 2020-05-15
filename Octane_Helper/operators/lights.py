@@ -250,5 +250,5 @@ class OctaneSelectLights(Operator):
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        self.index = -1
+        #self.index = -1
         return self.execute(context)
