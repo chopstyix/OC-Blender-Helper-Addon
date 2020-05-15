@@ -522,13 +522,14 @@ class OctaneUpdateDisplay(Operator):
 
     exposure: FloatProperty(
         name="Exposure",
-        min=0.001,
+        min=-10.0,
         step=10, 
         precision=3)
 
     gamma: FloatProperty(
         name="Gamma",
-        min=0.001,
+        default = 1.0,
+        min=0.0,
         step=10, 
         precision=3)
     
@@ -543,8 +544,8 @@ class OctaneUpdateDisplay(Operator):
     
     def invoke(self, context, event):
         self.display_device = 'None'
-        self.exposure = 0
-        self.gamma = 1
+        self.exposure = 0.0
+        self.gamma = 1.0
         self.hdr_tonemap_preview_enable = True
         self.report({'INFO'}, 'Updated display settings')
         return self.execute(context)

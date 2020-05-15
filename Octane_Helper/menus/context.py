@@ -8,6 +8,7 @@ class VIEW3D_MT_object_octane(Menu):
     def draw(self, context):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
+        layout.menu(OctaneObjectsMenu.bl_idname, icon='MESH_CUBE')
         layout.menu(OctaneEnvironmentMenu.bl_idname, icon='MAT_SPHERE_SKY')
         layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
         layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
@@ -17,7 +18,9 @@ class VIEW3D_MT_edit_mesh_octane(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.menu(OctaneMaterialsMenu.bl_idname)
+        layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
+        layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
+        layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
 
 class OctaneMaterialsMenu(Menu):
     bl_label = 'Materials'
@@ -60,6 +63,23 @@ class OctaneMaterialsMenu(Menu):
         layout.separator()
         layout.prop(context.scene, 'is_smooth')
         layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
+
+class OctaneObjectsMenu(Menu):
+    bl_label = 'Objects'
+    bl_idname = 'OCTANE_MT_objects'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.menu(OctaneMountainsMenu.bl_idname, icon='IMAGE_RGB_ALPHA')
+
+class OctaneMountainsMenu(Menu):
+    bl_label = 'Mountains'
+    bl_idname = 'OCTANE_MT_mountains'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text='Select a mountain from the list')
+        layout.template_icon_view(context.scene, 'oc_mountain', show_labels=False)
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'

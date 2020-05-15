@@ -191,7 +191,7 @@ class OctaneAddLightSpot(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        objs = load_objects('Spot')
+        objs = load_objects('Spot', 'lights')
         for obj in objs:
             obj['oc_light'] = 'Spot'
         refresh_lights_list(context, True)

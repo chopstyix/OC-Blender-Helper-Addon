@@ -1,8 +1,10 @@
 import bpy 
 import os
 
-def load_objects(name):
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), name + '.blend')
+mountains_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mountains')
+
+def load_objects(name, category):
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), category, name + '.blend')
     with bpy.data.libraries.load(path) as (data_from, data_to):
         data_to.objects = data_from.objects
         bpy.ops.wm.append(directory=os.path.join(path, 'Object'), files=[{'name': name} for name in data_to.objects])
