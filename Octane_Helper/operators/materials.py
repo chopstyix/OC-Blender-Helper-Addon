@@ -516,12 +516,6 @@ class OctaneAssignPattern(Operator):
             # Create material
             mat = create_material(context, 'OC_Pattern', 'ShaderNodeOctMixMat')
             nodes = mat.node_tree.nodes
-            correctNode = nodes.new('ShaderNodeOctColorCorrectTex')
-            correctNode.location = (-210, 300)
-            correctNode.inputs['Hue'].default_value = 0.0
-            correctNode.inputs['Saturation'].default_value = 0.0
-            correctNode.inputs['Gamma'].default_value = 0.0
-            correctNode.inputs['Contrast'].default_value = 1000
             if(self.material_type == 'Diffuse'):
                 baseNode = nodes.new('ShaderNodeOctDiffuseMat')
             else:
@@ -531,16 +525,18 @@ class OctaneAssignPattern(Operator):
             transparentNode = nodes.new('ShaderNodeOctDiffuseMat')
             transparentNode.location = (10, 50)
             transparentNode.inputs['Opacity'].default_value = 0.0
+            alphaImgNode = nodes.new('ShaderNodeOctAlphaImageTex')
+            alphaImgNode.location = (-460, 600)
+            alphaImgNode.image = bpy.data.images.load(self.filepath)
             imgNode = nodes.new('ShaderNodeOctImageTex')
             imgNode.location = (-460, 300)
-            imgNode.image = bpy.data.images.load(self.filepath)
+            imgNode.image = alphaImgNode.image
             # Link nodes
-            mat.node_tree.links.new(imgNode.outputs[0], correctNode.inputs['Texture'])
             if(self.material_type == 'Diffuse'):
                 mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Diffuse'])
             else:
                 mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Albedo color'])
-            mat.node_tree.links.new(correctNode.outputs[0], nodes[1].inputs['Amount'])
+            mat.node_tree.links.new(alphaImgNode.outputs[0], nodes[1].inputs['Amount'])
             mat.node_tree.links.new(baseNode.outputs[0], nodes[1].inputs['Material1'])
             mat.node_tree.links.new(transparentNode.outputs[0], nodes[1].inputs['Material2'])
             # Assign material to all selected objects

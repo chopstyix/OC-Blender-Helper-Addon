@@ -1,7 +1,8 @@
 import bpy 
 import os
 
-mountains_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mountains')
+landscapes_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landscapes')
+clouds_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'clouds')
 
 def load_objects(name, category):
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)), category, name + '.blend')

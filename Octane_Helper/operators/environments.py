@@ -286,6 +286,7 @@ class OctaneActivateEnvironment(Operator):
 
         ntree.nodes[context.scene.oc_worlds[index].node].is_active_output = True
 
+        bpy.ops.octane.update_display()
         refresh_worlds_list(context)
 
         return {'FINISHED'}
@@ -518,10 +519,11 @@ class OctaneUpdateDisplay(Operator):
         ('None', 'None', ''),
         ('XYZ', 'XYZ', ''),
         ('sRGB', 'sRGB', '')
-    ])
+    ], default='None')
 
     exposure: FloatProperty(
         name="Exposure",
+        default=0.0,
         min=-10.0,
         step=10, 
         precision=3)
@@ -533,7 +535,7 @@ class OctaneUpdateDisplay(Operator):
         step=10, 
         precision=3)
     
-    hdr_tonemap_preview_enable: BoolProperty(name='Enable Perspective Imager')
+    hdr_tonemap_preview_enable: BoolProperty(name='Enable Perspective Imager', default=True)
 
     def execute(self, context):
         context.scene.display_settings.display_device = self.display_device

@@ -6,7 +6,7 @@ from . lights import *
 from .. icons import get_icon
 from .. operators.materials import assign_material, selected_mat_get, selected_mat_set
 from .. operators.environments import get_enum_env_presets
-from .. operators.objects import get_enum_mountain, update_enum_mountain
+from .. operators.objects import get_enum_landscape, update_enum_landscape, get_enum_cloud, update_enum_cloud
 
 def object_menu_func(self, context):
     if context.scene.render.engine == 'octane':
@@ -23,7 +23,8 @@ classes = (
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
     OctaneObjectsMenu,
-    OctaneMountainsMenu,
+    OctaneLandscapesMenu,
+    OctaneCloudsMenu,
     OctaneEnvironmentMenu,
     OctaneRenderMenu,
     OctaneInfoMenu,
@@ -44,14 +45,15 @@ def register_menus():
     bpy.types.Scene.oc_env_preset = EnumProperty(name='Presets', items=get_enum_env_presets)
     bpy.types.Scene.oc_worlds = CollectionProperty(type=OctaneWorldListItem)
     bpy.types.Scene.oc_worlds_index = IntProperty(name='World', default=0)
-    bpy.types.Scene.oc_mountain = EnumProperty(name='Mountains', items=get_enum_mountain, update=update_enum_mountain)
+    bpy.types.Scene.oc_landscape = EnumProperty(name='landscapes', items=get_enum_landscape, update=update_enum_landscape)
+    bpy.types.Scene.oc_cloud = EnumProperty(name='clouds', items=get_enum_cloud, update=update_enum_cloud)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
 
 def unregister_menus():
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(edit_menu_func)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)
-    del bpy.types.Scene.oc_mountain
+    del bpy.types.Scene.oc_landscape
     del bpy.types.Scene.oc_worlds_index
     del bpy.types.Scene.oc_worlds
     del bpy.types.Scene.oc_lights_index
