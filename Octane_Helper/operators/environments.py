@@ -1,6 +1,6 @@
 import bpy 
 from bpy.types import Operator
-from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty
+from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 import os
 
 presets_dir = bpy.utils.user_resource('SCRIPTS', 'presets')
@@ -514,17 +514,37 @@ class OctaneUpdateDisplay(Operator):
     bl_idname = 'octane.update_display'
     bl_options = {'REGISTER', 'UNDO'}
 
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(context.scene.display_settings, 'display_device')
-        layout.prop(context.scene.view_settings, 'exposure')
-        layout.prop(context.scene.view_settings, 'gamma')
-        layout.prop(context.scene.octane, 'hdr_tonemap_preview_enable')
+    display_device: EnumProperty(name='Display Device', items=[
+        ('None', 'None', ''),
+        ('XYZ', 'XYZ', ''),
+        ('sRGB', 'sRGB', '')
+    ])
+
+    exposure: FloatProperty(
+        name="Exposure",
+        min=0.001,
+        step=10, 
+        precision=3)
+
+    gamma: FloatProperty(
+        name="Gamma",
+        min=0.001,
+        step=10, 
+        precision=3)
+    
+    hdr_tonemap_preview_enable: BoolProperty(name='Enable Perspective Imager')
 
     def execute(self, context):
-        context.scene.display_settings.display_device = 'None'
-        context.scene.view_settings.exposure = 0
-        context.scene.view_settings.gamma = 1
-        context.scene.octane.hdr_tonemap_preview_enable = True
-        self.report({'INFO'}, 'Color device is set to None, and Enabled perspective imager')
+        context.scene.display_settings.display_device = self.display_device
+        context.scene.view_settings.exposure = self.exposure
+        context.scene.view_settings.gamma = self.gamma
+        context.scene.octane.hdr_tonemap_preview_enable = self.hdr_tonemap_preview_enable
         return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        self.display_device = 'None'
+        self.exposure = 0
+        self.gamma = 1
+        self.hdr_tonemap_preview_enable = True
+        self.report({'INFO'}, 'Updated display settings')
+        return self.execute(context)

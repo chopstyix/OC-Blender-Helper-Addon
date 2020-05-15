@@ -248,3 +248,7 @@ class OctaneSelectLights(Operator):
         elif(self.index < len(lights)):
             lights[self.index].obj.select = True
         return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        self.index = -1
+        return self.execute(context)
