@@ -218,9 +218,29 @@ class OCtaneAssignClearGlass(Operator):
     bl_idname = 'octane.assign_clear_glass'
     bl_options = {'REGISTER', 'UNDO'}
 
+    roughness: FloatProperty(
+        name='Roughness',
+        default=0.063,
+        min=0.0,
+        max=1.0,
+        step=10, 
+        precision=3
+    )
+
+    index: FloatProperty(
+        name="Index",
+        default=1.45,
+        min=1,
+        max=8,
+        step=10, 
+        precision=3
+    )
+
     def execute(self, context):
         mat = create_material(context, 'OC_ClearGlass', 'ShaderNodeOctSpecularMat')
         nodes = mat.node_tree.nodes
+        nodes[1].inputs['Roughness'].default_value = self.roughness
+        nodes[1].inputs['Index'].default_value = self.index
         osl_node = nodes.new('ShaderNodeOctOSLTex')
         osl_node.location = (-210, 30)
         osl_node.mode = 'EXTERNAL'
@@ -228,6 +248,10 @@ class OCtaneAssignClearGlass(Operator):
         mat.node_tree.links.new(osl_node.outputs[0], nodes[1].inputs['Opacity'])
         assign_material(context, mat)
         return {'FINISHED'}
+    
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
 
 class OctaneAssignSSS(Operator):
     bl_label = 'SSS Material'
