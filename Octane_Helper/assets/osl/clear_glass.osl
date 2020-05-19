@@ -1,0 +1,10 @@
+#include <octane-oslintrin.h>
+
+shader RaytypeBlend(
+	output color o = 0
+){
+	if (raytype("camera"))
+		o = 1;
+	else
+		o = 0;    
+}

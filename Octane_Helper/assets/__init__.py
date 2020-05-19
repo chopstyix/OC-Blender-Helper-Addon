@@ -3,6 +3,7 @@ import os
 
 landscapes_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'landscapes')
 clouds_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'clouds')
+osl_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'osl')
 
 def load_objects(name, category):
     path = os.path.join(os.path.dirname(os.path.realpath(__file__)), category, name + '.blend')

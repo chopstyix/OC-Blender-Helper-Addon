@@ -2,7 +2,9 @@ import bpy, bmesh
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 from math import pi
+from .. assets import osl_dir
 import colorsys
+import os
 
 def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
@@ -211,6 +213,22 @@ class OctaneAssignHair(Operator):
         return {'FINISHED'}
 
 # Special materials
+class OCtaneAssignClearGlass(Operator):
+    bl_label = 'Clear Glass Material'
+    bl_idname = 'octane.assign_clear_glass'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        mat = create_material(context, 'OC_ClearGlass', 'ShaderNodeOctSpecularMat')
+        nodes = mat.node_tree.nodes
+        osl_node = nodes.new('ShaderNodeOctOSLTex')
+        osl_node.location = (-210, 30)
+        osl_node.mode = 'EXTERNAL'
+        osl_node.filepath = os.path.join(osl_dir, 'clear_glass.osl')
+        mat.node_tree.links.new(osl_node.outputs[0], nodes[1].inputs['Opacity'])
+        assign_material(context, mat)
+        return {'FINISHED'}
+
 class OctaneAssignSSS(Operator):
     bl_label = 'SSS Material'
     bl_idname = 'octane.assign_sss'

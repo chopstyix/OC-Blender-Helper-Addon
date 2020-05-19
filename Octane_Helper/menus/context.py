@@ -30,6 +30,39 @@ class OctaneMaterialsMenu(Menu):
         layout = self.layout
         layout.prop_search(context.scene, property='selected_mat', search_data=bpy.data, search_property='materials', text='', icon='MATERIAL')
         layout.separator()
+        layout.menu(OctaneBasicMaterialsMenu.bl_idname, icon='NODE_MATERIAL')
+        layout.separator()
+        layout.operator('octane.assign_emission', icon='LIGHT', text='RGB Emission Material').emission_type = 'RGB'
+        layout.operator('octane.assign_emission', icon='LIGHT', text='Texture Emission Material').emission_type = 'TEX'
+        layout.operator('octane.assign_emission', icon='LIGHT', text='IES Emission Material').emission_type = 'IES'
+        layout.separator()
+        layout.operator('octane.assign_clear_glass', icon='FCURVE')
+        layout.operator('octane.assign_sss', icon='SPHERECURVE')
+        layout.separator()
+        layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
+        layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
+        layout.operator('octane.assign_uvgrid', icon='LIGHTPROBE_GRID')
+        layout.separator()
+        layout.operator('octane.assign_mantaflow_volume', icon='FORCE_SMOKEFLOW')
+        layout.operator('octane.assign_embergen_volume', icon='FORCE_SMOKEFLOW')
+        layout.separator()
+        layout.operator('octane.open_shader_editor', icon='NODETREE')
+        layout.separator()
+        layout.operator('octane.rename_mat', icon='GREASEPENCIL')
+        layout.operator('octane.copy_mat', icon='COPYDOWN')
+        layout.operator('octane.paste_mat', icon='PASTEDOWN')
+        if(bpy.types.Material.copied_mat!=None):
+            layout.label(text='['+((bpy.types.Material.copied_mat.name[:16] + '..') if len(bpy.types.Material.copied_mat.name) > 16 else bpy.types.Material.copied_mat.name)+']')
+        layout.separator()
+        layout.prop(context.scene, 'is_smooth')
+        layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
+
+class OctaneBasicMaterialsMenu(Menu):
+    bl_label = 'Basic Materials'
+    bl_idname = 'OCTANE_MT_basic_materials'
+    
+    def draw(self, context):
+        layout = self.layout
         layout.operator('octane.assign_universal', icon='NODE_MATERIAL')
         layout.operator('octane.assign_diffuse', icon='NODE_MATERIAL')
         layout.operator('octane.assign_glossy', icon='NODE_MATERIAL')
@@ -42,27 +75,6 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_layered', icon='NODE_MATERIAL')
         layout.operator('octane.assign_composite', icon='NODE_MATERIAL')
         layout.operator('octane.assign_hair', icon='NODE_MATERIAL')
-        layout.separator()
-        layout.operator('octane.assign_emission', icon='LIGHT', text='RGB Emission Material').emission_type = 'RGB'
-        layout.operator('octane.assign_emission', icon='LIGHT', text='Texture Emission Material').emission_type = 'TEX'
-        layout.operator('octane.assign_emission', icon='LIGHT', text='IES Emission Material').emission_type = 'IES'
-        layout.operator('octane.assign_mantaflow_volume', icon='FORCE_SMOKEFLOW')
-        layout.operator('octane.assign_embergen_volume', icon='FORCE_SMOKEFLOW')
-        layout.operator('octane.assign_sss', icon='SPHERECURVE')
-        layout.operator('octane.assign_pattern', icon='TEXTURE', text='Pattern Material')
-        layout.operator('octane.assign_colorgrid', icon='LIGHTPROBE_GRID')
-        layout.operator('octane.assign_uvgrid', icon='LIGHTPROBE_GRID')
-        layout.separator()
-        layout.operator('octane.open_shader_editor', icon='NODETREE')
-        layout.separator()
-        layout.operator('octane.rename_mat', icon='GREASEPENCIL')
-        layout.operator('octane.copy_mat', icon='COPYDOWN')
-        layout.operator('octane.paste_mat', icon='PASTEDOWN')
-        if(bpy.types.Material.copied_mat!=None):
-            layout.label(text='['+((bpy.types.Material.copied_mat.name[:16] + '..') if len(bpy.types.Material.copied_mat.name) > 16 else bpy.types.Material.copied_mat.name)+']')
-        layout.separator()
-        layout.prop(context.scene, 'is_smooth')
-        layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
 
 class OctaneObjectsMenu(Menu):
     bl_label = 'Objects'

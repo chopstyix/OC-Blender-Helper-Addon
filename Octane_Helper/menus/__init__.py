@@ -22,6 +22,7 @@ classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
     OctaneMaterialsMenu,
+    OctaneBasicMaterialsMenu,
     OctaneObjectsMenu,
     OctaneLandscapesMenu,
     OctaneCloudsMenu,

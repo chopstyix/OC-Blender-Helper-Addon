@@ -21,6 +21,7 @@ classes = (
     OctaneAssignLayered,
     OctaneAssignComposite,
     OctaneAssignHair,
+    OCtaneAssignClearGlass,
     OctaneAssignSSS,
     OctaneAssignPattern,
     OctaneAssignMantaflowVolume,
