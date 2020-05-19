@@ -226,7 +226,7 @@ class OctaneSelectLights(Operator):
     bl_idname = 'octane.select_lights'
     bl_options = {'REGISTER', 'UNDO'}
 
-    index: IntProperty(name='Index', default=-1)
+    index: IntProperty(name='Index', default=-1, min=-1)
     
     def draw(self, context):
         layout = self.layout
@@ -245,7 +245,7 @@ class OctaneSelectLights(Operator):
         if(self.index == -1):
             for light in lights:
                 light.obj.select = True
-        elif(self.index < len(lights)):
+        elif(0 <= self.index < len(lights)):
             lights[self.index].obj.select = True
         return {'FINISHED'}
     

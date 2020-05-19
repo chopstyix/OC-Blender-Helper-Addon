@@ -70,8 +70,11 @@ class OctaneObjectsMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.menu(OctaneLandscapesMenu.bl_idname, icon='IMAGE_PLANE')
-        layout.menu(OctaneCloudsMenu.bl_idname, icon='IMAGE_PLANE')
+        layout.menu(OctaneLandscapesMenu.bl_idname, icon='META_PLANE')
+        layout.menu(OctaneCloudsMenu.bl_idname, icon='META_PLANE')
+        # Trees
+        # Separtor
+        # Other objects
 
 class OctaneLandscapesMenu(Menu):
     bl_label = 'Landscapes'
@@ -79,8 +82,13 @@ class OctaneLandscapesMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text='Select a landscape from the list')
-        layout.template_icon_view(context.scene, 'oc_landscape', show_labels=False)
+        col = layout.column(align=True)
+        col.label(text='Planes')
+        col.template_icon_view(context.scene, 'oc_landscape_plane', show_labels=False)
+        col.separator()
+        col = layout.column(align=True)
+        col.label(text='Meshes')
+        col.template_icon_view(context.scene, 'oc_landscape_mesh', show_labels=False)
 
 class OctaneCloudsMenu(Menu):
     bl_label = 'Clouds'

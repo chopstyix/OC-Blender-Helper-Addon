@@ -14,6 +14,8 @@ def load_asset_dir(dir):
             icons.load(name, path, 'IMAGE')
 
 def get_icon(name):
+    if name not in icons:
+        return icons['OBJ_THUMB'].icon_id
     return icons[name].icon_id
 
 def register_icons():

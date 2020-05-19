@@ -11,8 +11,8 @@ def load_objects(name, category):
         bpy.ops.wm.append(directory=os.path.join(path, 'Object'), files=[{'name': name} for name in data_to.objects])
         return bpy.context.selected_objects
 
-def save_objects(name, objects):
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), name + '.blend')
+def save_objects(name, objects, category):
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), category, name + '.blend')
     data_blocks = {
         *objects
     }
