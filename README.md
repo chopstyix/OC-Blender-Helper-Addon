@@ -14,13 +14,14 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * OctaneRender™ for Blender 2019 and later
-* Current version **v2.2.0**
+* Current version **v2.3.0**
   * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
 
 ## Downloads
 
-[Link](https://github.com/Yichen-Dou/OC-Blender-Helper-Addon/releases)
-* The filename is "Octane_Helper.zip". Please do not install the zip from the downloaded repository
+* Go to [Releases](https://github.com/Yichen-Dou/OC-Blender-Helper-Addon/releases)
+
+* Download the newest **Octane_Helper.zip**
 
 ## Features
 
@@ -31,7 +32,8 @@ A helper addon for Octane Blender edition
 ## Installation
 
 * Preferences > Add-ons > Install
-* Select Octane_Helper.zip to install
+* Select **Octane_Helper.zip** to install
+  * Please do not install the zip from the downloaded repository named OC-Blender-Helper-Addon-master.zip
 * Activate it
 
 ## How to use
