@@ -4,39 +4,35 @@ from bpy.types import PropertyGroup, UIList
 
 def get_bool_light_on(self):
     if(self.obj.type == 'LIGHT'):
-        self.obj.data.use_nodes = True
         # Search node in the active light object for emissive node
         for node in self.obj.data.node_tree.nodes:
             if(node.bl_idname=='ShaderNodeOctDiffuseMat' and node.inputs['Emission'].is_linked):
                 return node.inputs['Opacity'].default_value != 0.0
-            elif(node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+            elif(node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                 return node.inputs['Power'].default_value != 0.0
     elif(self.obj.type == 'MESH'):
         if(self.obj.active_material):
-            self.obj.active_material.use_nodes = True
             for node in self.obj.active_material.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctDiffuseMat' and node.inputs['Emission'].is_linked):
                     return node.inputs['Opacity'].default_value != 0.0
-                elif(node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                elif(node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                     return node.inputs['Power'].default_value != 0.0
     return False
 
 def set_bool_light_on(self, value):
     if(self.obj.type == 'LIGHT'):
-        self.obj.data.use_nodes = True
         # Search node in the active light object for emissive node
         for node in self.obj.data.node_tree.nodes:
             if(node.bl_idname=='ShaderNodeOctDiffuseMat' and node.inputs['Emission'].is_linked):
                 node.inputs['Opacity'].default_value = 1.0 if value else 0.0
-            elif(node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+            elif(node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                 node.inputs['Power'].default_value = 1.0 if value else 0.0
     elif(self.obj.type == 'MESH'):
         if(self.obj.active_material):
-            self.obj.active_material.use_nodes = True
             for node in self.obj.active_material.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctDiffuseMat' and node.inputs['Emission'].is_linked):
                     node.inputs['Opacity'].default_value = 1.0 if value else 0.0
-                elif(node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
+                elif(node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                     node.inputs['Power'].default_value = 1.0 if value else 0.0    
 
 class OctaneLightListItem(PropertyGroup):

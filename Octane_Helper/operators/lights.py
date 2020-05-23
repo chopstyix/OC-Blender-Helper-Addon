@@ -3,6 +3,13 @@ from bpy.types import Operator
 from bpy.props import EnumProperty, IntProperty
 from .. assets import load_objects
 
+def enable_nodes(obj):
+    if(obj.type == 'LIGHT'):
+        obj.data.use_nodes = True
+    elif(obj.type == 'MESH'):
+        for slot in obj.material_slots:
+            slot.material.use_nodes = True
+
 def get_enum_emissive_material(self, context):
     lights = context.scene.oc_lights
     index = context.scene.oc_lights_index
@@ -12,7 +19,6 @@ def get_enum_emissive_material(self, context):
     result = []
 
     if(obj.type == 'LIGHT'):
-        obj.data.use_nodes = True
         # Search node in the active light object for emissive node
         for node in obj.data.node_tree.nodes:
             if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
@@ -22,7 +28,6 @@ def get_enum_emissive_material(self, context):
         if(len(obj.material_slots)==0): return [('None', 'None', '')]
         # Search materials in the active light object for emissive material
         for slot in obj.material_slots:
-            slot.material.use_nodes = True
             for node in slot.material.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                     result.append((slot.material.name, slot.material.name, ''))
@@ -55,6 +60,7 @@ def refresh_lights_list(context, active_last=False, active_current=False):
                     light.icon = 'LIGHT_SPOT'
                 else:
                     light.icon = 'QUESTION'
+                enable_nodes(obj)
     if(active_last):
         context.scene.oc_lights_index = len(context.scene.oc_lights) - 1
 
