@@ -12,8 +12,7 @@ def get_enum_emissive_material(self, context):
     result = []
 
     if(obj.type == 'LIGHT'):
-        # Return None if Light is not using nodes
-        if(not obj.data.use_nodes): obj.data.use_nodes = True
+        obj.data.use_nodes = True
         # Search node in the active light object for emissive node
         for node in obj.data.node_tree.nodes:
             if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
@@ -23,6 +22,7 @@ def get_enum_emissive_material(self, context):
         if(len(obj.material_slots)==0): return [('None', 'None', '')]
         # Search materials in the active light object for emissive material
         for slot in obj.material_slots:
+            slot.material.use_nodes = True
             for node in slot.material.node_tree.nodes:
                 if(node.bl_idname=='ShaderNodeOctBlackBodyEmission' or node.bl_idname=='ShaderNodeOctTextureEmission' or node.bl_idname=='ShaderNodeOctToonDirectionLight' or node.bl_idname=='ShaderNodeOctToonPointLight'):
                     result.append((slot.material.name, slot.material.name, ''))
@@ -241,12 +241,15 @@ class OctaneSelectLights(Operator):
 
     def execute(self, context):
         refresh_lights_list(context, active_current=True)
+        bpy.ops.object.select_all(action='DESELECT')
         lights = context.scene.oc_lights
         if(self.index == -1):
             for light in lights:
                 light.obj.select = True
+                #context.view_layer.objects.active = light.obj
         elif(0 <= self.index < len(lights)):
             lights[self.index].obj.select = True
+            context.view_layer.objects.active = lights[self.index].obj
         return {'FINISHED'}
     
     def invoke(self, context, event):

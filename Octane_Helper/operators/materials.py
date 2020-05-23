@@ -27,6 +27,7 @@ def assign_material(context, mat):
         for obj in context.selected_objects:
             if(obj.type == 'MESH'):
                 obj.active_material = mat
+                obj.data.update()
     # Edit mode
     elif(context.mode == 'EDIT_MESH'):
         for obj in context.selected_objects:
@@ -45,8 +46,7 @@ def assign_material(context, mat):
 
 def assign_oclight(context, type):
     for obj in context.selected_objects:
-        if('oc_light' not in obj):
-            obj['oc_light'] = type
+        obj['oc_light'] = type
 
 def get_bright_color(color):
     hsv_color = colorsys.rgb_to_hsv(color[0], color[1], color[2])
