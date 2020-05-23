@@ -15,6 +15,16 @@ def get_y(world, type):
     elif(type == 'Max'):
         return max(ys)
 
+def get_trans_node(node):
+    result = []
+    for input in node.inputs:
+        for link in input.links:
+            if(link.from_node.bl_idname == 'ShaderNodeOct3DTransform'):
+                result.append(link.from_node)
+            else:
+                result += get_trans_node(link.from_node)
+    return result
+
 def create_world_output(context, name):
     world = context.scene.world
     world.use_nodes = True
@@ -31,21 +41,21 @@ def get_enum_trs(self, context):
 
 def update_enum_trs(self, context):
     world = context.scene.world
-    self.rotation = world.node_tree.nodes[self.transNodes].inputs['Rotation'].default_value
-    self.scale = world.node_tree.nodes[self.transNodes].inputs['Scale'].default_value
-    self.translation = world.node_tree.nodes[self.transNodes].inputs['Translation'].default_value
+    self.rotation = world.node_tree.nodes[self.transNode].inputs['Rotation'].default_value
+    self.scale = world.node_tree.nodes[self.transNode].inputs['Scale'].default_value
+    self.translation = world.node_tree.nodes[self.transNode].inputs['Translation'].default_value
 
 def update_hdri_rotation(self, context):
     world = context.scene.world
-    world.node_tree.nodes[self.transNodes].inputs['Rotation'].default_value = self.rotation
+    world.node_tree.nodes[self.transNode].inputs['Rotation'].default_value = self.rotation
 
 def update_hdri_scale(self, context):
     world = context.scene.world
-    world.node_tree.nodes[self.transNodes].inputs['Scale'].default_value = self.scale
+    world.node_tree.nodes[self.transNode].inputs['Scale'].default_value = self.scale
 
 def update_hdri_translation(self, context):
     world = context.scene.world
-    world.node_tree.nodes[self.transNodes].inputs['Translation'].default_value = self.translation
+    world.node_tree.nodes[self.transNode].inputs['Translation'].default_value = self.translation
 
 def refresh_worlds_list(context, active_last=False):
     context.scene.oc_worlds.clear()
@@ -481,7 +491,7 @@ class OctaneTransformHDRIEnv(Operator):
     bl_idname = 'octane.transform_hdri'
     bl_options = {'REGISTER', 'UNDO'}
 
-    transNodes: EnumProperty(items=get_enum_trs, name='Nodes', update=update_enum_trs)
+    transNode: EnumProperty(items=get_enum_trs, name='Nodes', update=update_enum_trs)
 
     rotation: FloatVectorProperty(name='Rotation', precision=3, step=10, min=-360, max=360, update=update_hdri_rotation)
     scale: FloatVectorProperty(name='Scale', precision=3, step=10, update=update_hdri_scale)
@@ -494,18 +504,21 @@ class OctaneTransformHDRIEnv(Operator):
             return False
         if(len([node for node in world.node_tree.nodes if node.bl_idname=='ShaderNodeOct3DTransform'])):
             return True
-        else:
-            return False
+        return False
     def execute(self, context):
         return {'FINISHED'}
     def draw(self, context):
         layout = self.layout
         col = layout.column()
-        col.prop(self, 'transNodes', text='')
+        col.prop(self, 'transNode', text='')
         col.prop(self, 'rotation')
         col.prop(self, 'scale')
         col.prop(self, 'translation')
     def invoke(self, context, event):
+        ntree = context.scene.world.node_tree
+        outNode = ntree.get_output_node('octane')
+        if(outNode):
+            self.transNode = get_trans_node(outNode)[0].name
         update_enum_trs(self, context)
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
