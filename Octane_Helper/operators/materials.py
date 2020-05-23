@@ -625,7 +625,7 @@ class OctaneAssignMantaflowVolume(Operator):
 
     fire_color: FloatVectorProperty(
         name="Fire Color",
-        default = (1.000000, 0.276358, 0.086804, 1.000000),
+        default = (1.000000, 0.261137, 0.056232, 1.000000),
         size=4,
         min = 0,
         max = 1,
@@ -728,10 +728,108 @@ class OctaneAssignEmbergenVolume(Operator):
     bl_idname = 'octane.assign_embergen_volume'
     bl_options = {'REGISTER', 'UNDO'}
 
+    volume_type: EnumProperty(items=[
+        ('Temperature', 'Temperature', '')
+    ], default='Temperature')
+
+    smoke_color: FloatVectorProperty(
+        name="Smoke Color",
+        default = (0.478368, 0.478368, 0.478368, 1.000000),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+
+    fire_color: FloatVectorProperty(
+        name="Fire Color",
+        default = (1.000000, 0.276358, 0.086804, 1.000000),
+        size=4,
+        min = 0,
+        max = 1,
+        subtype="COLOR")
+
+    fire_power: FloatProperty(
+        name="Power", 
+        default=50, 
+        min=0.001,
+        step=10, 
+        precision=3)
+
+    density: FloatProperty(
+        name="Density", 
+        default=2, 
+        min=0.001,
+        step=10, 
+        precision=3)
+    
+    details: FloatProperty(
+        name="Details", 
+        default=2, 
+        min=0.001,
+        step=10, 
+        precision=3)
+
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, 'volume_type', text='')
+        col = layout.column(align=True)
+        col.prop(self, 'smoke_color')
+        col.prop(self, 'fire_color')
+        col.prop(self, 'fire_power')
+        col = layout.column(align=True)
+        col.prop(self, 'density')
+        col.prop(self, 'details')
 
     def execute(self, context):
+        mat = create_material(context, 'OC_Embergen_Temperature', 'ShaderNodeOctVolumeMedium')
+        nodes = mat.node_tree.nodes
+
+        nodes[1].inputs['Density'].default_value = self.density
+        nodes[1].inputs['Vol. step length'].default_value = self.details
+        nodes[1].inputs['Absorption Tex'].default_value = self.smoke_color
+        nodes[1].inputs['Scattering Tex'].default_value = (1.000000, 1.000000, 1.000000, 1.000000)
+
+        absRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
+        absRampNode.color_ramp.octane_interpolation_type = 'OCTANE_INTERPOLATION_CUBIC'
+        absColor1 = absRampNode.color_ramp.elements[0]
+        absColor1.color = (0.0, 0.0, 0.0, 1.0)
+        absColor1.position = 0.0
+        absColor2 = absRampNode.color_ramp.elements[1]
+        absColor2.color = (1.0, 1.0, 1.0, 1.0)
+        absColor2.position = 0.571
+        absRampNode.inputs['Max grid val.'].default_value = 2.0
+        absRampNode.location = (-210, 400)
+
+        sctRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
+        sctRampNode.color_ramp.octane_interpolation_type = 'OCTANE_INTERPOLATION_CUBIC'
+        sctColor1 = sctRampNode.color_ramp.elements[0]
+        sctColor1.position = 0.0
+        sctColor2 = sctRampNode.color_ramp.elements[1]
+        sctColor2.position = 0.371
+        sctRampNode.inputs['Max grid val.'].default_value = 5.0
+        sctRampNode.location = (-210, 200)
+
+        emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex') 
+        emissionColor1 = emissionRampNode.color_ramp.elements[0]
+        emissionColor1.position = 0.366102
+        emissionColor2 = emissionRampNode.color_ramp.elements[1]
+        emissionColor2.color = self.fire_color
+        emissionColor2.position = 0.875
+        emissionRampNode.inputs['Max grid val.'].default_value = 5000.0
+        emissionRampNode.location = (-210, 0)
+
+        emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+        emissionNode.inputs['Power'].default_value = self.fire_power
+        emissionNode.inputs['Surface brightness'].default_value = True
+        emissionNode.location = (-210, -200)
+
+        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Abs. ramp'])
+        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scat. ramp'])
+        mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emiss. ramp'])
+        mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
+        
+        assign_material(context, mat)
+
         return {'FINISHED'}
 
     def invoke(self, context, event):
