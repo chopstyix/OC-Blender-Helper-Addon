@@ -8,7 +8,6 @@ class VIEW3D_MT_object_octane(Menu):
     def draw(self, context):
         layout = self.layout
         layout.menu(OctaneMaterialsMenu.bl_idname, icon='MATSPHERE')
-        layout.menu(OctaneObjectsMenu.bl_idname, icon='MESH_CUBE')
         layout.menu(OctaneEnvironmentMenu.bl_idname, icon='MAT_SPHERE_SKY')
         layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
         layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
@@ -75,41 +74,6 @@ class OctaneBasicMaterialsMenu(Menu):
         layout.operator('octane.assign_layered', icon='NODE_MATERIAL')
         layout.operator('octane.assign_composite', icon='NODE_MATERIAL')
         layout.operator('octane.assign_hair', icon='NODE_MATERIAL')
-
-class OctaneObjectsMenu(Menu):
-    bl_label = 'Objects'
-    bl_idname = 'OCTANE_MT_objects'
-
-    def draw(self, context):
-        layout = self.layout
-        layout.menu(OctaneLandscapesMenu.bl_idname, icon='META_PLANE')
-        layout.menu(OctaneCloudsMenu.bl_idname, icon='META_PLANE')
-        # Trees
-        # Separtor
-        # Other objects
-
-class OctaneLandscapesMenu(Menu):
-    bl_label = 'Landscapes'
-    bl_idname = 'OCTANE_MT_landscapes'
-
-    def draw(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        col.label(text='Planes')
-        col.template_icon_view(context.scene, 'oc_landscape_plane', show_labels=False)
-        col.separator()
-        col = layout.column(align=True)
-        col.label(text='Meshes')
-        col.template_icon_view(context.scene, 'oc_landscape_mesh', show_labels=False)
-
-class OctaneCloudsMenu(Menu):
-    bl_label = 'Clouds'
-    bl_idname = 'OCTANE_MT_clouds'
-
-    def draw(self, context):
-        layout = self.layout
-        layout.label(text='Select a cloud from the list')
-        layout.template_icon_view(context.scene, 'oc_cloud', show_labels=False)
 
 class OctaneEnvironmentMenu(Menu):
     bl_label = 'Environment'

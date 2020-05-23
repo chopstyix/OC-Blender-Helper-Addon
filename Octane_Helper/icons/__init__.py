@@ -3,8 +3,6 @@ import os
 
 icons = None
 icons_dir = os.path.dirname(__file__)
-landscapes_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'landscapes')
-clouds_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'clouds')
 
 def load_asset_dir(dir):
     for fn in os.listdir(dir):
@@ -26,8 +24,6 @@ def register_icons():
             name = fn[:-4]
             path = os.path.join(icons_dir, fn)
             icons.load(name, path, 'IMAGE')
-    for dir in [landscapes_dir, clouds_dir]:
-        load_asset_dir(dir)
 
 def unregister_icons():
     previews.remove(icons)
