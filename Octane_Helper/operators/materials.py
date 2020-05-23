@@ -7,6 +7,7 @@ import colorsys
 import os
 
 def create_material(context, name, root):
+    prefs = context.preferences.addons['Octane_Helper'].preferences
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     ntree = mat.node_tree
@@ -17,6 +18,8 @@ def create_material(context, name, root):
     mainMat.location = oldMainMat.location
     if('Smooth' in mainMat.inputs):
         mainMat.inputs['Smooth'].default_value = context.scene.is_smooth
+    if(hasattr(mainMat, 'brdf_model')):
+        mainMat.brdf_model = prefs.brdf_model
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
     return mat
