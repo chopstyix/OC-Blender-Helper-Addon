@@ -29,7 +29,7 @@ class NODE_MT_node_octane(Menu):
         layout.menu(OctaneNodeConvertToMenu.bl_idname, icon='SHADERFX')
         col = layout.column()
         col.enabled = (len(context.selected_nodes) == 2)
-        col.menu(OctaneNodeMaskByMenu.bl_idname, icon='MOD_MASK')
+        col.menu(OctaneNodeMixByMenu.bl_idname, icon='MOD_MASK')
         layout.separator()
         layout.operator('octane.connect_transform_projection', icon='NODETREE')
         layout.separator()
@@ -43,12 +43,17 @@ class OctaneNodeConvertToMenu(Menu):
     def draw(self, context):
         layout = self.layout
 
-class OctaneNodeMaskByMenu(Menu):
-    bl_label = 'Mask By'
-    bl_idname = 'OCTANE_MT_node_mask_by'
+class OctaneNodeMixByMenu(Menu):
+    bl_label = 'Mix By'
+    bl_idname = 'OCTANE_MT_node_mix_by'
 
     def draw(self, context):
         layout = self.layout
+        layout.operator('octane.mix_by', text='None').mix_type = 'None'
+        layout.operator('octane.mix_by', text='Image Tex').mix_type = 'ShaderNodeOctImageTex'
+        layout.operator('octane.mix_by', text='Image Tile Tex').mix_type = 'ShaderNodeOctImageTileTex'
+        layout.operator('octane.mix_by', text='Alpha Image Tex').mix_type = 'ShaderNodeOctAlphaImageTex'
+        layout.operator('octane.mix_by', text='Float Image Tex').mix_type = 'ShaderNodeOctFloatImageTex'
 
 class OctaneMaterialsMenu(Menu):
     bl_label = 'Materials'

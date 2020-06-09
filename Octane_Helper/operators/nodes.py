@@ -1,16 +1,28 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import EnumProperty, BoolProperty
+from bpy.props import EnumProperty, BoolProperty, StringProperty
 
-def remove_link(ntree, node, input):
-    if(node.inputs[input].is_linked):
-        ntree.links.remove(node.inputs[input].links[0])
+def remove_link(ntree, node, input=None, side=0):
+    if(side == 0):
+        if(node.inputs[input].is_linked):
+            ntree.links.remove(node.inputs[input].links[0])
+    else:
+        if(node.outputs[0].is_linked):
+            ntree.links.remove(node.outputs[0].links[0])
 
 def remove_connected_nodes(ntree, node):
     for input in node.inputs:
         for link in input.links:
             remove_connected_nodes(ntree, link.from_node)
             ntree.nodes.remove(link.from_node)
+
+def get_connected_nodes(node):
+    result = []
+    for input in node.inputs:
+        for link in input.links:
+            result.append(link.from_node)
+            result += get_connected_nodes(link.from_node)
+    return result
 
 class OctaneConnectTransformProjection(Operator):
     bl_label = 'Add Transform and Projection'
@@ -161,3 +173,40 @@ class OctaneRemoveConnectedNodes(Operator):
         remove_connected_nodes(ntree, context.selected_nodes[0])
         return {'FINISHED'}
 
+class OctaneMixBy(Operator):
+    bl_label = 'Mix'
+    bl_idname = 'octane.mix_by'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    mix_type: StringProperty(default='None')
+
+    def execute(self, context):
+        mat = context.object.active_material
+        ntree = mat.node_tree
+        active_nodes = context.selected_nodes
+        loc = active_nodes[0].location.copy()
+
+        for active_node in active_nodes:
+            remove_link(ntree, active_node, side=1)
+            active_node.location.x -= 250
+            for node in get_connected_nodes(active_node):
+                node.location.x -= 250
+
+        if(len([active_node for active_node in active_nodes if 'Mat' in active_node.bl_idname])):
+            mixNode = ntree.nodes.new('ShaderNodeOctMixMat')
+            mixNode.location = loc
+            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs['Material1'])
+            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs['Material2'])
+        else:
+            mixNode = ntree.nodes.new('ShaderNodeOctMixTex')
+            mixNode.location = loc
+            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs['Texture1'])
+            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs['Texture2'])
+
+        if(self.mix_type!='None'):
+            mixAmountNode = ntree.nodes.new(self.mix_type)
+            mixAmountNode.location = (loc.x, loc.y + 300)
+            ntree.links.new(mixAmountNode.outputs[0], mixNode.inputs['Amount'])
+
+        ntree.nodes.update()
+        return {'FINISHED'}
