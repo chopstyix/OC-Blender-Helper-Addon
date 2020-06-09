@@ -228,6 +228,7 @@ class OctaneNodeConvertTo(Operator):
 
     def execute(self, context):
         if(self.node_target!='None'):
+            except_list = ['Transmission']
             mat = context.object.active_material
             ntree = mat.node_tree
             active_node = context.selected_nodes[0]
@@ -239,7 +240,7 @@ class OctaneNodeConvertTo(Operator):
             for common_socket in common_sockets:
                 if(common_socket.is_linked):
                     ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs[common_socket.name])
-                elif(hasattr(common_socket, 'default_value')):
+                elif(hasattr(common_socket, 'default_value') and common_socket.name not in except_list):
                     newNode.inputs[common_socket.name].default_value = common_socket.default_value
 
             ntree.nodes.remove(active_node)
