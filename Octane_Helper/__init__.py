@@ -25,13 +25,15 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou",
-    "version": (2, 4, 2),
+    "version": (2, 5, 0),
     "blender": (2, 81, 0),
     "warning": "",
     "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
     "support": "COMMUNITY",
     "category": "3D View"
 }
+
+addon_keymaps = []
 
 class OctaneHelperPrefs(AddonPreferences):
     bl_idname = __name__
@@ -52,8 +54,24 @@ class OctaneHelperPrefs(AddonPreferences):
         col = layout.column()
         col.prop(self, "brdf_model")
 
+def register_keymaps():
+    wm = bpy.context.window_manager
+    kc = wm.keyconfigs.addon
+    if kc:
+        km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
+        kmi = km.keymap_items.new('octane.cameras_manager', type='C', value='PRESS', alt=True, shift=True)
+        kmi = km.keymap_items.new('octane.lights_manager', type='D', value='PRESS', alt=True, shift=True)
+        kmi = km.keymap_items.new('octane.environments_manager', type='E', value='PRESS', alt=True, shift=True)
+        addon_keymaps.append((km, kmi))
+
+def unregister_keymaps():
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+    addon_keymaps.clear()
+
 def register():
     bpy.utils.register_class(OctaneHelperPrefs)
+    register_keymaps()
     register_icons()
     register_operators()
     register_menus()
@@ -62,6 +80,7 @@ def unregister():
     unregister_menus()
     unregister_operators()
     unregister_icons()
+    unregister_keymaps
     bpy.utils.unregister_class(OctaneHelperPrefs)
 
 if __name__ == "__main__":

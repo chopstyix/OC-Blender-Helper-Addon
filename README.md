@@ -15,7 +15,7 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * OctaneRender™ for Blender 2020 and later
-* Current version **v2.4.2**
+* Current version **v2.5.0**
   * Tested on Blender_Octane_Edition_2020.1_21.8 (latest)
 
 ## Downloads
