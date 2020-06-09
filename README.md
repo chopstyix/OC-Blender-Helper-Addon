@@ -4,7 +4,7 @@ A helper addon for Octane Blender edition
 
 
 
-> The reason I develop this addon is for speeding up user workflow, so users can access basic functions provided by Octane very quickly and newcomers can know where to start. The materials and nodes setup are pretty raw and treat it as a starting point
+> The reason I develop this addon is for speeding up user workflow, so users can access basic functions provided by Octane very quickly and newcomers can know where to start. The materials and their nodes setup are pretty rough and use them as a starting point
 
 > I welcome issue reports, please let me know where to promote and fix
 
