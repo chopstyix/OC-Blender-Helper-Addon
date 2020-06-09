@@ -437,6 +437,18 @@ class OctaneManageLayers(Operator):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
 
+class OctaneSetActiveCam(Operator):
+    bl_label = 'Set Active Camera'
+    bl_idname = 'octane.set_active_cam'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    obj_name: StringProperty(default='None')
+
+    def execute(self, context):
+        if(self.obj_name!='None'):
+            context.scene.camera = context.scene.objects[self.obj_name]
+        return {'FINISHED'}
+
 class OctaneCamerasManager(Operator):
     bl_label = 'Cameras Manager'
     bl_idname = 'octane.cameras_manager'
@@ -465,19 +477,33 @@ class OctaneCamerasManager(Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'cameras', text='Camera')
-        layout.use_property_split = True
+        layout.use_property_split = False
+        
+        layout.separator()
+
+        split = layout.split(factor=0.85)
+        split.prop(self, 'cameras', text='')
+        
         if(self.cameras != 'None' and self.cameras != None and self.cameras != ''):
-            cam = context.scene.objects[self.cameras].data
+            obj = context.scene.objects[self.cameras]
+            cam = obj.data
             oct_cam = cam.octane
 
+            col = split.column()
+            col.enabled = (context.scene.camera != obj)
+            col.operator('octane.set_active_cam', text='Activate').obj_name = obj.name
+            
+            layout.separator()
+            split = layout.split()
+
             # Lens
-            layout.label(text='Lens')
-            col = layout.column()
+            side = split.column()
+            box = side.box()
+            col = box.column()
+            col.label(text='Lens')
             col.prop(cam, "type")
             col.separator()
             if cam.type == 'PERSP':
-                col = layout.column()
                 if cam.lens_unit == 'MILLIMETERS':
                     col.prop(cam, "lens")
                 elif cam.lens_unit == 'FOV':
@@ -508,8 +534,7 @@ class OctaneCamerasManager(Operator):
                     elif cam.lens_unit == 'FOV':
                         col.prop(cam, "angle")
                     col.prop(cam, "lens_unit")
-
-            col = layout.column()
+            
             col.separator()
             sub = col.column(align=True)
             sub.prop(cam, "shift_x", text="Shift X")
@@ -520,8 +545,9 @@ class OctaneCamerasManager(Operator):
             sub.prop(cam, "clip_end", text="End")
             
             # Sensor
-            layout.label(text='Sensor')
-            col = layout.column()
+            box = side.box()
+            col = box.column()
+            col.label(text='Sensor')
             col.prop(cam, "sensor_fit")
 
             if cam.sensor_fit == 'AUTO':
@@ -535,16 +561,38 @@ class OctaneCamerasManager(Operator):
                 sub.active = cam.sensor_fit == 'VERTICAL'
                 sub.prop(cam, "sensor_height", text="Height")
 
+            # Display settings
+            box = side.box()
+            col = box.column()
+            col.label(text='Display')
+            col.prop(cam, 'show_passepartout')
+            col.prop(cam, 'passepartout_alpha')
+            box = col.box()
+            row = box.row(align=True)
+            col = row.column(align=True)
+            col.prop(cam, 'show_composition_center')
+            col.prop(cam, 'show_composition_center_diagonal')
+            col.prop(cam, 'show_composition_thirds')
+            col.prop(cam, 'show_composition_golden')
+            col = row.column(align=True)
+            col.prop(cam, 'show_composition_golden_tria_a')
+            col.prop(cam, 'show_composition_golden_tria_b')
+            col.prop(cam, 'show_composition_harmony_tri_a')
+            col.prop(cam, 'show_composition_harmony_tri_b')
+
+
             # Dropdown Cam settings
-            layout.label(text='Octane')
-            layout.prop(self, 'octane_cam_settings', text='')
+            box = split.box()
+            col = box.column()
+            col.label(text='Octane')
+            col.prop(self, 'octane_cam_settings', text='')
 
             if(self.octane_cam_settings == 'Imager'):
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManageImager.bl_idname, text='Open Imager (Perspective)')
                 sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.cameras
-                box = layout.box()
+                box = col.box()
                 box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Imager (Perspective)')
@@ -579,11 +627,11 @@ class OctaneCamerasManager(Operator):
                 #sub.prop(oct_cam, "custom_lut")
                 #sub.prop(oct_cam, "lut_strength")
             elif(self.octane_cam_settings == 'PostProcess'):
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManagePostprocess.bl_idname, text='Open PostProcess (Perspective)')
                 sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.cameras
-                box = layout.box()
+                box = col.box()
                 box.enabled = (not context.scene.octane.use_preview_post_process_setting)
                 if(context.scene.octane.use_preview_post_process_setting):
                     box.label(text='Settings are controlled by PostProcess (Perspective)')
@@ -604,7 +652,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "spectral_shift")
 
             elif(self.octane_cam_settings == 'Depth of field'):
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.prop(oct_cam, "autofocus")
                 sub = box.row(align=True)
@@ -621,7 +669,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "bokeh_rotation")
                 sub.prop(oct_cam, "bokeh_roundedness")
             elif(self.octane_cam_settings == 'Distortion'):
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.label(text='Settings for different Camera lens type')
                 sub = box.column(align=True)
@@ -639,7 +687,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "use_fstop")
                 sub.prop(oct_cam, "fstop") 
             elif(self.octane_cam_settings == 'Stereo'):
-                box = layout.box()
+                box = col.box()
                 col = box.column(align=True)
                 sub = box.row()
                 sub.active = (cam.type != 'PANO')
@@ -662,7 +710,7 @@ class OctaneCamerasManager(Operator):
                 sub = col.row()
                 sub.prop(oct_cam, "right_filter")
             elif(self.octane_cam_settings == 'Baking'):
-                box = layout.box()
+                box = col.box()
                 col = box.column(align=True)
                 sub = col.row(align=True)
                 sub.prop(oct_cam, "baking_camera")
@@ -688,7 +736,7 @@ class OctaneCamerasManager(Operator):
                 sub.active = (oct_cam.baking_camera == True)
                 sub.prop(oct_cam, "baking_uv_set")
             elif(self.octane_cam_settings == 'OSL Camera'):
-                box = layout.box()
+                box = col.box()
                 col = box.column(align = True)
                 sub = col.row(align = True)
                 sub.prop_search(oct_cam.osl_camera_node_collections, "osl_camera_material_tree", bpy.data, "materials")
@@ -697,18 +745,18 @@ class OctaneCamerasManager(Operator):
                 sub.operator('update.osl_camera_nodes', text = 'Update')
             elif(self.octane_cam_settings == 'Denoiser'):
                 view_layer = context.window.view_layer
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
                 sub.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
-                box = layout.box()
+                box = col.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager))
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
                     box.label(text='Settings are controlled by Denoiser (Perspective)')
                 sub = box.column(align=True)
                 sub.prop(oct_cam, 'enable_denoising', text='Enable Camera Denosier')
                 sub.prop(view_layer, "use_pass_oct_denoise_beauty", text="Enable Beauty Pass")
-                box = layout.box()
+                box = col.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 box.label(text="Spectral AI Denoiser:")
                 sub = box.column(align=True)
@@ -717,7 +765,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, 'min_denoiser_samples')
                 sub.prop(oct_cam, 'max_denoiser_interval')
                 sub.prop(oct_cam, 'denoiser_blend')
-                box = layout.box()
+                box = col.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager) and oct_cam.enable_denoising and view_layer.use_pass_oct_denoise_beauty)
                 box.label(text="AI Up-Sampler:")
                 sub = box.column(align=True)
@@ -729,13 +777,14 @@ class OctaneCamerasManager(Operator):
             elif(self.octane_cam_settings == 'Motion Blur'):
                 rd = context.scene.render
                 ob = context.scene.objects[self.cameras]
-                box = layout.box()
+                box = col.box()
                 sub = box.column(align=True)
                 sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane Kernel')
                 sub.prop(ob.octane, "use_motion_blur", text="Enable Camera Motion Blur")
-                box = layout.box()
+                box = col.box()
                 box.enabled = (rd.use_motion_blur and ob.octane.use_motion_blur)
                 box.prop(ob.octane, "motion_steps", text="Steps")
+        layout.separator()
 
     def execute(self, context):
         return {'FINISHED'}
@@ -745,7 +794,7 @@ class OctaneCamerasManager(Operator):
             if(context.active_object.type=='CAMERA'):
                 self.cameras = context.active_object.name
         wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        return wm.invoke_popup(self, width=600)
     
 class OctaneCopyCameraSettings(Operator):
     bl_label = 'Copy Camera Settings'

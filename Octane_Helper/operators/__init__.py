@@ -76,7 +76,8 @@ classes = (
     OctaneRemoveConnectedNodes,
     OctaneConvertMat,
     OctaneMixBy,
-    OctaneNodeConvertTo
+    OctaneNodeConvertTo,
+    OctaneSetActiveCam
 )
 
 def register_operators():
