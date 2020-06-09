@@ -73,7 +73,8 @@ classes = (
     OctaneUpdateDisplay,
     OctaneConnectTransformProjection,
     OctaneSwitchAB,
-    OctaneRemoveConnectedNodes
+    OctaneRemoveConnectedNodes,
+    OctaneConvertMat
 )
 
 def register_operators():

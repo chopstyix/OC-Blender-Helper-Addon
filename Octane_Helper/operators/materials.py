@@ -1,6 +1,7 @@
 import bpy, bmesh
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
+from octane import converters
 from math import pi
 from .. assets import osl_dir
 import colorsys
@@ -69,6 +70,19 @@ def selected_mat_get(self):
 def selected_mat_set(self, value):
     if(value!=''):
         assign_material(bpy.context, bpy.data.materials[value])
+
+def convert_mat_octane(obj):
+    slots = obj.material_slots
+    for slot in slots:
+        mat = slot.material
+        if(mat):
+            outNode = mat.node_tree.get_output_node('octane')
+            if(outNode and outNode.target != 'octane'):
+                converted_material = mat.copy()
+                converted_material.name = mat.name
+                converters.convert_to_octane_material(mat, converted_material)
+                converters.convert_all_related_material(mat, converted_material)
+                slot.material = converted_material
 
 # Assign Materials
 class OctaneAssignUniversal(Operator):
@@ -924,3 +938,16 @@ class OctaneAutosmooth(Operator):
         self.enable_autosmooth = True
         self.autosmooth_value = (context.active_object.data.auto_smooth_angle * 180 / pi)
         return self.execute(context)
+
+class OctaneConvertMat(Operator):
+    bl_label = 'Blender Materials to Octane'
+    bl_idname = 'octane.convert_mat'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if(obj.type == 'MESH'):
+                convert_mat_octane(obj)
+                obj.data.update()
+        self.report({'INFO'}, 'Conversion finished')
+        return {'FINISHED'}

@@ -74,6 +74,7 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.assign_mantaflow_volume', icon='FORCE_SMOKEFLOW')
         layout.operator('octane.assign_embergen_volume', icon='FORCE_SMOKEFLOW')
         layout.separator()
+        layout.operator('octane.convert_mat', icon='EXPERIMENTAL')
         layout.operator('octane.open_shader_editor', icon='NODETREE')
         layout.separator()
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
