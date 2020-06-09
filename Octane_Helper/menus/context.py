@@ -26,7 +26,29 @@ class NODE_MT_node_octane(Menu):
 
     def draw(self, context):
         layout = self.layout
+        layout.menu(OctaneNodeConvertToMenu.bl_idname, icon='SHADERFX')
+        col = layout.column()
+        col.enabled = (len(context.selected_nodes) == 2)
+        col.menu(OctaneNodeMaskByMenu.bl_idname, icon='MOD_MASK')
+        layout.separator()
         layout.operator('octane.connect_transform_projection', icon='NODETREE')
+        layout.separator()
+        layout.operator('octane.switch_ab', icon='MODIFIER')
+        layout.operator('octane.remove_connected_nodes', icon='MODIFIER')
+
+class OctaneNodeConvertToMenu(Menu):
+    bl_label = 'Convert To'
+    bl_idname = 'OCTANE_MT_node_convert_to'
+
+    def draw(self, context):
+        layout = self.layout
+
+class OctaneNodeMaskByMenu(Menu):
+    bl_label = 'Mask By'
+    bl_idname = 'OCTANE_MT_node_mask_by'
+
+    def draw(self, context):
+        layout = self.layout
 
 class OctaneMaterialsMenu(Menu):
     bl_label = 'Materials'

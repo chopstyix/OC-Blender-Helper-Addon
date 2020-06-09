@@ -71,7 +71,9 @@ classes = (
     OctaneRenameEnvironment,
     OctaneDeleteEnvironment,
     OctaneUpdateDisplay,
-    OctaneConnectTransformProjection
+    OctaneConnectTransformProjection,
+    OctaneSwitchAB,
+    OctaneRemoveConnectedNodes
 )
 
 def register_operators():

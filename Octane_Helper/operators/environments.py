@@ -1,6 +1,7 @@
 import bpy 
 from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
+from . nodes import remove_connected_nodes
 import os
 
 presets_dir = bpy.utils.user_resource('SCRIPTS', 'presets')
@@ -76,12 +77,6 @@ def refresh_worlds_list(context, active_last=False):
         bpy.ops.octane.activate_env()
     else:
         context.scene.oc_worlds_index = active
-
-def remove_connected_nodes(ntree, node):
-    for input in node.inputs:
-        for link in input.links:
-            remove_connected_nodes(ntree, link.from_node)
-            ntree.nodes.remove(link.from_node)
 
 def get_enum_env_presets(self, context):
     if not os.path.isdir(env_path):

@@ -26,6 +26,8 @@ classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
     NODE_MT_node_octane,
+    OctaneNodeConvertToMenu,
+    OctaneNodeMaskByMenu,
     OctaneMaterialsMenu,
     OctaneBasicMaterialsMenu,
     OctaneEnvironmentMenu,
