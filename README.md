@@ -28,9 +28,9 @@ A helper addon for Octane Blender edition
 
 * You can find them by yourself
 
-![1591685781241](C:\Users\Lando\Documents\Gits\OC-Blender-Helper-Addon\assets\1591685781241.png)
+![1591685781241](assets/1591685781241.png)
 
-![1591686366725](C:\Users\Lando\Documents\Gits\OC-Blender-Helper-Addon\assets\1591686366725.png)
+![1591686366725](assets/1591686366725.png)
 
 ## Installation
 
