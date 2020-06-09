@@ -21,6 +21,13 @@ class VIEW3D_MT_edit_mesh_octane(Menu):
         layout.menu(OctaneRenderMenu.bl_idname, icon='RESTRICT_RENDER_OFF')
         layout.menu(OctaneInfoMenu.bl_idname, icon='QUESTION')
 
+class NODE_MT_node_octane(Menu):
+    bl_label = 'Octane'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator('octane.connect_transform_projection', icon='NODETREE')
+
 class OctaneMaterialsMenu(Menu):
     bl_label = 'Materials'
     bl_idname = 'OCTANE_MT_materials'

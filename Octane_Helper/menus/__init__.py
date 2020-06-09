@@ -17,9 +17,15 @@ def edit_menu_func(self, context):
         self.layout.menu('VIEW3D_MT_edit_mesh_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
+def node_menu_func(self, context):
+    if context.scene.render.engine == 'octane':
+        self.layout.menu('NODE_MT_node_octane', icon_value=get_icon('OCT_RENDER'))
+        self.layout.separator()
+
 classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
+    NODE_MT_node_octane,
     OctaneMaterialsMenu,
     OctaneBasicMaterialsMenu,
     OctaneEnvironmentMenu,
@@ -44,8 +50,10 @@ def register_menus():
     bpy.types.Scene.oc_worlds_index = IntProperty(name='World', default=0)
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
+    bpy.types.NODE_MT_context_menu.prepend(node_menu_func)
 
 def unregister_menus():
+    bpy.types.NODE_MT_context_menu.remove(node_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(edit_menu_func)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)
     del bpy.types.Scene.oc_worlds_index

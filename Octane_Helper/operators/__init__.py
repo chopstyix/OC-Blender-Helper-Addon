@@ -4,6 +4,7 @@ from .backplates import *
 from .lights import *
 from .render import *
 from .windows import *
+from .nodes import *
 
 classes = (
     OctaneAssignUniversal,
@@ -69,7 +70,8 @@ classes = (
     OctaneActivateEnvironment,
     OctaneRenameEnvironment,
     OctaneDeleteEnvironment,
-    OctaneUpdateDisplay
+    OctaneUpdateDisplay,
+    OctaneConnectTransformProjection
 )
 
 def register_operators():
