@@ -180,6 +180,10 @@ class OctaneMixBy(Operator):
 
     mix_type: StringProperty(default='None')
 
+    @classmethod
+    def poll(cls, context):
+        return len(context.selected_nodes) == 2
+
     def execute(self, context):
         mat = context.object.active_material
         ntree = mat.node_tree
@@ -209,4 +213,35 @@ class OctaneMixBy(Operator):
             ntree.links.new(mixAmountNode.outputs[0], mixNode.inputs['Amount'])
 
         ntree.nodes.update()
+        return {'FINISHED'}
+
+class OctaneNodeConvertTo(Operator):
+    bl_label = 'Convert Node To'
+    bl_idname = 'octane.node_convert_to'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    node_target: StringProperty(default='None')
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.selected_nodes) and 'Mat' in context.selected_nodes[0].bl_idname
+
+    def execute(self, context):
+        if(self.node_target!='None'):
+            mat = context.object.active_material
+            ntree = mat.node_tree
+            active_node = context.selected_nodes[0]
+            newNode = ntree.nodes.new(self.node_target)
+            newNode.location = active_node.location
+
+            # A list of socket objects, not strs
+            common_sockets = [in_socket for in_socket in active_node.inputs if in_socket.name in newNode.inputs]
+            for common_socket in common_sockets:
+                if(common_socket.is_linked):
+                    ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs[common_socket.name])
+                elif(hasattr(common_socket, 'default_value')):
+                    newNode.inputs[common_socket.name].default_value = common_socket.default_value
+
+            ntree.nodes.remove(active_node)
+            ntree.nodes.update()
         return {'FINISHED'}

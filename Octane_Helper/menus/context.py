@@ -26,13 +26,19 @@ class NODE_MT_node_octane(Menu):
 
     def draw(self, context):
         layout = self.layout
-        layout.menu(OctaneNodeConvertToMenu.bl_idname, icon='SHADERFX')
+
+        col = layout.column()
+        col.enabled = (len(context.selected_nodes) and 'Mat' in context.selected_nodes[0].bl_idname)
+        col.menu(OctaneNodeConvertToMenu.bl_idname, icon='SHADERFX')
+        
         col = layout.column()
         col.enabled = (len(context.selected_nodes) == 2)
         col.menu(OctaneNodeMixByMenu.bl_idname, icon='MOD_MASK')
         layout.separator()
+        
         layout.operator('octane.connect_transform_projection', icon='NODETREE')
         layout.separator()
+        
         layout.operator('octane.switch_ab', icon='MODIFIER')
         layout.operator('octane.remove_connected_nodes', icon='MODIFIER')
 
@@ -42,6 +48,18 @@ class OctaneNodeConvertToMenu(Menu):
 
     def draw(self, context):
         layout = self.layout
+        layout.operator('octane.node_convert_to', text='Universal Material').node_target = 'ShaderNodeOctUniversalMat'
+        layout.operator('octane.node_convert_to', text='Diffuse Material').node_target = 'ShaderNodeOctDiffuseMat'
+        layout.operator('octane.node_convert_to', text='Glossy Material').node_target = 'ShaderNodeOctGlossyMat'
+        layout.operator('octane.node_convert_to', text='Specular Material').node_target = 'ShaderNodeOctSpecularMat'
+        layout.operator('octane.node_convert_to', text='Mix Material').node_target = 'ShaderNodeOctMixMat'
+        layout.operator('octane.node_convert_to', text='Portal Material').node_target = 'ShaderNodeOctPortalMat'
+        layout.operator('octane.node_convert_to', text='ShadowCatcher Material').node_target = 'ShaderNodeOctShadowCatcherMat'
+        layout.operator('octane.node_convert_to', text='Toon Material').node_target = 'ShaderNodeOctToonMat'
+        layout.operator('octane.node_convert_to', text='Metal Material').node_target = 'ShaderNodeOctMetalMat'
+        layout.operator('octane.node_convert_to', text='Layered Material').node_target = 'ShaderNodeOctLayeredMat'
+        layout.operator('octane.node_convert_to', text='Composite Material').node_target = 'ShaderNodeOctCompositeMat'
+        layout.operator('octane.node_convert_to', text='Hair Material').node_target = 'ShaderNodeOctHairMat'
 
 class OctaneNodeMixByMenu(Menu):
     bl_label = 'Mix By'
