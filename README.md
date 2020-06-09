@@ -1,4 +1,5 @@
-# OC-Blender-Helper-Addon
+OC-Blender-Helper-Addon
+
 A helper addon for Octane Blender edition
 
 
@@ -13,9 +14,9 @@ A helper addon for Octane Blender edition
 
 ## Versions
 
-* OctaneRender™ for Blender 2019 and later
-* Current version **v2.3.0**
-  * Tested on Blender_Octane_Edition_2020.1.RC3_21.5_beta (latest)
+* OctaneRender™ for Blender 2020 and later
+* Current version **v2.4.0**
+  * Tested on Blender_Octane_Edition_2020.1_21.8 (latest)
 
 ## Downloads
 
@@ -27,7 +28,9 @@ A helper addon for Octane Blender edition
 
 * You can find them by yourself
 
-![image-20200424215536249](README.assets/image-20200424215536249.png)
+![1591685781241](C:\Users\Lando\Documents\Gits\OC-Blender-Helper-Addon\assets\1591685781241.png)
+
+![1591686366725](C:\Users\Lando\Documents\Gits\OC-Blender-Helper-Addon\assets\1591686366725.png)
 
 ## Installation
 
@@ -35,17 +38,17 @@ A helper addon for Octane Blender edition
 * Select **Octane_Helper.zip** to install
   * Please do not install the zip from the downloaded repository named OC-Blender-Helper-Addon-master.zip
 * Activate it
+  * If you have installed the addon, please restart your Blender
 
 ## How to use
 
-* Pretty simple, just **Right Click** in the 3D viewport
-* Make sure the Octane render is enabled, otherwise the menu will not show up
-* It works in either object mode or edit mode, but provides different functions
+* Pretty simple, just **Right Click** in the **3D viewport** or **Nodes Editor (Object)**
+* Make sure the **Octane render is enabled**, otherwise the menu will not show up
+* It works in object mode, edit mode and nodes editor, but provides different functions
 
 ## Issues
 
 * We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
-* Free tire users are currently using 2019 builds which does not include a sphere light. So please do not click the Add Sphere Light button for now
 
 ## WIP
 

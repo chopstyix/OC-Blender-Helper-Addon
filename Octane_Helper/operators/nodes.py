@@ -243,6 +243,12 @@ class OctaneNodeConvertTo(Operator):
                 elif(hasattr(common_socket, 'default_value') and common_socket.name not in except_list):
                     newNode.inputs[common_socket.name].default_value = common_socket.default_value
 
+            # Connect output
+            if(active_node.outputs[0].is_linked):
+                target_socket = active_node.outputs[0].links[0].to_socket
+                ntree.links.remove(active_node.outputs[0].links[0])
+                ntree.links.new(target_socket, newNode.outputs[0])
+
             ntree.nodes.remove(active_node)
             ntree.nodes.update()
         return {'FINISHED'}

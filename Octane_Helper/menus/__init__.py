@@ -18,7 +18,7 @@ def edit_menu_func(self, context):
         self.layout.separator()
 
 def node_menu_func(self, context):
-    if context.scene.render.engine == 'octane':
+    if context.scene.render.engine == 'octane' and context.space_data.shader_type == 'OBJECT':
         self.layout.menu('NODE_MT_node_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
