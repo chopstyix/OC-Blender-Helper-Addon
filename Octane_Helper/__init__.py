@@ -20,6 +20,7 @@ from bpy.props import EnumProperty
 from . icons import register_icons, unregister_icons
 from . operators import register_operators, unregister_operators
 from . menus import register_menus, unregister_menus
+import rna_keymap_ui
 
 bl_info = {
     "name": "Octane Helper",
@@ -53,16 +54,23 @@ class OctaneHelperPrefs(AddonPreferences):
         layout = self.layout
         col = layout.column()
         col.prop(self, "brdf_model")
+        col = layout.column()
+        kc = bpy.context.window_manager.keyconfigs.addon
+        for km, kmi in addon_keymaps:
+            km = km.active()
+            col.context_pointer_set("keymap", km)
+            rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
 
 def register_keymaps():
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
-    if kc:
-        km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
-        kmi = km.keymap_items.new('octane.cameras_manager', type='C', value='PRESS', alt=True, shift=True)
-        kmi = km.keymap_items.new('octane.lights_manager', type='D', value='PRESS', alt=True, shift=True)
-        kmi = km.keymap_items.new('octane.environments_manager', type='E', value='PRESS', alt=True, shift=True)
-        addon_keymaps.append((km, kmi))
+    km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
+    kmi_cameras = km.keymap_items.new('octane.cameras_manager', type='C', value='PRESS', alt=True, shift=True)
+    kmi_lights = km.keymap_items.new('octane.lights_manager', type='D', value='PRESS', alt=True, shift=True)
+    kmi_environments = km.keymap_items.new('octane.environments_manager', type='E', value='PRESS', alt=True, shift=True)
+    addon_keymaps.append((km, kmi_cameras))
+    addon_keymaps.append((km, kmi_lights))
+    addon_keymaps.append((km, kmi_environments))
 
 def unregister_keymaps():
     for km, kmi in addon_keymaps:
