@@ -87,8 +87,15 @@ class OctaneConnectTransformProjection(Operator):
         col.prop(self, 'projection_type', text='')
 
     def execute(self, context):
-        mat = context.object.active_material
-        ntree = mat.node_tree
+        if(context.object.type == 'MESH'):
+            mat = context.object.active_material
+            ntree = mat.node_tree
+        elif(context.object.type == 'LIGHT'):
+            ntree = context.object.data.node_tree
+        else:
+            self.report({'ERROR'}, 'Not supported')
+            return {'CANCELLED'}
+
         active_nodes = context.selected_nodes
 
         for active_node in active_nodes:
@@ -127,7 +134,14 @@ class OctaneSwitchAB(Operator):
         return False
 
     def execute(self, context):
-        ntree = context.object.active_material.node_tree
+        if(context.object.type == 'MESH'):
+            mat = context.object.active_material
+            ntree = mat.node_tree
+        elif(context.object.type == 'LIGHT'):
+            ntree = context.object.data.node_tree
+        else:
+            self.report({'ERROR'}, 'Not supported')
+            return {'CANCELLED'}
         a = None
         b = None
 
@@ -169,7 +183,14 @@ class OctaneRemoveConnectedNodes(Operator):
         return False
 
     def execute(self, context):
-        ntree = context.object.active_material.node_tree
+        if(context.object.type == 'MESH'):
+            mat = context.object.active_material
+            ntree = mat.node_tree
+        elif(context.object.type == 'LIGHT'):
+            ntree = context.object.data.node_tree
+        else:
+            self.report({'ERROR'}, 'Not supported')
+            return {'CANCELLED'}
         remove_connected_nodes(ntree, context.selected_nodes[0])
         return {'FINISHED'}
 
@@ -185,8 +206,14 @@ class OctaneMixBy(Operator):
         return len(context.selected_nodes) == 2
 
     def execute(self, context):
-        mat = context.object.active_material
-        ntree = mat.node_tree
+        if(context.object.type == 'MESH'):
+            mat = context.object.active_material
+            ntree = mat.node_tree
+        elif(context.object.type == 'LIGHT'):
+            ntree = context.object.data.node_tree
+        else:
+            self.report({'ERROR'}, 'Not supported')
+            return {'CANCELLED'}
         active_nodes = context.selected_nodes
         loc = active_nodes[0].location.copy()
 
@@ -229,8 +256,14 @@ class OctaneNodeConvertTo(Operator):
     def execute(self, context):
         if(self.node_target!='None'):
             except_list = ['Transmission']
-            mat = context.object.active_material
-            ntree = mat.node_tree
+            if(context.object.type == 'MESH'):
+                mat = context.object.active_material
+                ntree = mat.node_tree
+            elif(context.object.type == 'LIGHT'):
+                ntree = context.object.data.node_tree
+            else:
+                self.report({'ERROR'}, 'Not supported')
+                return {'CANCELLED'}
             active_node = context.selected_nodes[0]
             newNode = ntree.nodes.new(self.node_target)
             newNode.location = active_node.location
