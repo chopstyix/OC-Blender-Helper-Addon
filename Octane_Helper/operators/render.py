@@ -478,8 +478,6 @@ class OctaneCamerasManager(Operator):
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = False
-        
-        layout.separator()
 
         split = layout.split(factor=0.85)
         split.prop(self, 'cameras', text='')
@@ -784,7 +782,6 @@ class OctaneCamerasManager(Operator):
                 box = col.box()
                 box.enabled = (rd.use_motion_blur and ob.octane.use_motion_blur)
                 box.prop(ob.octane, "motion_steps", text="Steps")
-        layout.separator()
 
     def execute(self, context):
         return {'FINISHED'}
@@ -794,7 +791,7 @@ class OctaneCamerasManager(Operator):
             if(context.active_object.type=='CAMERA'):
                 self.cameras = context.active_object.name
         wm = context.window_manager
-        return wm.invoke_popup(self, width=600)
+        return wm.invoke_props_dialog(self, width=600)
     
 class OctaneCopyCameraSettings(Operator):
     bl_label = 'Copy Camera Settings'
