@@ -251,10 +251,10 @@ class OctaneSelectLights(Operator):
         lights = context.scene.oc_lights
         if(self.index == -1):
             for light in lights:
-                light.obj.select = True
+                light.obj.select_set(True)
                 #context.view_layer.objects.active = light.obj
         elif(0 <= self.index < len(lights)):
-            lights[self.index].obj.select = True
+            lights[self.index].obj.select_set(True)
             context.view_layer.objects.active = lights[self.index].obj
         return {'FINISHED'}
     
