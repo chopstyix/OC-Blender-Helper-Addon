@@ -523,16 +523,11 @@ class OctaneUpdateDisplay(Operator):
     bl_idname = 'octane.update_display'
     bl_options = {'REGISTER', 'UNDO'}
 
-    display_device: EnumProperty(name='Display Device', items=[
-        ('None', 'None', ''),
-        ('XYZ', 'XYZ', ''),
-        ('sRGB', 'sRGB', '')
-    ], default='None')
-
     exposure: FloatProperty(
         name="Exposure",
         default=0.0,
         min=-10.0,
+        max=10,
         step=10, 
         precision=3)
 
@@ -540,20 +535,22 @@ class OctaneUpdateDisplay(Operator):
         name="Gamma",
         default = 1.0,
         min=0.0,
+        max=5.0,
         step=10, 
         precision=3)
     
     hdr_tonemap_preview_enable: BoolProperty(name='Enable Perspective Imager', default=True)
 
     def execute(self, context):
-        context.scene.display_settings.display_device = self.display_device
+        context.scene.display_settings.display_device = 'sRGB'
+        context.scene.view_settings.view_transform = 'Raw'
+        context.scene.view_settings.look = 'None'
         context.scene.view_settings.exposure = self.exposure
         context.scene.view_settings.gamma = self.gamma
         context.scene.octane.hdr_tonemap_preview_enable = self.hdr_tonemap_preview_enable
         return {'FINISHED'}
     
     def invoke(self, context, event):
-        self.display_device = 'None'
         self.exposure = 0.0
         self.gamma = 1.0
         self.hdr_tonemap_preview_enable = True
