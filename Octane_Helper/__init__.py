@@ -36,6 +36,7 @@ bl_info = {
 
 addon_keymaps = []
 
+# Prefs for the addon
 class OctaneHelperPrefs(AddonPreferences):
     bl_idname = __name__
 

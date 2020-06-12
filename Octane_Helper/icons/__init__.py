@@ -4,18 +4,13 @@ import os
 icons = None
 icons_dir = os.path.dirname(__file__)
 
-def load_asset_dir(dir):
-    for fn in os.listdir(dir):
-        if fn.endswith('.thumb.png'):
-            name = fn[:-10]
-            path = os.path.join(dir, fn)
-            icons.load(name, path, 'IMAGE')
-
+# Get the icon id
 def get_icon(name):
     if name not in icons:
         return icons['OBJ_THUMB'].icon_id
     return icons[name].icon_id
 
+# Register icons
 def register_icons():
     global icons
     icons = previews.new()
