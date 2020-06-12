@@ -13,6 +13,7 @@ def update_backplate(self, context):
 class OctaneAddBackplate(Operator):
     bl_label = 'Add Backplate'
     bl_idname = 'octane.add_backplate'
+    bl_description = 'Add a visible rgb environment to the active world output'
     bl_options = {'REGISTER', 'UNDO'}
 
     backplate_color: FloatVectorProperty(
@@ -62,6 +63,7 @@ class OctaneAddBackplate(Operator):
 class OctaneRemoveBackplate(Operator):
     bl_label = 'Remove Backplate'
     bl_idname = 'octane.remove_backplate'
+    bl_description = 'Remove the visible environment'
     bl_options = {'REGISTER', 'UNDO'}
    
     @classmethod
@@ -91,6 +93,7 @@ class OctaneRemoveBackplate(Operator):
 class OctaneModifyBackplate(Operator):
     bl_label = 'Modify Backplate'
     bl_idname = 'octane.modify_backplate'
+    bl_description = 'Change color of the visible environment'
     bl_options = {'REGISTER', 'UNDO'}
    
     backplate_color: FloatVectorProperty(

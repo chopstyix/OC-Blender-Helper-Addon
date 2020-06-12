@@ -68,6 +68,7 @@ def refresh_lights_list(context, active_last=False, active_current=False):
 class OctaneLightsManager(Operator):
     bl_label = 'Lights Manager'
     bl_idname = 'octane.lights_manager'
+    bl_description = 'A panel that manages all emissive objects which have been marked as light sources'
     bl_options = {'REGISTER'}
 
     emissive_material: EnumProperty(
@@ -128,6 +129,7 @@ class OctaneLightsManager(Operator):
 class OctaneSetLight(Operator):
     bl_label = 'Mark as a Light Source'
     bl_idname = 'octane.set_light'
+    bl_description = 'To mark selected objects as light sources with a tag, so they can be managed by the Lights Manager'
     bl_options = {'REGISTER', 'UNDO'}
 
     types = [
@@ -230,6 +232,7 @@ class OctaneAddLightToonSpot(Operator):
 class OctaneSelectLights(Operator):
     bl_label = 'Select Lights'
     bl_idname = 'octane.select_lights'
+    bl_description = 'Select lights [-1 : All lights; n : Light by index]'
     bl_options = {'REGISTER', 'UNDO'}
 
     index: IntProperty(name='Index', default=-1, min=-1)

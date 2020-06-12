@@ -110,6 +110,7 @@ def append_env_nodes(ntree_to, rootNodes, offset_y):
 class OctaneEnvironmentsManager(Operator):
     bl_label = 'Environments manager'
     bl_idname = 'octane.environments_manager'
+    bl_description = 'A panel that manages world outputs in the current project. It also includes a presets feature which stores your presets locally'
     bl_options = {'REGISTER'}
 
     category: EnumProperty(
@@ -215,7 +216,7 @@ class OctaneAddEnvironmentPreset(Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text='This will save your world nodes to a file')
+        layout.label(text='This will save your world nodes as a preset to the file')
         col = layout.column(align=True)
         col.prop(self, 'save_name')
         col.prop(self, 'pack_images')
@@ -340,6 +341,7 @@ class OctaneDeleteEnvironment(Operator):
 class OctaneAddSkyEnv(Operator):
     bl_label = 'Setup Sky'
     bl_idname = 'octane.add_tex_sky'
+    bl_description = 'Add a daylight environment'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -357,6 +359,7 @@ class OctaneAddSkyEnv(Operator):
 class OctaneAddMedEnv(Operator):
     bl_label = 'Setup Medium'
     bl_idname = 'octane.add_med_env'
+    bl_description = 'Add a medium(fog) environment'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -388,6 +391,7 @@ class OctaneAddMedEnv(Operator):
 class OctaneAddTexEnv(Operator):
     bl_label = 'Setup Texture'
     bl_idname = 'octane.add_tex_env'
+    bl_description = 'Add a texture environment'
     bl_options = {'REGISTER', 'UNDO'}
 
     filepath: StringProperty(subtype="FILE_PATH")
@@ -449,6 +453,7 @@ class OctaneAddTexEnv(Operator):
 class OctaneAddPaintEnv(Operator):
     bl_label = 'Setup Paint'
     bl_idname = 'octane.add_paint_env'
+    bl_description = 'Add a paintable environment'
     bl_options = {'REGISTER', 'UNDO'}
     
     def execute(self, context):
@@ -484,6 +489,7 @@ class OctaneAddPaintEnv(Operator):
 class OctaneTransformHDRIEnv(Operator):
     bl_label = 'Transform Texture Environment'
     bl_idname = 'octane.transform_hdri'
+    bl_description = 'Find connected 3D transform nodes in World outputs so users can transform the texture env quickly'
     bl_options = {'REGISTER', 'UNDO'}
 
     transNode: EnumProperty(items=get_enum_trs, name='Nodes', update=update_enum_trs)
@@ -521,6 +527,7 @@ class OctaneTransformHDRIEnv(Operator):
 class OctaneUpdateDisplay(Operator):
     bl_label = 'Update Display Settings'
     bl_idname = 'octane.update_display'
+    bl_description = 'Set display device to sRGB, view transform to RAW, look to None to make sure the color in Octane Blender is correct'
     bl_options = {'REGISTER', 'UNDO'}
 
     exposure: FloatProperty(

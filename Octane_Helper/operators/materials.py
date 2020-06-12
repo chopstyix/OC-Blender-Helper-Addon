@@ -857,6 +857,7 @@ class OctaneAssignEmbergenVolume(Operator):
 class OctaneRenameMat(Operator):
     bl_label = 'Rename'
     bl_idname = 'octane.rename_mat'
+    bl_description = 'Rename the active material'
     bl_options = {'REGISTER', 'UNDO'}
 
     name: StringProperty(
@@ -884,6 +885,7 @@ class OctaneRenameMat(Operator):
 class OctaneCopyMat(Operator):
     bl_label = 'Copy'
     bl_idname = 'octane.copy_mat'
+    bl_description = 'Copy active material of the selected object to paste it later'
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -902,6 +904,7 @@ class OctaneCopyMat(Operator):
 class OctanePasteMat(Operator):
     bl_label = 'Paste'
     bl_idname = 'octane.paste_mat'
+    bl_description = 'Paste the copied material to all selected objects/faces'
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
@@ -912,10 +915,29 @@ class OctanePasteMat(Operator):
             assign_material(context, bpy.types.Material.copied_mat)
         return {'FINISHED'}
 
+class OctaneDuplicateMat(Operator):
+    bl_label = 'Duplicate'
+    bl_idname = 'octane.duplicate_mat'
+    bl_description = 'Duplicate the active material and copy it so you can paste it to other object/faces'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        obj = context.active_object
+        if(obj is not None):
+            if(obj.type == 'MESH'):
+                return (len(obj.material_slots)>=1)
+        return False
+    def execute(self, context):
+        mat = context.active_object.active_material.copy()
+        bpy.types.Material.copied_mat = mat
+        return {'FINISHED'}
+
 # Autosmooth
 class OctaneAutosmooth(Operator):
     bl_label = 'Mesh Autosmooth'
     bl_idname = 'octane.autosmooth'
+    bl_description = 'Blender autosmooth function'
     bl_options = {'REGISTER', 'UNDO'}
 
     enable_autosmooth: BoolProperty(default=True, name='Enable Autosmooth')
@@ -942,6 +964,7 @@ class OctaneAutosmooth(Operator):
 class OctaneConvertMat(Operator):
     bl_label = 'Blender Materials to Octane'
     bl_idname = 'octane.convert_mat'
+    bl_description = 'Convert Cycles/EEVEE materials of selected objects to Octane materials using built-in Materials Converter (Dev)'
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):

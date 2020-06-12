@@ -102,6 +102,7 @@ class OctaneMaterialsMenu(Menu):
         layout.separator()
         layout.operator('octane.rename_mat', icon='GREASEPENCIL')
         layout.operator('octane.copy_mat', icon='COPYDOWN')
+        layout.operator("octane.duplicate_mat", icon='DUPLICATE')
         layout.operator('octane.paste_mat', icon='PASTEDOWN')
         if(bpy.types.Material.copied_mat!=None):
             layout.label(text='['+((bpy.types.Material.copied_mat.name[:16] + '..') if len(bpy.types.Material.copied_mat.name) > 16 else bpy.types.Material.copied_mat.name)+']')
