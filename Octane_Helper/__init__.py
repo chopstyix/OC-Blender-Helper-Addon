@@ -17,6 +17,7 @@
 import bpy
 from bpy.types import AddonPreferences
 from bpy.props import EnumProperty
+from . megascans import register_megascans, unregister_megascans
 from . icons import register_icons, unregister_icons
 from . operators import register_operators, unregister_operators
 from . menus import register_menus, unregister_menus
@@ -82,14 +83,16 @@ def register():
     bpy.utils.register_class(OctaneHelperPrefs)
     register_keymaps()
     register_icons()
+    register_megascans()
     register_operators()
     register_menus()
 
 def unregister():
     unregister_menus()
     unregister_operators()
+    unregister_megascans()
     unregister_icons()
-    unregister_keymaps
+    unregister_keymaps()
     bpy.utils.unregister_class(OctaneHelperPrefs)
 
 if __name__ == "__main__":
