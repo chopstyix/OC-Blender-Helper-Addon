@@ -1,15 +1,15 @@
-# ##### QUIXEL AB - MEGASCANS PLugin FOR BLENDER #####
+# ##### QUIXEL AB - MEGASCANS Module FOR BLENDER #####
 #
-# The Megascans Plugin  plugin for Blender is an add-on that lets
+# The Megascans Module  module for Blender is an add-on that lets
 # you instantly import assets with their shader setup with one click only.
 #
-# Because it relies on some of the latest 2.80 features, this plugin is currently
+# Because it relies on some of the latest 2.80 features, this module is currently
 # only available for Blender 2.80 and forward.
 #
 # You are free to modify, add features or tweak this add-on as you see fit, and
 # don't hesitate to send us some feedback if you've done something cool with it.
 #
-# ##### QUIXEL AB - MEGASCANS PLUGIN FOR BLENDER #####
+# ##### QUIXEL AB - MEGASCANS Module FOR BLENDER #####
 
 import bpy, threading, os, time, json, socket
 from bpy.app.handlers import persistent
@@ -21,25 +21,10 @@ globals()['MG_Material'] = []
 globals()['MG_AlembicPath'] = []
 globals()['MG_ImportComplete'] = False
 
-bl_info = {
-    "name": "Megascans Plugin",
-    "description": "Connects Blender to Quixel Bridge for one-click imports with shader setup and geometry",
-    "author": "Quixel",
-    "version": (3, 1),
-    "blender": (2, 80, 0),
-    "location": "File > Import",
-    "warning": "", # used for warning icon and text in addons panel
-    "wiki_url": "https://docs.quixel.org/bridge/livelinks/blender/info_quickstart.html",
-    "tracker_url": "https://docs.quixel.org/bridge/livelinks/blender/info_quickstart#release_notes",
-    "support": "COMMUNITY",
-    "category": "Import-Export"
-}
-
-
-# MS_Init_ImportProcess is the main asset import class.
+# OctaneMSImportProcess is the main asset import class.
 # This class is invoked whenever a new asset is set from Bridge.
 
-class MS_Init_ImportProcess():
+class OctaneMSImportProcess():
 
     # This initialization method create the data structure to process our assets
     # later on in the initImportProcess method. The method loops on all assets
@@ -154,7 +139,7 @@ class MS_Init_ImportProcess():
             if len(globals()['MG_AlembicPath']) > 0:
                 globals()['MG_ImportComplete'] = True        
         except Exception as e:
-            print( "Megascans Plugin Error initializing the import process. Error: ", str(e) )
+            print( "Megascans Module Error initializing the import process. Error: ", str(e) )
         
         globals()['Megascans_DataSet'] = None
     
@@ -178,7 +163,7 @@ class MS_Init_ImportProcess():
                     globals()['MG_Material'].append(self.mat)
 
         except Exception as e:
-            print( "Megascans Plugin Error while importing textures/geometry or setting up material. Error: ", str(e) )
+            print( "Megascans Module Error while importing textures/geometry or setting up material. Error: ", str(e) )
 
     def ImportGeometry(self):
         try:
@@ -208,7 +193,7 @@ class MS_Init_ImportProcess():
             if self.isAlembic:
                 globals()['MG_AlembicPath'].append(abcPaths)
         except Exception as e:
-            print( "Megascans Plugin Error while importing textures/geometry or setting up material. Error: ", str(e) )
+            print( "Megascans Module Error while importing textures/geometry or setting up material. Error: ", str(e) )
 
     def dump(self, obj):
         for attr in dir(obj):
@@ -221,7 +206,7 @@ class MS_Init_ImportProcess():
                 if obj.type == "MESH":
                     self.selectedObjects.append(obj)
         except Exception as e:
-            print("Megascans Plugin Error::CollectSelectedObjects::", str(e) )
+            print("Megascans Module Error::CollectSelectedObjects::", str(e) )
 
     def ApplyMaterialToGeometry(self):
         for obj in self.selectedObjects:
@@ -492,7 +477,7 @@ class ms_Init(threading.Thread):
                             self.importer(self.TotalData)
                             break
         except Exception as e:
-            print( "Megascans Plugin Error initializing the thread. Error: ", str(e) )
+            print( "Megascans Module Error initializing the thread. Error: ", str(e) )
 
 class thread_checker(threading.Thread):
     
@@ -517,13 +502,13 @@ class thread_checker(threading.Thread):
                         run_checker = False
                         break
         except Exception as e:
-            print( "Megascans Plugin Error initializing thread checker. Error: ", str(e) )
+            print( "Megascans Module Error initializing thread checker. Error: ", str(e) )
             pass
 
-class MS_Init_LiveLink(bpy.types.Operator):
+class OctaneMSLiveLink(bpy.types.Operator):
 
-    bl_idname = "bridge.plugin"
-    bl_label = "Megascans Plugin"
+    bl_idname = "octane.ms_livelink"
+    bl_label = "Megascans Module"
     socketCount = 0
 
     def execute(self, context):
@@ -535,16 +520,16 @@ class MS_Init_LiveLink(bpy.types.Operator):
             bpy.app.timers.register(self.newDataMonitor)
             return {'FINISHED'}
         except Exception as e:
-            print( "Megascans Plugin Error starting blender plugin. Error: ", str(e) )
+            print( "Megascans Module Error starting blender module. Error: ", str(e) )
             return {"FAILED"}
 
     def newDataMonitor(self):
         try:
             if globals()['Megascans_DataSet'] != None:
-                MS_Init_ImportProcess()
+                OctaneMSImportProcess()
                 globals()['Megascans_DataSet'] = None       
         except Exception as e:
-            print( "Megascans Plugin Error starting blender plugin (newDataMonitor). Error: ", str(e) )
+            print( "Megascans Module Error starting blender module (newDataMonitor). Error: ", str(e) )
             return {"FAILED"}
         return 1.0
 
@@ -560,19 +545,19 @@ class MS_Init_LiveLink(bpy.types.Operator):
             #Start the newly created thread.
             thread_checker_.start()
         except Exception as e:
-            print( "Megascans Plugin Error starting blender plugin (socketMonitor). Error: ", str(e) )
+            print( "Megascans Module Error starting blender module (socketMonitor). Error: ", str(e) )
             return {"FAILED"}
 
     def importer (self, recv_data):
         try:
             globals()['Megascans_DataSet'] = recv_data
         except Exception as e:
-            print( "Megascans Plugin Error starting blender plugin (importer). Error: ", str(e) )
+            print( "Megascans Module Error starting blender module (importer). Error: ", str(e) )
             return {"FAILED"}
 
-class MS_Init_Abc(bpy.types.Operator):
+class OctaneMSAbc(bpy.types.Operator):
 
-    bl_idname = "ms_livelink_abc.py"
+    bl_idname = "octane.ms_abc"
     bl_label = "Import ABC"
 
     def execute(self, context):
@@ -611,32 +596,32 @@ class MS_Init_Abc(bpy.types.Operator):
 
             return {'FINISHED'}
         except Exception as e:
-            print( "Megascans Plugin Error starting MS_Init_Abc. Error: ", str(e) )
+            print( "Megascans Module Error starting OctaneMSAbc. Error: ", str(e) )
             return {"CANCELLED"}
 
 @persistent
-def load_plugin(scene):
+def load_ms_module(scene):
     try:
-        bpy.ops.bridge.plugin()
+        bpy.ops.octane.ms_livelink()
     except Exception as e:
-        print( "Bridge Plugin Error::Could not start the plugin. Description: ", str(e) )
+        print( "Failed to start the Megascans module: ", str(e) )
 
 def menu_func_import(self, context):
-    self.layout.operator(MS_Init_Abc.bl_idname, text="Megascans: Import Alembic Files")
+    self.layout.operator(OctaneMSAbc.bl_idname, text="Megascans: Import Alembic Files")
 
 def register_megascans():
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.
-        if "load_plugin" in bpy.app.handlers.load_post[0].__name__.lower() or load_plugin in bpy.app.handlers.load_post:
+        if "load_ms_module" in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
             return
-    bpy.utils.register_class(MS_Init_LiveLink)
-    bpy.utils.register_class(MS_Init_Abc)
-    bpy.app.handlers.load_post.append(load_plugin)
+    bpy.utils.register_class(OctaneMSLiveLink)
+    bpy.utils.register_class(OctaneMSAbc)
+    bpy.app.handlers.load_post.append(load_ms_module)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 def unregister_megascans():
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.
-        if "load_plugin" in bpy.app.handlers.load_post[0].__name__.lower() or load_plugin in bpy.app.handlers.load_post:
-            bpy.app.handlers.load_post.remove(load_plugin)
+        if "load_ms_module" in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
+            bpy.app.handlers.load_post.remove(load_ms_module)
