@@ -11,8 +11,9 @@
 #
 # ##### QUIXEL AB - MEGASCANS Module FOR BLENDER #####
 
-import bpy, threading, os, time, json, socket
+import bpy, threading, os, json
 from bpy.app.handlers import persistent
+from . threads import *
 
 globals()['Megascans_DataSet'] = None
 
@@ -429,82 +430,6 @@ class OctaneMSImportProcess():
             if item[1] == textureType:
                 return item[0].lower()
 
-class ms_Init(threading.Thread):
-    
-	#Initialize the thread and assign the method (i.e. importer) to be called when it receives JSON data.
-    def __init__(self, importer):
-        threading.Thread.__init__(self)
-        self.importer = importer
-
-	#Start the thread to start listing to the port.
-    def run(self):
-        try:
-            run_livelink = True
-            host, port = 'localhost', 28888
-            #Making a socket object.
-            socket_ = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #Binding the socket to host and port number mentioned at the start.
-            socket_.bind((host, port))
-
-            #Run until the thread starts receiving data.
-            while run_livelink:
-                socket_.listen(5)
-                #Accept connection request.
-                client, addr = socket_.accept()
-                data = ""
-                buffer_size = 4096*2
-                #Receive data from the client. 
-                data = client.recv(buffer_size)
-                if data == b'Bye Megascans':
-                    run_livelink = False
-                    break
-
-                #If any data is received over the port.
-                if data != "":
-                    self.TotalData = b""
-                    self.TotalData += data #Append the previously received data to the Total Data.
-                    #Keep running until the connection is open and we are receiving data.
-                    while run_livelink:
-                        #Keep receiving data from client.
-                        data = client.recv(4096*2)
-                        if data == b'Bye Megascans':
-                            run_livelink = False
-                            break
-                        #if we are getting data keep appending it to the Total data.
-                        if data : self.TotalData += data
-                        else:
-                            #Once the data transmission is over call the importer method and send the collected TotalData.
-                            self.importer(self.TotalData)
-                            break
-        except Exception as e:
-            print( "Megascans Module Error initializing the thread. Error: ", str(e) )
-
-class thread_checker(threading.Thread):
-    
-	#Initialize the thread and assign the method (i.e. importer) to be called when it receives JSON data.
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-	#Start the thread to start listing to the port.
-    def run(self):
-        try:
-            run_checker = True
-            while run_checker:
-                time.sleep(3)
-                for i in threading.enumerate():
-                    if(i.getName() == "MainThread" and i.is_alive() == False):
-                        host, port = 'localhost', 28888
-                        s = socket.socket()
-                        s.connect((host,port))
-                        data = "Bye Megascans"
-                        s.send(data.encode())
-                        s.close()
-                        run_checker = False
-                        break
-        except Exception as e:
-            print( "Megascans Module Error initializing thread checker. Error: ", str(e) )
-            pass
-
 class OctaneMSLiveLink(bpy.types.Operator):
 
     bl_idname = "octane.ms_livelink"
@@ -606,9 +531,6 @@ def load_ms_module(scene):
     except Exception as e:
         print( "Failed to start the Megascans module: ", str(e) )
 
-def menu_func_import(self, context):
-    self.layout.operator(OctaneMSAbc.bl_idname, text="Megascans: Import Alembic Files")
-
 def register_megascans():
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.
@@ -617,10 +539,11 @@ def register_megascans():
     bpy.utils.register_class(OctaneMSLiveLink)
     bpy.utils.register_class(OctaneMSAbc)
     bpy.app.handlers.load_post.append(load_ms_module)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 def unregister_megascans():
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
+    bpy.app.handlers.load_post.remove(load_ms_module)
+    bpy.utils.unregister_class(OctaneMSAbc)
+    bpy.utils.unregister_class(OctaneMSLiveLink)
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.
         if "load_ms_module" in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
