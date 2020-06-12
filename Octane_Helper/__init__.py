@@ -16,7 +16,7 @@
 
 import bpy
 from bpy.types import AddonPreferences
-from bpy.props import EnumProperty
+from bpy.props import EnumProperty, IntProperty, BoolProperty
 from . megascans import register_megascans, unregister_megascans
 from . icons import register_icons, unregister_icons
 from . operators import register_operators, unregister_operators
@@ -52,17 +52,87 @@ class OctaneHelperPrefs(AddonPreferences):
         default='OCTANE_BRDF_OCTANE'
     )
 
+    disp_type: EnumProperty(
+        items=[
+            ('TEXTURE', 'Texture', 'Octane Texture Displacement'),
+            ('VERTEX', 'Vertex', 'Octane Vertex Displacement')
+        ],
+        name="Displacement Mode",
+        description="Set default Octane displacement mode",
+        default="TEXTURE"
+    )
+
+    disp_level_texture: EnumProperty(
+        items=[
+            ('OCTANE_DISPLACEMENT_LEVEL_256', '256', '256x256'),
+            ('OCTANE_DISPLACEMENT_LEVEL_512', '512', '512x512'),
+            ('OCTANE_DISPLACEMENT_LEVEL_1024', '1024', '1024x1024'),
+            ('OCTANE_DISPLACEMENT_LEVEL_2048', '2048', '2048x2048'),
+            ('OCTANE_DISPLACEMENT_LEVEL_4096', '4096', '4096x4096'),
+            ('OCTANE_DISPLACEMENT_LEVEL_8192', '8192', '8192x8192')
+        ],
+        name="Subdivision",
+        default="OCTANE_DISPLACEMENT_LEVEL_4096"
+    )
+
+    disp_level_vertex: IntProperty(
+        name="Subdivision",
+        min=0,
+        max=6,
+        default=6
+    )
+
+    is_cavity_enabled: BoolProperty(
+        name="Enable Cavity map",
+        default=False
+    )
+
+    is_curvature_enabled: BoolProperty(
+        name="Enable Curvature map",
+        default=False
+    )
+
+    is_bump_enabled: BoolProperty(
+        name="Enable Bump map",
+        default=False
+    )
+
+    is_fuze_enabled: BoolProperty(
+        name="Enable Fuze map",
+        default=False
+    )
+
     def draw(self, context):
         layout = self.layout
-        col = layout.column()
-        col.prop(self, "brdf_model")
-        col = layout.column()
+
+        box = layout.box()
+        box.label(text='Octane')
+        box.prop(self, "brdf_model")
+        box.separator()
+
+        box = layout.box()
+        box.label(text='Megascans')
+        row = box.row(align=True)
+        row.prop(self, "disp_type")
+        if(self.disp_type == "TEXTURE"):
+            row.prop(self, "disp_level_texture")
+        else:
+            row.prop(self, "disp_level_vertex")
+        box.prop(self, "is_cavity_enabled")
+        box.prop(self, "is_curvature_enabled")
+        box.prop(self, "is_bump_enabled")
+        box.prop(self, "is_fuze_enabled")
+        box.separator()
+
+        box = layout.box()
+        box.label(text='Keymap')
         kc = bpy.context.window_manager.keyconfigs.addon
         for km, kmi in addon_keymaps:
             km = km.active()
-            col.context_pointer_set("keymap", km)
-            rna_keymap_ui.draw_kmi([], kc, km, kmi, col, 0)
-
+            box.context_pointer_set("keymap", km)
+            rna_keymap_ui.draw_kmi([], kc, km, kmi, box, 0)
+        box.separator()
+        
 def register_keymaps():
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
