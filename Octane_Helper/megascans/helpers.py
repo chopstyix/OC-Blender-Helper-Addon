@@ -78,3 +78,8 @@ def is_me_here():
     if('load_ms_module' in [handler.__name__.lower() for handler in bpy.app.handlers.load_post]):
         return True
     return False
+
+def notify(msg, title, icon = 'INFO'):
+    def draw(self, context):
+        self.layout.label(text=msg)
+    bpy.context.window_manager.popup_menu(draw, title = title, icon = icon)
