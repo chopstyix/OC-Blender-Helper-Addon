@@ -44,6 +44,7 @@ A helper addon for Octane Blender edition
 * There is no UI button to activate it
 * Make sure you do not have the **Official Livelink Addon** installed. Otherwise, this module will keep silent with imports
 * The imported surface material can be found in Material Slots to be assigned manually
+  * You can also use Right-Click menu > Materials > Paste to paste the surface material
 
 ![image-20200308174856061](assets/image-20200308174856061.png)
 
