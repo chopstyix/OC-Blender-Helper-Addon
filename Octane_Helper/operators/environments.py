@@ -1,20 +1,11 @@
 import bpy 
 from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
-from . nodes import remove_connected_nodes
+from . nodes import remove_connected_nodes, get_y
 import os
 
 presets_dir = bpy.utils.user_resource('SCRIPTS', 'presets')
 env_path = os.path.join(presets_dir, 'octane', 'environments')
-
-def get_y(world, type):
-    if(not world.node_tree.get_output_node('octane')):
-        return 0
-    ys = [node.location.y for node in world.node_tree.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
-    if(type == 'Min'):
-        return min(ys)
-    elif(type == 'Max'):
-        return max(ys)
 
 def get_trans_node(node):
     result = []
@@ -32,7 +23,7 @@ def create_world_output(context, name):
     outNode = world.node_tree.nodes.new('ShaderNodeOutputWorld')
     outNode.name = name
     
-    outNode.location = (300, get_y(world, 'Min')-800)
+    outNode.location = (300, get_y(world.node_tree, 'ShaderNodeOutputWorld', 'Min')-800)
     return outNode
 
 def get_enum_trs(self, context):
@@ -198,7 +189,7 @@ class OctaneAppendEnvironmentPreset(Operator):
             ntree_from = added_world.node_tree
             ntree_to = context.scene.world.node_tree
             outNodes = [node for node in ntree_from.nodes if node.bl_idname == 'ShaderNodeOutputWorld']
-            offset_y = get_y(context.scene.world, 'Min') - get_y(added_world, 'Max')
+            offset_y = get_y(ntree_to, 'ShaderNodeOutputWorld', 'Min') - get_y(ntree_from, 'ShaderNodeOutputWorld', 'Max')
             append_env_nodes(ntree_to, outNodes, offset_y)
             
             bpy.data.worlds.remove(added_world)

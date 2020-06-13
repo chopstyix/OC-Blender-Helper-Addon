@@ -24,6 +24,15 @@ def get_connected_nodes(node):
             result += get_connected_nodes(link.from_node)
     return result
 
+def get_y(ntree, target, type):
+    if(not ntree.get_output_node('octane')):
+        return 0
+    ys = [node.location.y for node in ntree.nodes if node.bl_idname == target]
+    if(type == 'Min'):
+        return min(ys)
+    elif(type == 'Max'):
+        return max(ys)
+
 class OctaneConnectTransformProjection(Operator):
     bl_label = 'Add Transform and Projection'
     bl_idname = 'octane.connect_transform_projection'

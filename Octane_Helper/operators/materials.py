@@ -21,6 +21,7 @@ def create_material(context, name, root):
     # Create a new shader node
     mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location
+    mainMat.name = 'root'
     if('Smooth' in mainMat.inputs):
         mainMat.inputs['Smooth'].default_value = context.scene.is_smooth
     if(hasattr(mainMat, 'brdf_model')):

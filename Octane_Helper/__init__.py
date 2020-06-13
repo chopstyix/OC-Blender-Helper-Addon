@@ -62,19 +62,6 @@ class OctaneHelperPrefs(AddonPreferences):
         default="TEXTURE"
     )
 
-    disp_level_texture: EnumProperty(
-        items=[
-            ('OCTANE_DISPLACEMENT_LEVEL_256', '256', '256x256'),
-            ('OCTANE_DISPLACEMENT_LEVEL_512', '512', '512x512'),
-            ('OCTANE_DISPLACEMENT_LEVEL_1024', '1024', '1024x1024'),
-            ('OCTANE_DISPLACEMENT_LEVEL_2048', '2048', '2048x2048'),
-            ('OCTANE_DISPLACEMENT_LEVEL_4096', '4096', '4096x4096'),
-            ('OCTANE_DISPLACEMENT_LEVEL_8192', '8192', '8192x8192')
-        ],
-        name="Subdivision",
-        default="OCTANE_DISPLACEMENT_LEVEL_4096"
-    )
-
     disp_level_vertex: IntProperty(
         name="Subdivision",
         min=0,
@@ -114,9 +101,7 @@ class OctaneHelperPrefs(AddonPreferences):
         box.label(text='Megascans')
         row = box.row(align=True)
         row.prop(self, "disp_type")
-        if(self.disp_type == "TEXTURE"):
-            row.prop(self, "disp_level_texture")
-        else:
+        if(self.disp_type == "VERTEX"):
             row.prop(self, "disp_level_vertex")
         box.prop(self, "is_cavity_enabled")
         box.prop(self, "is_curvature_enabled")
