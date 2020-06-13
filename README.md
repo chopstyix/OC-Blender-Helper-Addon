@@ -1,4 +1,4 @@
-OC-Blender-Helper-Addon
+# OC-Blender-Helper-Addon
 
 A helper addon for Octane Blender edition
 
@@ -14,9 +14,11 @@ A helper addon for Octane Blender edition
 
 ## Versions
 
-* OctaneRender™ for Blender 2020 and later
+* **OctaneRender™ for Blender 2020 and later**
 * Current version **v2.6.0**
-  * Tested on Blender_Octane_Edition_2020.1_21.8 (latest)
+  * Tested on **Blender_Octane_Edition_2020.1_21.8** (latest)
+  * **Megascans Livelink Module** is included since **v2.6.0**
+    * [Archived Git Project](https://github.com/Yichen-Dou/MSLiveLink-OC-Blender)
 
 ## Downloads
 
@@ -26,11 +28,47 @@ A helper addon for Octane Blender edition
 
 ## Features
 
-* You can find them by yourself
+**Right-Click Menu**
+
+* Make sure the **Octane render is enabled**, otherwise the menu will not show up
+* It works in object mode, edit mode and nodes editor, but provides different functions
 
 ![1591685781241](assets/1591685781241.png)
 
 ![1591686366725](assets/1591686366725.png)
+
+**Megascans Livelink Module**
+
+* Make sure the **Octane render is enabled**, otherwise it declines to import the asset
+* It starts automatically when you open the Octane Blender
+* There is no UI button to activate it
+* Make sure you do not have the official Livelink addon installed. Otherwise, the addon will raise an exception
+
+![image-20200308174856061](README/assets/image-20200308174856061.png)
+
+![image-20200308175602574](README/assets/image-20200308175602574.png)
+
+**Minimum textures to get a correct response for Megascans Livelink**
+
+![image-20200308173100845](README/assets/image-20200308173100845-1592054308984.png)
+
+**Supported Textures for Megascans Livelink**
+
+| Textures         | Info                             |
+| ---------------- | -------------------------------- |
+| **Albedo**       | Added by default (If exists)     |
+| **Displacement** | Added by default (If exists)     |
+| **Normal**       | Added by default (If exists)     |
+| **Roughness**    | Added by default (If exists)     |
+| **Specular**     | Added by default (If exists)     |
+| Opacity          | Added by default (If exists)     |
+| Translucency     | Added by default (If exists)     |
+| Metalness        | Added by default (If exists)     |
+| AO               | Added by default (If exists)     |
+| Bump             | Optional (Toggle in preferences) |
+| Fuzz             | Optional (Toggle in preferences) |
+| Cavity           | Optional (Toggle in preferences) |
+| Curvature        | Optional (Toggle in preferences) |
 
 ## Installation
 
@@ -40,16 +78,12 @@ A helper addon for Octane Blender edition
 * Activate it
   * If you have installed the addon, please restart your Blender
 
-## How to use
+## Questions
 
-* Pretty simple, just **Right Click** in the **3D viewport** or **Nodes Editor (Object)**
-* Make sure the **Octane render is enabled**, otherwise the menu will not show up
-* It works in object mode, edit mode and nodes editor, but provides different functions
-
-## Issues
-
-* We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
-
-## WIP
-
-* Bake
+* Cannot insert keyframes from UI panels
+  * We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
+* Megascans Livelink module does not respond to imports
+  * Check the log to see the error
+  * Starting from 2020, when you first time launch the Bridge App and click the "Download Plugin", it automatically puts an addon that occupies the port at startup into C:\Users\\[Your username]\AppData\Roaming\Blender Foundation\Blender\2.8[X]\scripts\startup. It's called "MSPlugin", please remove the folder and restart the Blender
+* Other issues
+  * Please check the log from Blender > Top Bar > Window > Toggle System Console and let me know what's happening
