@@ -1,4 +1,5 @@
 import bpy
+import socket
 
 supported_textures = [
     'opacity',
@@ -51,8 +52,29 @@ def add_components_tex(ntree, components):
         ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['Transform'])
         y_exp += -320
 
-def group_into_empty(objs):
+def group_into_empty(objs, name):
     bpy.ops.object.empty_add(type='SPHERE', radius=0.2)
     empty = bpy.context.view_layer.objects.active
+    empty.name = name
     for obj in objs:
         obj.parent = empty
+
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind(("127.0.0.1", port))
+        except socket.error as e:
+            if e.errno == errno.EADDRINUSE:
+                return True
+        s.close()
+        return False
+
+def is_official_here():
+    if('load_plugin' in [handler.__name__.lower() for handler in bpy.app.handlers.load_post]):
+        return True
+    return False
+
+def is_me_here():
+    if('load_ms_module' in [handler.__name__.lower() for handler in bpy.app.handlers.load_post]):
+        return True
+    return False

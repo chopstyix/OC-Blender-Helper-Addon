@@ -104,7 +104,7 @@ def import_meshes(element):
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
     if ('scatter' in element['categories'] or 'scatter' in element['tags']):
-        group_into_empty(objects)
+        group_into_empty(objects, element['name'])
 
     return objects
 
@@ -284,27 +284,15 @@ class OctaneMSLiveLink(bpy.types.Operator):
 @persistent
 def load_ms_module(scene):
     try:
-        if(is_port_in_use(28888)):
-            raise 'Failed to start the Megascans module: the port is in use. It may caused by the Quixel official addon, please follow the instruction on wiki to remove it'
         bpy.ops.octane.ms_livelink()
     except Exception as e:
         print('Failed to start the Megascans module: ', str(e))
 
-def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind(("127.0.0.1", port))
-        except socket.error as e:
-            if e.errno == errno.EADDRINUSE:
-                return True
-        s.close()
-        return False
-
 def register_megascans():
-    if len(bpy.app.handlers.load_post) > 0:
-        # Check if trying to register twice.
-        if 'load_ms_module' in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
-            return
+    if(is_official_here()):
+        raise Exception('Failed to start the Megascans module: the port is used by the Quixel official add-on, please follow the instruction on wiki to remove it')
+    if(is_me_here()):
+        return
     bpy.utils.register_class(OctaneMSLiveLink)
     bpy.app.handlers.load_post.append(load_ms_module)
 
