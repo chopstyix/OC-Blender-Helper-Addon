@@ -17,6 +17,7 @@ import os
 import json
 from bpy.app.handlers import persistent
 from . threads import *
+from .. operators.materials import create_material, assign_material_objs
 
 globals()['Megascans_DataSet'] = None
 
@@ -48,7 +49,7 @@ def init_import():
 
     for json_data in json_array:
         # Asset
-        asset_name = json_data['name']
+        asset_name = json_data['name'].replace(" ", "_")
         asset_id = json_data['id']
         asset_type = json_data['type']
         asset_path = json_data['path']
@@ -66,7 +67,7 @@ def init_import():
             'asset_name': asset_name, 
             'asset_id': asset_id, 
             'asset_type': asset_type, 
-            'asset_path': asset_path
+            'asset_path': asset_path,
             'meshes': meshes,
             'components': components
         })
@@ -76,22 +77,29 @@ def init_import():
 def import_meshes(meshes):
     objects = []
     for mesh in meshes:
-        mesh_path = obj['path']
-        mesh_format = obj['format']
+        mesh_path = mesh['path']
+        mesh_format = mesh['format']
+
+        bpy.ops.object.select_all(action='DESELECT')
 
         if mesh_format.lower() == "fbx":
             bpy.ops.import_scene.fbx(filepath=mesh_path)
             # get selected objects
-            obj_objects = [ o for o in bpy.context.scene.objects if o.select_get() ]
-            objects += obj_objects
+            objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
 
         elif mesh_format.lower() == "obj":
             bpy.ops.import_scene.obj(filepath=mesh_path, use_split_objects = True, use_split_groups = True, global_clight_size = 1.0)
             # get selected objects
-            obj_objects = [ o for o in bpy.context.scene.objects if o.select_get() ]
-            objects += obj_objects
+            objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
     return objects
+
+def import_material(components, mat_name):
+    mat = create_material(bpy.context, 'MS_' + mat_name, 'ShaderNodeOctUniversalMat')
+    ntree = mat.node_tree
+    nodes = ntree.nodes
+
+    return mat
 
 class OctaneMSLiveLink(bpy.types.Operator):
     bl_idname = 'octane.ms_livelink'
@@ -114,9 +122,13 @@ class OctaneMSLiveLink(bpy.types.Operator):
         try:
             if globals()['Megascans_DataSet'] != None:
                 # Call these from another operator
-                result = init_import()
-                objects = import_meshes(result['meshes'])
-
+                elements = init_import()
+                for element in elements:
+                    objs = import_meshes(element['meshes'])
+                    mat = import_material(element['components'], element['asset_name'])
+                    assign_material_objs(objs, mat)
+                    if(len(objs)==1):
+                        bpy.context.view_layer.objects.active = objs[0]
                 globals()['Megascans_DataSet'] = None
         except Exception as e:
             print(

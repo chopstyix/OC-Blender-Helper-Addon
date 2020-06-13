@@ -52,6 +52,12 @@ def assign_material(context, mat):
                         face.material_index = len(obj.material_slots) - 1
                 obj.data.update()
 
+def assign_material_objs (objs, mat):
+    for obj in objs:
+        if(obj.type == 'MESH'):
+            obj.active_material = mat
+            obj.data.update()
+
 def assign_oclight(context, type):
     for obj in context.selected_objects:
         obj['oc_light'] = type
