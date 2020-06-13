@@ -161,13 +161,11 @@ def register_megascans():
         if 'load_ms_module' in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
             return
     bpy.utils.register_class(OctaneMSLiveLink)
-    bpy.utils.register_class(OctaneMSAbc)
     bpy.app.handlers.load_post.append(load_ms_module)
 
 
 def unregister_megascans():
     bpy.app.handlers.load_post.remove(load_ms_module)
-    bpy.utils.unregister_class(OctaneMSAbc)
     bpy.utils.unregister_class(OctaneMSLiveLink)
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.

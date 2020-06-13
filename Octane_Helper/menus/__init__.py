@@ -22,9 +22,6 @@ def node_menu_func(self, context):
         self.layout.menu('NODE_MT_node_octane', icon_value=get_icon('OCT_RENDER'))
         self.layout.separator()
 
-def menu_func_import(self, context):
-    self.layout.operator('octane.ms_abc', text="MS Octane Import Alembic Files")
-
 classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
@@ -56,10 +53,8 @@ def register_menus():
     bpy.types.VIEW3D_MT_object_context_menu.prepend(object_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.prepend(edit_menu_func)
     bpy.types.NODE_MT_context_menu.prepend(node_menu_func)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 def unregister_menus():
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.types.NODE_MT_context_menu.remove(node_menu_func)
     bpy.types.VIEW3D_MT_edit_mesh_context_menu.remove(edit_menu_func)
     bpy.types.VIEW3D_MT_object_context_menu.remove(object_menu_func)
