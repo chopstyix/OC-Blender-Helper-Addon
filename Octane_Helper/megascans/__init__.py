@@ -238,17 +238,17 @@ class OctaneMSLiveLink(bpy.types.Operator):
             if globals()['Megascans_DataSet'] != None:
                 # Start Import
                 elements = init_import()
-                for element in elements:
-                    objs = import_meshes(element['meshes'])
-                    mat = import_material(element['components'], element['asset_name'])
-                    if(mat):
+                if(elements):
+                    for element in elements:
+                        objs = import_meshes(element['meshes'])
+                        mat = import_material(element['components'], element['asset_name'])
                         assign_material_objs(objs, mat)
-                    if(len(objs)==1):
-                        bpy.context.view_layer.objects.active = objs[0]
-                    elif(len(objs)>1):
-                        for obj in objs:
-                            obj.select_set(True)
-                        bpy.context.view_layer.objects.active = objs[0]
+                        if(len(objs)==1):
+                            bpy.context.view_layer.objects.active = objs[0]
+                        elif(len(objs)>1):
+                            for obj in objs:
+                                obj.select_set(True)
+                            bpy.context.view_layer.objects.active = objs[0]
                 # Finish Import
                 globals()['Megascans_DataSet'] = None
         except Exception as e:
