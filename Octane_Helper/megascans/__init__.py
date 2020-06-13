@@ -127,6 +127,10 @@ def import_material(element):
     # Add image textures
     add_components_tex(ntree, components)
 
+    # Surface to copied
+    if ('surface' in element['categories'] or 'surface' in element['tags']):
+        bpy.types.Material.copied_mat = mat
+
     # Albedo and AO
     if('albedo' in textures):
         if('ao' in textures):
