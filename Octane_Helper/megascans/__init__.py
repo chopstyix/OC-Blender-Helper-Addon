@@ -25,6 +25,15 @@ globals()['MG_ImportComplete'] = False
 # OctaneMSImportProcess is the main asset import class.
 # This class is invoked whenever a new asset is set from Bridge.
 
+def display_view3d():
+    for window in bpy.context.window_manager.windows:
+        screen = window.screen
+        for area in screen.areas:
+            if area.type == 'VIEW_3D':
+                override = {'window': window, 'screen': screen, 'area': area}
+                return override
+    return {}
+
 class OctaneMSImportProcess():
 
     # This initialization method create the data structure to process our assets
@@ -135,7 +144,7 @@ class OctaneMSImportProcess():
 
                     # Initialize the import method to start building our shader and import our geometry
                     self.initImportProcess()
-                    print("Imported asset from " + self.assetName + " Quixel Bridge")
+                    print("Imported asset [" + self.assetName + "] from Quixel Bridge")
         
             if len(globals()['MG_AlembicPath']) > 0:
                 globals()['MG_ImportComplete'] = True        
@@ -451,7 +460,8 @@ class OctaneMSLiveLink(bpy.types.Operator):
     def newDataMonitor(self):
         try:
             if globals()['Megascans_DataSet'] != None:
-                OctaneMSImportProcess()
+                process = OctaneMSImportProcess()
+                print(process.json_data)
                 globals()['Megascans_DataSet'] = None       
         except Exception as e:
             print( "Megascans Module Error starting blender module (newDataMonitor). Error: ", str(e) )
