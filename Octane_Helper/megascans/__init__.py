@@ -27,22 +27,6 @@ globals()['MG_AlembicPath'] = []
 globals()['MG_Material'] = []
 globals()['MG_ImportComplete'] = False
 
-supported_textures = [
-    'opacity',
-    'ao',
-    'albedo',
-    'specular',
-    'roughness',
-    'metalness',
-    'displacement',
-    'translucency',
-    'normal',
-    'bump',
-    'fuzz',
-    'cavity',
-    'curvature'
-]
-
 disp_levels = {
     '2K': 'OCTANE_DISPLACEMENT_LEVEL_2048',
     '4K': 'OCTANE_DISPLACEMENT_LEVEL_4096',

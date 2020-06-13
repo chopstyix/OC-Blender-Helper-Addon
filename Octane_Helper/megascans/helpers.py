@@ -1,5 +1,21 @@
 import bpy
 
+supported_textures = [
+    'opacity',
+    'ao',
+    'albedo',
+    'specular',
+    'roughness',
+    'metalness',
+    'displacement',
+    'translucency',
+    'normal',
+    'bump',
+    'fuzz',
+    'cavity',
+    'curvature'
+]
+
 # Helper functions
 def display_view3d():
     for window in bpy.context.window_manager.windows:
