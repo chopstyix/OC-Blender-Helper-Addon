@@ -89,6 +89,11 @@ class OctaneHelperPrefs(AddonPreferences):
         default=False
     )
 
+    use_plane: BoolProperty(
+        name='Use Plane for Surface',
+        default=False
+    )
+
     def draw(self, context):
         layout = self.layout
 
@@ -99,6 +104,7 @@ class OctaneHelperPrefs(AddonPreferences):
 
         box = layout.box()
         box.label(text='Megascans')
+        box.prop(self, 'use_plane')
         row = box.row(align=True)
         row.prop(self, "disp_type")
         if(self.disp_type == "VERTEX"):

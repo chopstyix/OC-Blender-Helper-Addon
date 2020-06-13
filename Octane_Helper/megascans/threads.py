@@ -48,7 +48,7 @@ class ms_Init(threading.Thread):
                             self.importer(self.TotalData)
                             break
         except Exception as e:
-            print( "Megascans Module Error initializing the thread. Error: ", str(e) )
+            print( "[Octane Helper] Octane Megascans Module Error initializing the thread. Error: ", str(e) )
 
 class thread_checker(threading.Thread):
     
@@ -73,5 +73,5 @@ class thread_checker(threading.Thread):
                         run_checker = False
                         break
         except Exception as e:
-            print( "Megascans Module Error initializing thread checker. Error: ", str(e) )
+            print( "[Octane Helper] Octane Megascans Module Error initializing thread checker. Error: ", str(e) )
             pass

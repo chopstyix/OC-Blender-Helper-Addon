@@ -35,7 +35,7 @@ disp_levels = {
 
 def init_import():
     if(bpy.context.scene.render.engine != 'octane'):
-        print('Please activate the Octane engine in order to use the Octane Megascans Module')
+        print('[Octane Helper] Please activate the Octane engine in order to use the Octane Megascans Module')
         return None
     
     globals()['MG_AlembicPath'] = []
@@ -81,7 +81,7 @@ def init_import():
 
 def import_meshes(element):
     if(bpy.context.scene.render.engine != 'octane'):
-        print('Please activate the Octane engine in order to use the Octane Megascans Module')
+        print('[Octane Helper] Please activate the Octane engine in order to use the Octane Megascans Module')
         return None
     
     meshes = element['meshes']
@@ -91,6 +91,7 @@ def import_meshes(element):
         mesh_path = mesh['path']
         mesh_format = mesh['format']
 
+        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
 
         if mesh_format.lower() == "fbx":
@@ -103,6 +104,7 @@ def import_meshes(element):
             # get selected objects
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
+    # Scatter
     if ('scatter' in element['categories'] or 'scatter' in element['tags']):
         group_into_empty(objects, element['name'])
 
@@ -110,7 +112,7 @@ def import_meshes(element):
 
 def import_material(element):
     if(bpy.context.scene.render.engine != 'octane'):
-        print('Please activate the Octane engine in order to use the Octane Megascans Module')
+        print('[Octane Helper] Please activate the Octane engine in order to use the Octane Megascans Module')
         return None
     
     components = element['components']
@@ -230,7 +232,7 @@ class OctaneMSLiveLink(bpy.types.Operator):
             bpy.app.timers.register(self.newDataMonitor)
             return {'FINISHED'}
         except Exception as e:
-            print('Octane Megascans Module Error (OctaneMSLiveLink):', str(e))
+            print('[Octane Helper] Octane Megascans Module Error (OctaneMSLiveLink):', str(e))
             return {'FAILED'}
 
     def newDataMonitor(self):
@@ -255,7 +257,7 @@ class OctaneMSLiveLink(bpy.types.Operator):
                 # Finish Import
                 globals()['Megascans_DataSet'] = None
         except Exception as e:
-            print('Octane Megascans Module Error (newDataMonitor):', str(e))
+            print('[Octane Helper] Octane Megascans Module Error (newDataMonitor):', str(e))
             return {'FAILED'}
         return 1.0
 
@@ -270,15 +272,14 @@ class OctaneMSLiveLink(bpy.types.Operator):
             # Start the newly created thread.
             thread_checker_.start()
         except Exception as e:
-            print('Octane Megascans Module Error (socketMonitor):', str(e))
+            print('[Octane Helper] Octane Megascans Module Error (socketMonitor):', str(e))
             return {'FAILED'}
 
     def importer(self, recv_data):
         try:
             globals()['Megascans_DataSet'] = recv_data
         except Exception as e:
-            print(
-                'Octane Megascans Module Error starting blender module (importer). Error: ', str(e))
+            print('[Octane Helper] Octane Megascans Module Error starting blender module (importer). Error: ', str(e))
             return {'FAILED'}
 
 @persistent
@@ -286,15 +287,14 @@ def load_ms_module(scene):
     try:
         bpy.ops.octane.ms_livelink()
     except Exception as e:
-        print('Failed to start the Octane Megascans Module: ', str(e))
+        print('[Octane Helper] Failed to start the Octane Megascans Module: ', str(e))
 
 def register_megascans():
     if(is_official_here()):
-        print('Failed to start the Octane Megascans Module: the port is used by the Quixel official add-on, please follow the instruction on wiki to remove it')
+        print('[Octane Helper] Failed to start the Octane Megascans Module: the port is used by the official Quixel add-on, please follow the instruction on wiki to remove it')
         return
     if(is_me_here()):
         return
-    bpy.utils.register_class(OctaneMSNotification)
     bpy.utils.register_class(OctaneMSLiveLink)
     bpy.app.handlers.load_post.append(load_ms_module)
 
@@ -303,7 +303,6 @@ def unregister_megascans():
         return
     bpy.app.handlers.load_post.remove(load_ms_module)
     bpy.utils.unregister_class(OctaneMSLiveLink)
-    bpy.utils.unregister_class(OctaneMSNotification)
     if len(bpy.app.handlers.load_post) > 0:
         # Check if trying to register twice.
         if 'load_ms_module' in bpy.app.handlers.load_post[0].__name__.lower() or load_ms_module in bpy.app.handlers.load_post:
