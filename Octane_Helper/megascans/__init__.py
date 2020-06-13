@@ -48,10 +48,13 @@ def init_import():
 
     for json_data in json_array:
         # Asset
-        asset_name = json_data['name'].replace(" ", "_")
-        asset_id = json_data['id']
-        asset_type = json_data['type']
-        asset_path = json_data['path']
+        name = json_data['name'].replace(" ", "_")
+        aid = json_data['id']
+        atype = json_data['type']
+        path = json_data['path']
+        category = json_data['category']
+        categories = json_data['categories']
+        tags = json_data['tags']
         meshes = [mesh for mesh in json_data['meshList']]
         components = [component for component in json_data['components'] if component['type'] in supported_textures]
         components.sort(key=component_sort)
@@ -63,21 +66,26 @@ def init_import():
                 component['type'] = 'albedo'
         
         result.append({
-            'asset_name': asset_name, 
-            'asset_id': asset_id, 
-            'asset_type': asset_type, 
-            'asset_path': asset_path,
+            'name': name, 
+            'id': aid, 
+            'type': atype, 
+            'path': path,
+            'category': category,
+            'categories': categories,
+            'tags': tags,
             'meshes': meshes,
             'components': components
         })
     
     return result
 
-def import_meshes(meshes):
+def import_meshes(element):
     if(bpy.context.scene.render.engine != 'octane'):
         print('Please activate the Octane engine in order to use the Megascans module')
         return None
     
+    meshes = element['meshes']
+
     objects = []
     for mesh in meshes:
         mesh_path = mesh['path']
@@ -95,13 +103,19 @@ def import_meshes(meshes):
             # get selected objects
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
+    if ('scatter' in element['categories'] or 'scatter' in element['tags']):
+        group_into_empty(objects)
+
     return objects
 
-def import_material(components, mat_name):
+def import_material(element):
     if(bpy.context.scene.render.engine != 'octane'):
         print('Please activate the Octane engine in order to use the Megascans module')
         return None
     
+    components = element['components']
+    mat_name = element['name']
+
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
     mat = create_material(bpy.context, 'MS_' + mat_name, 'ShaderNodeOctUniversalMat')
     ntree = mat.node_tree
@@ -132,6 +146,9 @@ def import_material(components, mat_name):
         ntree.links.new(nodes['roughness'].outputs[0], nodes['root'].inputs['Roughness'])
     
     # Metalness
+    if(element['category'] == 'Metal'):
+        nodes['root'].inputs['Metallic'].default_value = 1
+    
     if('metalness' in textures):
         ntree.links.new(nodes['metalness'].outputs[0], nodes['root'].inputs['Metallic'])
     
@@ -224,9 +241,11 @@ class OctaneMSLiveLink(bpy.types.Operator):
                 elements = init_import()
                 if(elements):
                     for element in elements:
-                        objs = import_meshes(element['meshes'])
-                        mat = import_material(element['components'], element['asset_name'])
+                        # Import meshes and material
+                        objs = import_meshes(element)
+                        mat = import_material(element)
                         assign_material_objs(objs, mat)
+                        # Select objects
                         if(len(objs)==1):
                             bpy.context.view_layer.objects.active = objs[0]
                         elif(len(objs)>1):

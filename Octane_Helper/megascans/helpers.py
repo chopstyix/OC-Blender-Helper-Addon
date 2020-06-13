@@ -50,3 +50,9 @@ def add_components_tex(ntree, components):
             texNode.border_mode = 'OCT_BORDER_MODE_CLAMP'
         ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['Transform'])
         y_exp += -320
+
+def group_into_empty(objs):
+    bpy.ops.object.empty_add(type='SPHERE', radius=0.2)
+    empty = bpy.context.view_layer.objects.active
+    for obj in objs:
+        obj.parent = empty
