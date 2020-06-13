@@ -42,15 +42,18 @@ A helper addon for Octane Blender edition
 * Make sure the **Octane render is enabled**, otherwise it declines to import the asset
 * It starts automatically when you open the Octane Blender
 * There is no UI button to activate it
-* Make sure you do not have the official Livelink addon installed. Otherwise, the addon will raise an exception
+* Make sure you do not have the **Official Livelink Addon** installed. Otherwise, this module will keep silent with imports
+* The imported surface material can be found in Material Slots to be assigned manually
 
-![image-20200308174856061](README/assets/image-20200308174856061.png)
+![image-20200308174856061](assets/image-20200308174856061.png)
 
-![image-20200308175602574](README/assets/image-20200308175602574.png)
+![image-20200308175602574](assets/image-20200308175602574.png)
+
+![image-20200613123137705](assets/image-20200613123137705.png)
 
 **Minimum textures to get a correct response for Megascans Livelink**
 
-![image-20200308173100845](README/assets/image-20200308173100845-1592054308984.png)
+![image-20200308173100845](assets/image-20200308173100845.png)
 
 **Supported Textures for Megascans Livelink**
 
@@ -85,5 +88,6 @@ A helper addon for Octane Blender edition
 * Megascans Livelink module does not respond to imports
   * Check the log to see the error
   * Starting from 2020, when you first time launch the Bridge App and click the "Download Plugin", it automatically puts an addon that occupies the port at startup into C:\Users\\[Your username]\AppData\Roaming\Blender Foundation\Blender\2.8[X]\scripts\startup. It's called "MSPlugin", please remove the folder and restart the Blender
+  * There is no switch button for the official quixel addon, so if you want to use the addon for cycles/eevee again, just simply reinstall the offical addon then the octane megascans module will keep silent
 * Other issues
   * Please check the log from Blender > Top Bar > Window > Toggle System Console and let me know what's happening
