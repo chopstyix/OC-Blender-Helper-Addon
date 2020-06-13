@@ -70,7 +70,6 @@ class OctaneMSImportProcess():
                     self.RenderEngine = bpy.context.scene.render.engine.lower() # Get the current render engine. i.e. blender_eevee or cycles
                     self.Workflow = self.json_data.get('pbrWorkflow', 'specular')
                     self.DisplacementSetup = 'regular'
-                    self.isCycles = bool(self.RenderEngine == 'cycles')
                     self.isScatterAsset = self.CheckScatterAsset()
                     self.textureList = []
                     self.isBillboard = self.CheckIsBillboard()
@@ -86,10 +85,6 @@ class OctaneMSImportProcess():
 
                     if "applyToSelection" in self.json_data.keys():
                         self.ApplyToSelection = bool(self.json_data["applyToSelection"])
-
-                    if (self.isCycles):
-                        if(bpy.context.scene.cycles.feature_set == 'EXPERIMENTAL'):
-                            self.DisplacementSetup = 'adaptive'
                     
                     texturesListName = "components"
                     if(self.isBillboard):
@@ -311,17 +306,6 @@ class OctaneMSImportProcess():
         self.mat.node_tree.nodes[self.parentName].distribution = 'MULTI_GGX'
         self.mat.node_tree.nodes[self.parentName].inputs[4].default_value = 1 if self.isMetal else 0 # Metallic value
         self.mat.node_tree.nodes[self.parentName].inputs[14].default_value = self.IOR
-        
-        self.mappingNode = None
-
-        if self.isCycles and self.assetType not in ["3d", "3dplant"]:
-            # Create mapping node.
-            self.mappingNode = self.CreateGenericNode("ShaderNodeMapping", -1950, 0)
-            self.mappingNode.vector_type = 'TEXTURE'
-            # Create texture coordinate node.
-            texCoordNode = self.CreateGenericNode("ShaderNodeTexCoord", -2150, -200)
-            # Connect texCoordNode to the mappingNode
-            self.mat.node_tree.links.new(self.mappingNode.inputs[0], texCoordNode.outputs[0])
 
     def CreateTextureNode(self, textureType, PosX, PosY, colorspace = 1, connectToMaterial = False, materialInputIndex = 0):
         texturePath = self.GetTexturePath(textureType)
@@ -336,9 +320,7 @@ class OctaneMSImportProcess():
 
         if connectToMaterial:
             self.ConnectNodeToMaterial(materialInputIndex, textureNode)
-        # If it is Cycles render we connect it to the mapping node.
-        if self.isCycles and self.assetType not in ["3d", "3dplant"]:
-            self.mat.node_tree.links.new(textureNode.inputs[0], self.mappingNode.outputs[0])
+
         return textureNode
 
     def CreateTextureMultiplyNode(self, aTextureType, bTextureType, PosX, PosY, aPosX, aPosY, bPosX, bPosY, aColorspace, bColorspace, connectToMaterial, materialInputIndex):
