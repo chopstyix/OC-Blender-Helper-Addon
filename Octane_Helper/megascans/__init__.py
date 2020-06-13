@@ -91,7 +91,6 @@ def import_meshes(element):
         mesh_path = mesh['path']
         mesh_format = mesh['format']
 
-        bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.select_all(action='DESELECT')
 
         if mesh_format.lower() == "fbx":
