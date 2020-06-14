@@ -34,14 +34,18 @@ def component_sort(component):
 def get_component(components, name):
     return [component for component in components if component['type'] == name][0]
 
-def add_components_tex(ntree, components):
+def add_components_tex(ntree, element):
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
+    components = element['components']
     y_exp = 620
 
     transform_node = ntree.nodes.new('ShaderNodeOctFullTransform')
     transform_node.name = 'transform'
-    projection_node = ntree.nodes.new('ShaderNodeOctUVWProjection')
-    projection_node.name = 'projection'
+
+    use_projection = (('surface' in element['categories'] or 'surface' in element['tags']) and prefs.use_projection_surface)
+    if(use_projection):
+        projection_node = ntree.nodes.new(prefs.surface_projection)
+        projection_node.name = 'projection'
     
     texNodes = []
 
@@ -54,12 +58,14 @@ def add_components_tex(ntree, components):
         if(component['type'] == 'displacement' and prefs.disp_type == "VERTEX"):
             texNode.border_mode = 'OCT_BORDER_MODE_CLAMP'
         ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['Transform'])
-        ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['Projection'])
+        if(use_projection):
+            ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['Projection'])
         texNodes.append(texNode)
         y_exp += -320
     
     transform_node.location = (-1200, get_y_nodes(ntree, texNodes, 'Mid'))
-    projection_node.location = (-1200, transform_node.location.y - 350)
+    if(use_projection):
+        projection_node.location = (-1200, transform_node.location.y - 350)
 
 def group_into_empty(objs, name):
     bpy.ops.object.empty_add(type='SPHERE', radius=0.2)

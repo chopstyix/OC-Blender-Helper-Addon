@@ -89,9 +89,24 @@ class OctaneHelperPrefs(AddonPreferences):
         default=False
     )
 
-    use_plane: BoolProperty(
-        name='Use Plane for Surface',
+    use_projection_surface: BoolProperty(
+        name='Use Projection for Surface Materials',
         default=False
+    )
+
+    surface_projection: EnumProperty(
+        items = [
+            ('ShaderNodeOctBoxProjection', 'Box Projection', ''),
+            ('ShaderNodeOctCylProjection', 'Cylindrical Projection', ''),
+            ('ShaderNodeOctPerspProjection', 'Perspective Projection', ''),
+            ('ShaderNodeOctSphericalProjection', 'Spherical Projection', ''),
+            ('ShaderNodeOctUVWProjection', 'UVW Projection', ''),
+            ('ShaderNodeOctXYZProjection', 'XYZ Projection', ''),
+            ('ShaderNodeOctTriplanarProjection', 'Triplanar Projection', ''),
+            ('ShaderNodeOctOSLUVProjection', 'OSL Delayed Projection', ''),
+            ('ShaderNodeOctOSLProjection', 'OSL Projection', '')
+        ],
+        default = 'ShaderNodeOctUVWProjection'
     )
 
     def draw(self, context):
@@ -104,15 +119,18 @@ class OctaneHelperPrefs(AddonPreferences):
 
         box = layout.box()
         box.label(text='Megascans')
-        box.prop(self, 'use_plane')
-        row = box.row(align=True)
-        row.prop(self, "disp_type")
+        col = box.column(align=True)
+        col.prop(self, 'use_projection_surface')
+        col.prop(self, 'surface_projection', text='')
+        col = box.column(align=True)
+        col.prop(self, "disp_type")
         if(self.disp_type == "VERTEX"):
-            row.prop(self, "disp_level_vertex")
-        box.prop(self, "is_cavity_enabled")
-        box.prop(self, "is_curvature_enabled")
-        box.prop(self, "is_bump_enabled")
-        box.prop(self, "is_fuze_enabled")
+            col.prop(self, "disp_level_vertex")
+        col = box.column(align=True)
+        col.prop(self, "is_cavity_enabled")
+        col.prop(self, "is_curvature_enabled")
+        col.prop(self, "is_bump_enabled")
+        col.prop(self, "is_fuze_enabled")
         box.separator()
 
         box = layout.box()

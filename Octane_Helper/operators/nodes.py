@@ -57,7 +57,7 @@ class OctaneConnectTransformProjection(Operator):
 
     use_transform: BoolProperty(default=True, name='Enable Transform')
 
-    use_projection: BoolProperty(default=True, name='Enable Projection')
+    use_projection: BoolProperty(default=False, name='Enable Projection')
 
     transform_type: EnumProperty(
         items = [

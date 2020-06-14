@@ -128,7 +128,7 @@ def import_material(element):
     textures = [component['type'] for component in components]
 
     # Add image textures
-    add_components_tex(ntree, components)
+    add_components_tex(ntree, element)
 
     # Surface to copied
     if ('surface' in element['categories'] or 'surface' in element['tags']):
