@@ -325,9 +325,9 @@ class OctaneNodeConvertTo(Operator):
 
             # Connect output
             if(active_node.outputs[0].is_linked):
-                target_socket = active_node.outputs[0].links[0].to_socket
-                ntree.links.remove(active_node.outputs[0].links[0])
-                ntree.links.new(target_socket, newNode.outputs[0])
+                target_sockets = [link.to_socket for link in active_node.outputs[0].links]
+                for target_socket in target_sockets:
+                    ntree.links.new(target_socket, newNode.outputs[0])
 
             ntree.nodes.remove(active_node)
             ntree.nodes.update()
