@@ -104,11 +104,11 @@ def import_meshes(element):
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
     # Scatter
-    if ('scatter' in element['categories'] or 'scatter' in element['tags']):
+    if (('scatter' in element['categories'] or 'scatter' in element['tags']) and len(objects)):
         group_into_empty(objects, element['name'])
     
     # Plants
-    if ('plants' in element['categories'] or 'plants' in element['tags']):
+    if (('plants' in element['categories'] or 'plants' in element['tags']) and len(objects)):
         group_into_empty(objects, element['name'])
 
     return objects
