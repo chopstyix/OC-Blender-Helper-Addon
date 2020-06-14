@@ -32,6 +32,23 @@ def get_y(ntree, target, type):
         return min(ys)
     elif(type == 'Max'):
         return max(ys)
+    elif(type == 'Mid'):
+        return (min(ys)+max(ys))/2
+    else:
+        return 0
+
+def get_y_nodes(ntree, nodes, type):
+    if(not ntree.get_output_node('octane')):
+        return 0
+    ys = [node.location.y for node in nodes]
+    if(type == 'Min'):
+        return min(ys)
+    elif(type == 'Max'):
+        return max(ys)
+    elif(type == 'Mid'):
+        return (min(ys)+max(ys))/2
+    else:
+        return 0
 
 class OctaneConnectTransformProjection(Operator):
     bl_label = 'Add Transform and Projection'
@@ -107,19 +124,23 @@ class OctaneConnectTransformProjection(Operator):
 
         active_nodes = context.selected_nodes
 
+        if(self.use_transform):
+            transform_node = ntree.nodes.new(self.transform_type)
+            transform_node.location = (active_nodes[0].location.x - 320, get_y_nodes(ntree, active_nodes, 'Mid'))
+        
+        if(self.use_projection):
+            project_node = ntree.nodes.new(self.projection_type)
+            if(self.use_transform):
+                project_node.location = (transform_node.location.x, transform_node.location.y - 350)
+            else:
+                project_node.location = (active_nodes[0].location.x - 320, get_y_nodes(ntree, active_nodes, 'Mid'))
+
         for active_node in active_nodes:
             if(self.use_transform):
-                transform_node = ntree.nodes.new(self.transform_type)
-                transform_node.location = (active_node.location.x - 200, active_node.location.y)
                 remove_link(ntree, active_node, 'Transform')
                 ntree.links.new(active_node.inputs['Transform'], transform_node.outputs[0])
             
             if(self.use_projection):
-                project_node = ntree.nodes.new(self.projection_type)
-                if(self.use_transform):
-                    project_node.location = (transform_node.location.x, transform_node.location.y - 350)
-                else:
-                    project_node.location = (active_node.location.x - 200, active_node.location.y)
                 remove_link(ntree, active_node, 'Projection')
                 ntree.links.new(active_node.inputs['Projection'], project_node.outputs[0])
 
@@ -260,7 +281,15 @@ class OctaneNodeConvertTo(Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_nodes) and 'Mat' in context.selected_nodes[0].bl_idname
+        if(not len(context.selected_nodes)):
+            return False
+        if('Projection' in context.selected_nodes[0].bl_idname):
+            return True
+        elif('Transform' in context.selected_nodes[0].bl_idname):
+            return True
+        elif('Mat' in context.selected_nodes[0].bl_idname):
+            return True
+        return False
 
     def execute(self, context):
         if(self.node_target!='None'):
@@ -270,6 +299,15 @@ class OctaneNodeConvertTo(Operator):
                 ntree = mat.node_tree
             elif(context.object.type == 'LIGHT'):
                 ntree = context.object.data.node_tree
+            else:
+                self.report({'ERROR'}, 'Not supported')
+                return {'CANCELLED'}
+            if('Projection' in context.selected_nodes[0].bl_idname and 'Projection' in self.node_target):
+                pass
+            elif('Transform' in context.selected_nodes[0].bl_idname and 'Transform' in self.node_target):
+                pass
+            elif('Mat' in context.selected_nodes[0].bl_idname and 'Mat' in self.node_target):
+                pass
             else:
                 self.report({'ERROR'}, 'Not supported')
                 return {'CANCELLED'}

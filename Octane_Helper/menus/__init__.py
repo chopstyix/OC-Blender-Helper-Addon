@@ -3,29 +3,16 @@ from bpy.props import IntProperty, BoolProperty, CollectionProperty, StringPrope
 from . context import *
 from . worlds import *
 from . lights import *
-from .. icons import get_icon
 from .. operators.materials import assign_material, selected_mat_get, selected_mat_set
 from .. operators.environments import get_enum_env_presets
-
-def object_menu_func(self, context):
-    if context.scene.render.engine == 'octane':
-        self.layout.menu('VIEW3D_MT_object_octane', icon_value=get_icon('OCT_RENDER'))
-        self.layout.separator()
-
-def edit_menu_func(self, context):
-    if context.scene.render.engine == 'octane':
-        self.layout.menu('VIEW3D_MT_edit_mesh_octane', icon_value=get_icon('OCT_RENDER'))
-        self.layout.separator()
-
-def node_menu_func(self, context):
-    if context.scene.render.engine == 'octane' and context.space_data.shader_type == 'OBJECT':
-        self.layout.menu('NODE_MT_node_octane', icon_value=get_icon('OCT_RENDER'))
-        self.layout.separator()
 
 classes = (
     VIEW3D_MT_object_octane,
     VIEW3D_MT_edit_mesh_octane,
     NODE_MT_node_octane,
+    OctaneNodeConvertToShadersMenu,
+    OctaneNodeConvertToProjectionsMenu,
+    OctaneNodeConvertToTransformsMenu,
     OctaneNodeConvertToMenu,
     OctaneNodeMixByMenu,
     OctaneMaterialsMenu,

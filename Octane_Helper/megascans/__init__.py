@@ -106,6 +106,10 @@ def import_meshes(element):
     # Scatter
     if ('scatter' in element['categories'] or 'scatter' in element['tags']):
         group_into_empty(objects, element['name'])
+    
+    # Plants
+    if ('plants' in element['categories'] or 'plants' in element['tags']):
+        group_into_empty(objects, element['name'])
 
     return objects
 
@@ -258,6 +262,7 @@ class OctaneMSLiveLink(bpy.types.Operator):
                                 obj.select_set(True)
                             bpy.context.view_layer.objects.active = objs[0]
                 # Finish Import
+                print('Imported an asset from Quixel Bridge')
                 globals()['Megascans_DataSet'] = None
         except Exception as e:
             print('[Octane Helper] Octane Megascans Module Error (newDataMonitor):', str(e))
@@ -303,6 +308,8 @@ def register_megascans():
 
 def unregister_megascans():
     if(is_official_here()):
+        return
+    if(is_me_here()):
         return
     bpy.app.handlers.load_post.remove(load_ms_module)
     bpy.utils.unregister_class(OctaneMSLiveLink)

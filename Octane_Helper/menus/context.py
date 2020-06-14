@@ -1,6 +1,23 @@
 import bpy
 import addon_utils
 from bpy.types import Menu
+from bpy.props import StringProperty
+from .. icons import get_icon
+
+def object_menu_func(self, context):
+    if context.scene.render.engine == 'octane':
+        self.layout.menu('VIEW3D_MT_object_octane', icon_value=get_icon('OCT_RENDER'))
+        self.layout.separator()
+
+def edit_menu_func(self, context):
+    if context.scene.render.engine == 'octane':
+        self.layout.menu('VIEW3D_MT_edit_mesh_octane', icon_value=get_icon('OCT_RENDER'))
+        self.layout.separator()
+
+def node_menu_func(self, context):
+    if context.scene.render.engine == 'octane' and context.space_data.shader_type == 'OBJECT':
+        self.layout.menu('NODE_MT_node_octane', icon_value=get_icon('OCT_RENDER'))
+        self.layout.separator()
 
 class VIEW3D_MT_object_octane(Menu):
     bl_label = 'Octane'
@@ -28,7 +45,10 @@ class NODE_MT_node_octane(Menu):
         layout = self.layout
 
         col = layout.column()
-        col.enabled = (len(context.selected_nodes) and 'Mat' in context.selected_nodes[0].bl_idname)
+        col.enabled = (len(context.selected_nodes) and (
+            'Mat' in context.selected_nodes[0].bl_idname or 
+            'Projection' in context.selected_nodes[0].bl_idname or
+            'Transform' in context.selected_nodes[0].bl_idname))
         col.menu(OctaneNodeConvertToMenu.bl_idname, icon='SHADERFX')
         
         col = layout.column()
@@ -42,9 +62,9 @@ class NODE_MT_node_octane(Menu):
         layout.operator('octane.switch_ab', icon='MODIFIER')
         layout.operator('octane.remove_connected_nodes', icon='MODIFIER')
 
-class OctaneNodeConvertToMenu(Menu):
-    bl_label = 'Convert To'
-    bl_idname = 'OCTANE_MT_node_convert_to'
+class OctaneNodeConvertToShadersMenu(Menu):
+    bl_label = 'Shaders'
+    bl_idname = 'OCTANE_MT_node_convert_to_shaders'
 
     def draw(self, context):
         layout = self.layout
@@ -60,6 +80,44 @@ class OctaneNodeConvertToMenu(Menu):
         layout.operator('octane.node_convert_to', text='Layered Material').node_target = 'ShaderNodeOctLayeredMat'
         layout.operator('octane.node_convert_to', text='Composite Material').node_target = 'ShaderNodeOctCompositeMat'
         layout.operator('octane.node_convert_to', text='Hair Material').node_target = 'ShaderNodeOctHairMat'
+
+class OctaneNodeConvertToProjectionsMenu(Menu):
+    bl_label = 'Projections'
+    bl_idname = 'OCTANE_MT_node_convert_to_projections'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator('octane.node_convert_to', text='Box Projection').node_target = "ShaderNodeOctBoxProjection"
+        layout.operator('octane.node_convert_to', text='Cylindrical Projection').node_target = "ShaderNodeOctCylProjection"
+        layout.operator('octane.node_convert_to', text='Perspective Projection').node_target = "ShaderNodeOctPerspProjection"
+        layout.operator('octane.node_convert_to', text='Spherical Projection').node_target = "ShaderNodeOctSphericalProjection"
+        layout.operator('octane.node_convert_to', text='UVW Projection').node_target = "ShaderNodeOctUVWProjection"
+        layout.operator('octane.node_convert_to', text='XYZ Projection').node_target = "ShaderNodeOctXYZProjection"
+        layout.operator('octane.node_convert_to', text='Triplanar Projection').node_target = "ShaderNodeOctTriplanarProjection"
+        layout.operator('octane.node_convert_to', text='OSL Delayed Projection').node_target = "ShaderNodeOctOSLUVProjection"
+        layout.operator('octane.node_convert_to', text='OSL Projection').node_target = "ShaderNodeOctOSLProjection"
+
+class OctaneNodeConvertToTransformsMenu(Menu):
+    bl_label = 'Transforms'
+    bl_idname = 'OCTANE_MT_node_convert_to_transforms'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.operator('octane.node_convert_to', text='Scale Transform').node_target = "ShaderNodeOctScaleTransform"
+        layout.operator('octane.node_convert_to', text='Rotate Transform').node_target = "ShaderNodeOctRotateTransform"
+        layout.operator('octane.node_convert_to', text='Full Transform').node_target = "ShaderNodeOctFullTransform"
+        layout.operator('octane.node_convert_to', text='2D Transform').node_target = "ShaderNodeOct2DTransform"
+        layout.operator('octane.node_convert_to', text='3D Transform').node_target = "ShaderNodeOct3DTransform"
+
+class OctaneNodeConvertToMenu(Menu):
+    bl_label = 'Convert To'
+    bl_idname = 'OCTANE_MT_node_convert_to'
+
+    def draw(self, context):
+        layout = self.layout
+        layout.menu(OctaneNodeConvertToShadersMenu.bl_idname, icon='NODE_MATERIAL')
+        layout.menu(OctaneNodeConvertToTransformsMenu.bl_idname, icon='FILE_3D')
+        layout.menu(OctaneNodeConvertToProjectionsMenu.bl_idname, icon='AXIS_SIDE')
 
 class OctaneNodeMixByMenu(Menu):
     bl_label = 'Mix By'
@@ -111,7 +169,7 @@ class OctaneMaterialsMenu(Menu):
         layout.operator('octane.autosmooth', icon='SMOOTHCURVE')
 
 class OctaneBasicMaterialsMenu(Menu):
-    bl_label = 'Basic Materials'
+    bl_label = 'Shaders'
     bl_idname = 'OCTANE_MT_basic_materials'
     
     def draw(self, context):

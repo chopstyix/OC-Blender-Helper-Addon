@@ -1,5 +1,6 @@
 import bpy
 import socket
+from .. operators.nodes import get_y_nodes
 
 supported_textures = [
     'opacity',
@@ -37,9 +38,12 @@ def add_components_tex(ntree, components):
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
     y_exp = 620
 
-    transNode = ntree.nodes.new('ShaderNodeOct3DTransform')
-    transNode.name = 'transform'
-    transNode.location = (-1200, 300)
+    transform_node = ntree.nodes.new('ShaderNodeOctFullTransform')
+    transform_node.name = 'transform'
+    projection_node = ntree.nodes.new('ShaderNodeOctUVWProjection')
+    projection_node.name = 'projection'
+    
+    texNodes = []
 
     for component in components:
         texNode = ntree.nodes.new('ShaderNodeOctImageTex')
@@ -50,7 +54,12 @@ def add_components_tex(ntree, components):
         if(component['type'] == 'displacement' and prefs.disp_type == "VERTEX"):
             texNode.border_mode = 'OCT_BORDER_MODE_CLAMP'
         ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['Transform'])
+        ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['Projection'])
+        texNodes.append(texNode)
         y_exp += -320
+    
+    transform_node.location = (-1200, get_y_nodes(ntree, texNodes, 'Mid'))
+    projection_node.location = (-1200, transform_node.location.y - 350)
 
 def group_into_empty(objs, name):
     bpy.ops.object.empty_add(type='SPHERE', radius=0.2)
