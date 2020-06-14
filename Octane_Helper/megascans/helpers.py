@@ -94,6 +94,12 @@ def is_me_here():
         return True
     return False
 
+def is_in_element(items, element):
+    for item in items:
+        if item in element['categories'] or item in element['tags']:
+            return True
+    return False
+
 def notify(msg, title, icon = 'INFO'):
     def draw(self, context):
         self.layout.label(text=msg)

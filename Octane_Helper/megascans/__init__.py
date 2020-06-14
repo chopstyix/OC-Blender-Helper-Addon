@@ -103,12 +103,8 @@ def import_meshes(element):
             # get selected objects
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
-    # Scatter
-    if (('scatter' in element['categories'] or 'scatter' in element['tags']) and len(objects)):
-        group_into_empty(objects, element['name'])
-    
-    # Plants
-    if (('plants' in element['categories'] or 'plants' in element['tags']) and len(objects)):
+    # Scatter, Plants
+    if (is_in_element(['scatter', 'plants'], element) and len(objects)):
         group_into_empty(objects, element['name'])
 
     return objects
@@ -130,8 +126,8 @@ def import_material(element):
     # Add image textures
     add_components_tex(ntree, element)
 
-    # Surface to copied
-    if ('surface' in element['categories'] or 'surface' in element['tags']):
+    # Surface, Atlas to copied
+    if (is_in_element(['surface', 'atlas'], element)):
         bpy.types.Material.copied_mat = mat
 
     # Albedo and AO
