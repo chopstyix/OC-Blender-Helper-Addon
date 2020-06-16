@@ -973,7 +973,7 @@ class OctaneCopyObjProperties(Operator):
     bl_options = {'REGISTER', 'UNDO'}
     def execute(self, context):
         active_obj = context.active_object
-        copylist = ['baking_group_id', 'baking_uv_transform_rz', 'baking_uv_transform_sx', 'baking_uv_transform_sy', 'baking_uv_transform_tx', 'baking_uv_transform_ty', 'camera_visibility', 'color', 'dirt_visibility', 'general_visibility', 'light_id_env', 'light_id_pass_1', 'light_id_pass_2', 'light_id_pass_3', 'light_id_pass_4', 'light_id_pass_5', 'light_id_pass_6', 'light_id_pass_7', 'light_id_pass_8', 'light_id_sunlight', 'object_mesh_type', 'random_color_seed', 'render_layer_id', 'shadow_visibility']
+        copylist = ['use_motion_blur', 'use_deform_motion', 'motion_steps', 'baking_group_id', 'baking_uv_transform_rz', 'baking_uv_transform_sx', 'baking_uv_transform_sy', 'baking_uv_transform_tx', 'baking_uv_transform_ty', 'camera_visibility', 'color', 'dirt_visibility', 'general_visibility', 'light_id_env', 'light_id_pass_1', 'light_id_pass_2', 'light_id_pass_3', 'light_id_pass_4', 'light_id_pass_5', 'light_id_pass_6', 'light_id_pass_7', 'light_id_pass_8', 'light_id_sunlight', 'object_mesh_type', 'random_color_seed', 'render_layer_id', 'shadow_visibility']
         for obj in context.selected_objects:
             for item in copylist:
                 exec('obj.octane.{} = active_obj.octane.{}'.format(item, item))
