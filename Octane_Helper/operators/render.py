@@ -781,10 +781,16 @@ class OctaneCamerasManager(Operator):
                 box = col.box()
                 sub = box.column(align=True)
                 sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane Kernel')
-                sub.prop(ob.octane, "use_motion_blur", text="Enable Camera Motion Blur")
-                box = col.box()
-                box.enabled = (rd.use_motion_blur and ob.octane.use_motion_blur)
-                box.prop(ob.octane, "motion_steps", text="Steps")
+                sub = box.column(align=True)
+                sub.enabled = rd.use_motion_blur
+                sub.prop(context.scene.octane, "mb_direction")
+                sub.prop(context.scene.octane, "shutter_time")
+                sub.prop(context.scene.octane, "subframe_start")
+                sub.prop(context.scene.octane, "subframe_end")
+                sub = box.column()
+                sub.enabled = False
+                sub.label(text='Each moving object has motion blur settings')
+                sub.label(text='under Change Object Properties')
 
     def execute(self, context):
         return {'FINISHED'}
@@ -942,6 +948,17 @@ class OctaneChangeObjProperties(Operator):
         sub = box.row(align=True)
         sub.prop(octane_object, "baking_uv_transform_tx")
         sub.prop(octane_object, "baking_uv_transform_ty")
+
+        box = layout.box()
+        box.label(text='Motion Blur')
+        sub = box.column(align=True)
+        sub.prop(context.scene.render, 'use_motion_blur', text='Enable Motion Blur in Octane Kernel')
+        sub.prop(octane_object, "use_motion_blur", text="Enable object for Motion Blur")
+        sub = box.column(align=True)
+        sub.enabled = (context.scene.render.use_motion_blur and octane_object.use_motion_blur)
+        if ob.type != 'CAMERA':
+            sub.prop(octane_object, "use_deform_motion", text="Deformation")
+        sub.prop(octane_object, "motion_steps", text="Steps")
 
     def execute(self, context):
         return {'FINISHED'}
