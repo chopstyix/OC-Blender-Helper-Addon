@@ -465,14 +465,13 @@ class OctaneCamerasManager(Operator):
             ('Imager', 'Imager (Camera)', ''),
             ('PostProcess', 'PostProcess (Camera)', ''),
             ('Denoiser', 'Denoiser (Camera)', ''),
-            ('Depth of field', 'Depth of field', ''),
-            ('Distortion', 'Distortion', ''),
+            ('DOF and Distortion', 'DOF and Distortion', ''),
             ('Stereo', 'Stereo', ''),
             ('Baking', 'Baking', ''),
             ('OSL Camera', 'OSL Camera', ''),
             ('Motion Blur', 'Motion Blur', '')
         ],
-        default='Depth of field'
+        default='DOF and Distortion'
     )
 
     def draw(self, context):
@@ -649,7 +648,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "spectral_intencity")
                 sub.prop(oct_cam, "spectral_shift")
 
-            elif(self.octane_cam_settings == 'Depth of field'):
+            elif(self.octane_cam_settings == 'DOF and Distortion'):
                 box = col.box()
                 sub = box.column(align=True)
                 sub.prop(oct_cam, "autofocus")
@@ -666,10 +665,11 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam, "bokeh_sidecount")
                 sub.prop(oct_cam, "bokeh_rotation")
                 sub.prop(oct_cam, "bokeh_roundedness")
-            elif(self.octane_cam_settings == 'Distortion'):
                 box = col.box()
                 sub = box.column(align=True)
-                sub.label(text='Settings for different Camera lens type')
+                col = sub.column()
+                col.enabled = False
+                col.label(text='Settings for the active lens type')
                 sub = box.column(align=True)
                 sub.active = (cam.type == 'PANO')
                 sub.prop(oct_cam, "pan_mode")
@@ -684,6 +684,7 @@ class OctaneCamerasManager(Operator):
                 sub = box.row(align=True)
                 sub.prop(oct_cam, "use_fstop")
                 sub.prop(oct_cam, "fstop") 
+            
             elif(self.octane_cam_settings == 'Stereo'):
                 box = col.box()
                 col = box.column(align=True)
