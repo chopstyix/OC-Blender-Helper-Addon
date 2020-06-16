@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator
-from bpy.props import EnumProperty, StringProperty, IntProperty
+from bpy.props import EnumProperty, StringProperty, IntProperty, FloatProperty
 
 def get_enum_cameras(self, context):
     result = []
@@ -9,6 +9,15 @@ def get_enum_cameras(self, context):
             result.append((obj.name, obj.name, ''))
     if(len(result)!=0): return result
     else: return [('None', 'None', '')]
+
+def update_shutter_speed(self, context):
+    context.scene.octane.shutter_time = self.shutter_speed * context.scene.render.fps * 100
+
+def update_shutter_mode(self, context):
+    if(self.shutter_mode == 'Speed'):
+        self.shutter_speed = context.scene.octane.shutter_time / 100 / context.scene.render.fps
+    else:
+        context.scene.octane.shutter_time = self.shutter_speed * context.scene.render.fps * 100
 
 # Classes
 class OctaneManageImager(Operator):
@@ -474,6 +483,22 @@ class OctaneCamerasManager(Operator):
         default='DOF and Distortion'
     )
 
+    shutter_mode: EnumProperty(
+        name='Shutter Mode',
+        items=[
+            ('Time', 'Time', ''),
+            ('Speed', 'Speed', '')
+        ],
+        default='Time',
+        update=update_shutter_mode
+    )
+
+    shutter_speed: FloatProperty(
+        name='Shutter Speed', 
+        description='SSpeed * FPS * 100 = STime%',
+        min=0,
+        update=update_shutter_speed)
+
     def draw(self, context):
         layout = self.layout
         layout.use_property_split = False
@@ -783,8 +808,18 @@ class OctaneCamerasManager(Operator):
                 sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane Kernel')
                 sub = box.column(align=True)
                 sub.enabled = rd.use_motion_blur
-                sub.prop(context.scene.octane, "mb_direction")
-                sub.prop(context.scene.octane, "shutter_time")
+                sub.label(text='Shutter alignment:')
+                sub.prop(context.scene.octane, "mb_direction", text='')
+                sub = box.column(align=True)
+                sub.enabled = rd.use_motion_blur
+                split = sub.split(factor=0.35, align=True)
+                split.prop(self, 'shutter_mode', text='')
+                if(self.shutter_mode == 'Time'):
+                    split.prop(context.scene.octane, "shutter_time")
+                else:
+                    split.prop(self, "shutter_speed")
+                sub = box.column(align=True)
+                sub.enabled = rd.use_motion_blur
                 sub.prop(context.scene.octane, "subframe_start")
                 sub.prop(context.scene.octane, "subframe_end")
                 sub = box.column()
@@ -796,6 +831,7 @@ class OctaneCamerasManager(Operator):
         return {'FINISHED'}
 
     def invoke(self, context, event):
+        self.shutter_speed = context.scene.octane.shutter_time / 100 / context.scene.render.fps
         if(context.active_object!=None):
             if(context.active_object.type=='CAMERA'):
                 self.cameras = context.active_object.name
