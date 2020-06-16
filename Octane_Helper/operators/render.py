@@ -564,6 +564,7 @@ class OctaneCamerasManager(Operator):
             col.label(text='Display')
             col.prop(cam, 'show_passepartout')
             col.prop(cam, 'passepartout_alpha')
+            '''
             box = col.box()
             row = box.row(align=True)
             col = row.column(align=True)
@@ -576,6 +577,7 @@ class OctaneCamerasManager(Operator):
             col.prop(cam, 'show_composition_golden_tria_b')
             col.prop(cam, 'show_composition_harmony_tri_a')
             col.prop(cam, 'show_composition_harmony_tri_b')
+            '''
 
 
             # Dropdown Cam settings
