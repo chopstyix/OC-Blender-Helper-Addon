@@ -604,6 +604,12 @@ class OctaneCamerasManager(Operator):
             col.prop(cam, 'show_composition_harmony_tri_b')
             '''
 
+            # Preview settings
+            box = side.box()
+            col = box.column()
+            col.label(text='Preview')
+            col.prop(oct_cam, 'use_camera_dimension_as_preview_resolution')
+            col.prop(oct_cam, 'used_as_universal_camera')
 
             # Dropdown Cam settings
             box = split.box()
