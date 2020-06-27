@@ -14,9 +14,9 @@ A helper addon for Octane Blender edition
 
 ## Versions
 
-* **OctaneRender™ for Blender 2020 and later**
+* **OctaneRender™ for Blender 2020.1.3_21.9 and later**
 * Current version **v2.7.4**
-  * Tested on **Blender_Octane_Edition_2020.1_21.8** (latest)
+  * Tested on **Blender_Octane_Edition_2020.1.3_21.9_stable** (latest)
   * **Megascans Livelink Module** is included since **v2.6.0**
     * [Archived Git Project](https://github.com/Yichen-Dou/MSLiveLink-OC-Blender)
 
@@ -88,7 +88,11 @@ A helper addon for Octane Blender edition
   * We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
 * Megascans Livelink module does not respond to imports
   * Check the log to see the error
+  * Some assets' meshes cannot be imported due to issues with built-in fbx/obj importer, which will be fixed in the future
   * Starting from 2020, when you first time launch the Bridge App and click the "Download Plugin", it automatically puts an addon that occupies the port at startup into C:\Users\\[Your username]\AppData\Roaming\Blender Foundation\Blender\2.8[X]\scripts\startup. It's called "MSPlugin", please remove the folder and restart the Blender
   * There is no switch button for the official quixel addon, so if you want to use the addon for cycles/eevee again, just simply reinstall the offical addon then the octane megascans module will keep silent
+* Wrong nodes setup with any material created from Right-Click Menu or Megascans module
+  * For example, duplicated shader nodes without output node
+  * Starting from Blender_Octane_Edition_2020.1.3_21.9_stable, there is a small difference when setting up materials. If you have to use previous versions, please use addons before 2.7.4
 * Other issues
   * Please check the log from Blender > Top Bar > Window > Toggle System Console and let me know what's happening
