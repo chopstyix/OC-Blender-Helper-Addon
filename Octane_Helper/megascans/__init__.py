@@ -199,7 +199,7 @@ def import_material(element):
         transparentNode.name = 'transparent'
         transparentNode.location = (10, 670)
         transparentNode.inputs['Opacity'].default_value = 0
-        ntree.links.new(nodes['opacity_mix_transparent'].outputs[0], nodes[0].inputs['Surface'])
+        ntree.links.new(nodes['opacity_mix_transparent'].outputs[0], nodes['output'].inputs['Surface'])
         ntree.links.new(nodes['root'].outputs[0], nodes['opacity_mix_transparent'].inputs['Material1'])
         ntree.links.new(nodes['transparent'].outputs[0], nodes['opacity_mix_transparent'].inputs['Material2'])
         ntree.links.new(nodes['opacity'].outputs[0], nodes['opacity_mix_transparent'].inputs['Amount'])

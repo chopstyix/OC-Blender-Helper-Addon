@@ -15,9 +15,10 @@ def create_material(context, name, root):
     mat.use_nodes = True
     ntree = mat.node_tree
     outNode = ntree.get_output_node('octane')
+    outNode.name = 'output'
     nodes = mat.node_tree.nodes
     # Get the default shader that is created automatically and remove it later
-    oldMainMat = nodes[1]
+    oldMainMat = nodes[0]
     # Create a new shader node
     mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location
