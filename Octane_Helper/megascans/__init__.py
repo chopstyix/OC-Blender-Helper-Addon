@@ -126,9 +126,9 @@ def import_material(element):
     # Add image textures
     add_components_tex(ntree, element)
 
-    # Surface, Atlas to copied
-    if (is_in_element(['surface', 'atlas'], element)):
-        bpy.types.Material.copied_mat = mat
+    # All to copied
+    #if (is_in_element(['surface', 'atlas'], element)):
+    bpy.types.Material.copied_mat = mat
 
     # Albedo and AO
     if('albedo' in textures):
