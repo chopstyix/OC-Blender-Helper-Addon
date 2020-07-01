@@ -15,7 +15,7 @@ A helper addon for Octane Blender edition
 ## Versions
 
 * **OctaneRender™ for Blender 2020.1.3_21.9 and later**
-* Current version **v2.7.5**
+* Current version **v2.7.6**
   * Tested on **Blender_Octane_Edition_2020.1.3_21.9_stable** (latest)
   * **Megascans Livelink Module** is included since **v2.6.0**
     * [Archived Git Project](https://github.com/Yichen-Dou/MSLiveLink-OC-Blender)
