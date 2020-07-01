@@ -1,4 +1,4 @@
-import bpy.utils.previews as previews
+import bpy.utils.previews
 import os
 
 icons = None
@@ -13,7 +13,7 @@ def get_icon(name):
 # Register icons
 def register_icons():
     global icons
-    icons = previews.new()
+    icons = bpy.utils.previews.new()
     for fn in os.listdir(icons_dir):
         if fn.endswith('.png'):
             name = fn[:-4]
@@ -21,4 +21,4 @@ def register_icons():
             icons.load(name, path, 'IMAGE')
 
 def unregister_icons():
-    previews.remove(icons)
+    bpy.utils.previews.remove(icons)
