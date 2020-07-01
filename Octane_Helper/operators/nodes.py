@@ -317,19 +317,28 @@ class OctaneNodeConvertTo(Operator):
 
             # A list of socket objects, not strs
             # Different names for Diffuse color in Universal and Other shaders. We need to handle it. This shoule be removed in the future
-            is_universal_to_other = (active_node.bl_idname == 'ShaderNodeOctUniversalMat' and newNode.bl_idname != 'ShaderNodeOctUniversalMat' and 'Mat' in newNode.bl_idname)
-            is_other_to_universal = ('Mat' in active_node.bl_idname and newNode.bl_idname == 'ShaderNodeOctUniversalMat' and active_node.bl_idname != 'ShaderNodeOctUniversalMat')
             common_sockets = [in_socket for in_socket in active_node.inputs if (in_socket.name in newNode.inputs) or (in_socket.name in ['Albedo color', 'Diffuse'] and ('Albedo color' in newNode.inputs or 'Diffuse' in newNode.inputs))]
             for common_socket in common_sockets:
                 if(common_socket.is_linked):
-                    if(common_socket.name == 'Albedo color' and is_universal_to_other):
+                    if(common_socket.name == 'Albedo color' and 'Diffuse' in newNode.inputs):
                         ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs['Diffuse'])
-                    elif(common_socket.name == 'Diffuse' and is_other_to_universal):
+                    elif(common_socket.name == 'Diffuse' and 'Albedo color' in newNode.inputs):
                         ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs['Albedo color'])
                     else:
                         ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs[common_socket.name])
                 elif(hasattr(common_socket, 'default_value') and common_socket.name not in except_list):
-                    newNode.inputs[common_socket.name].default_value = common_socket.default_value
+                    if(common_socket.name == 'Albedo color' and 'Diffuse' in newNode.inputs):
+                        newNode.inputs['Diffuse'].default_value = common_socket.default_value
+                    elif(common_socket.name == 'Diffuse' and 'Albedo color' in newNode.inputs):
+                        newNode.inputs['Albedo color'].default_value = common_socket.default_value
+                    else:
+                        if(hasattr(newNode.inputs[common_socket.name], 'default_value')):
+                            newNode.inputs[common_socket.name].default_value = common_socket.default_value
+                        else:
+                            rgb_node = ntree.nodes.new('ShaderNodeOctRGBSpectrumTex')
+                            rgb_node.inputs['Color'].default_value = common_socket.default_value
+                            rgb_node.location = (newNode.location.x - 200, newNode.location.y)
+                            ntree.links.new(rgb_node.outputs[0], newNode.inputs[common_socket.name])
 
             # Connect output
             if(active_node.outputs[0].is_linked):
