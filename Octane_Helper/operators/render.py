@@ -2,13 +2,18 @@ import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty, StringProperty, IntProperty, FloatProperty
 
-def get_enum_cameras(self, context):
+class OctaneCamObject:
     result = []
-    for obj in context.scene.objects:
-        if obj.type == 'CAMERA':
-            result.append((obj.name, obj.name, ''))
-    if(len(result)!=0): return result
-    else: return [('None', 'None', '')]
+    @staticmethod
+    def get_enum_cameras():
+        OctaneCamObject.result.clear()
+        for obj in bpy.context.scene.objects:
+            if obj.type == 'CAMERA':
+                OctaneCamObject.result.append((obj.name, obj.name, ''))
+        if OctaneCamObject.result:
+            return OctaneCamObject.result
+        else:
+            return [('None', 'None', '')]
 
 def update_shutter_speed(self, context):
     context.scene.octane.shutter_time = self.shutter_speed * context.scene.render.fps * 100
@@ -463,9 +468,9 @@ class OctaneCamerasManager(Operator):
     bl_idname = 'octane.cameras_manager'
     bl_options = {'REGISTER'}
 
-    cameras: EnumProperty(
+    camera: EnumProperty(
         name='Cameras',
-        items=get_enum_cameras
+        items=lambda _, __: OctaneCamObject.get_enum_cameras()
     )
     
     octane_cam_settings: EnumProperty(
@@ -504,10 +509,10 @@ class OctaneCamerasManager(Operator):
         layout.use_property_split = False
 
         split = layout.split(factor=0.85)
-        split.prop(self, 'cameras', text='')
+        split.prop(self, 'camera', text='')
         
-        if(self.cameras != 'None' and self.cameras != None and self.cameras != ''):
-            obj = context.scene.objects[self.cameras]
+        if(self.camera != 'None' and self.camera != None and self.camera != ''):
+            obj = context.scene.objects[self.camera]
             cam = obj.data
             oct_cam = cam.octane
 
@@ -621,7 +626,7 @@ class OctaneCamerasManager(Operator):
                 box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManageImager.bl_idname, text='Open Imager (Perspective)')
-                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.cameras
+                sub.operator(OctaneCopyCameraSettings.bl_idname, text='Copy settings to Imager (Perspective)').camera = self.camera
                 box = col.box()
                 box.enabled = (not context.scene.octane.use_preview_setting_for_camera_imager)
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
@@ -660,7 +665,7 @@ class OctaneCamerasManager(Operator):
                 box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManagePostprocess.bl_idname, text='Open PostProcess (Perspective)')
-                sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.cameras
+                sub.operator(OctaneCopyPostProcessSettings.bl_idname, text='Copy settings to PostProcess (Perspective)').camera = self.camera
                 box = col.box()
                 box.enabled = (not context.scene.octane.use_preview_post_process_setting)
                 if(context.scene.octane.use_preview_post_process_setting):
@@ -780,7 +785,7 @@ class OctaneCamerasManager(Operator):
                 box = col.box()
                 sub = box.column(align=True)
                 sub.operator(OctaneManageDenoiser.bl_idname, text='Open Denoiser (Perspective)')
-                sub.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.cameras
+                sub.operator(OctaneCopyDenosierSettings.bl_idname, text='Copy settings to Denoiser (Perspective)').camera = self.camera
                 box = col.box()
                 box.enabled = ((not context.scene.octane.use_preview_setting_for_camera_imager))
                 if(context.scene.octane.use_preview_setting_for_camera_imager):
@@ -808,7 +813,7 @@ class OctaneCamerasManager(Operator):
                 sub.prop(oct_cam.ai_up_sampler, 'max_up_sampler_interval')
             elif(self.octane_cam_settings == 'Motion Blur'):
                 rd = context.scene.render
-                ob = context.scene.objects[self.cameras]
+                ob = context.scene.objects[self.camera]
                 box = col.box()
                 sub = box.column(align=True)
                 sub.prop(rd, "use_motion_blur", text='Enable Motion Blur in Octane Kernel')
@@ -840,7 +845,7 @@ class OctaneCamerasManager(Operator):
         self.shutter_speed = context.scene.octane.shutter_time / 100 / context.scene.render.fps
         if(context.active_object!=None):
             if(context.active_object.type=='CAMERA'):
-                self.cameras = context.active_object.name
+                self.camera = context.active_object.name
         wm = context.window_manager
         return wm.invoke_props_dialog(self, width=600)
     
