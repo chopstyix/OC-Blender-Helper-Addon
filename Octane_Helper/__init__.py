@@ -59,7 +59,7 @@ class OctaneHelperPrefs(AddonPreferences):
         ],
         name="Displacement Mode",
         description="Set default Octane displacement mode",
-        default="VERTEX"
+        default="TEXTURE"
     )
 
     disp_level_vertex: IntProperty(

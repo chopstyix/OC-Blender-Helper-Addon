@@ -13,6 +13,7 @@ A helper addon for Octane Blender edition
 
 
 ## Versions
+> New Octane Helper 2021 is on the way :) See you in Jan 2021
 
 * **OctaneRender™ for Blender 2020.1.3_21.9 and later**
 * Current version **v2.7.6**
@@ -83,7 +84,8 @@ A helper addon for Octane Blender edition
   * If you have installed the addon, please restart your Blender
 
 ## Questions
-
+* When should I use Update display settings under Environment menu?
+  * In any new project, you should click that button once to update current display settings because by default Octane Blender has a wrong setup for display device
 * Cannot insert keyframes from UI panels
   * We cannot insert keyframes and click file selector eyedropper from panels yet because of a known bug in Blender build, which will be fixed in future builds
 * Megascans Livelink module does not respond to imports
