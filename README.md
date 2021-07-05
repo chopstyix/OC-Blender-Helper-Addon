@@ -2,6 +2,8 @@
 
 A helper addon for Octane Blender edition
 
+> WIP on a completely new and powerful tool for Blender & OC Blender users. See you soon
+
 
 
 > The reason I develop this addon is for speeding up user workflow, so users can access basic functions provided by Octane very quickly and newcomers can know where to start. The materials and their nodes setup are pretty rough and use them as a starting point
