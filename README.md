@@ -2,7 +2,7 @@
 
 A helper addon for Octane Blender edition
 
-> WIP on a completely new and powerful tool for Blender & OC Blender users. See you soon
+> **[New] WIP on a completely new and powerful tool for Blender & OC Blender users. See you soon**
 
 
 
