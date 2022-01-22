@@ -4,7 +4,7 @@ from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorPro
 from . nodes import remove_connected_nodes, get_y
 import os
 
-presets_dir = bpy.utils.user_resource('SCRIPTS', 'presets')
+presets_dir = bpy.utils.user_resource('SCRIPTS', path = 'presets')
 env_path = os.path.join(presets_dir, 'octane', 'environments')
 
 def get_trans_node(node):
