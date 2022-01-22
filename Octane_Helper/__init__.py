@@ -26,11 +26,11 @@ import rna_keymap_ui
 bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
-    "author": "Yichen Dou",
-    "version": (2, 7, 7),
-    "blender": (2, 81, 0),
+    "author": "Yichen Dou, Ed O'Connell",
+    "version": (2, 7, 8),
+    "blender": (3, 0, 0),
     "warning": "",
-    "wiki_url": "https://github.com/Yichen-Dou/OC-Blender-Helper-Addon",
+    "wiki_url": "https://github.com/llennoco22/OC-Blender-Helper-Addon",
     "support": "COMMUNITY",
     "category": "3D View"
 }
