@@ -29,6 +29,7 @@ def create_material(context, name, root):
         mainMat.brdf_model = prefs.brdf_model
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
+    print("ran without issue")
     return mat
 
 def assign_material(context, mat):
@@ -47,7 +48,7 @@ def assign_material(context, mat):
                     if face.select:
                         # If no base material found, create one
                         if (len(obj.material_slots)==0):
-                            obj.active_material = create_material(context, mat.name + '_Base', 'ShaderNodeOctDiffuseMat')
+                            obj.active_material = create_material(context, mat.name + '_Base', 'OctaneDiffuseMaterial')
                         if(obj.active_material != mat):
                             obj.data.materials.append(mat)
                         obj.active_material_index = len(obj.material_slots) - 1
@@ -105,7 +106,7 @@ class OctaneAssignUniversal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Universal', 'ShaderNodeOctUniversalMat')
+        mat = create_material(context, 'OC_Universal', 'OctaneUniversalMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -117,7 +118,7 @@ class OctaneAssignGlossy(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Glossy', 'ShaderNodeOctGlossyMat')
+        mat = create_material(context, 'OC_Glossy', 'OctaneGlossyMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -129,7 +130,7 @@ class OctaneAssignSpecular(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Specular', 'ShaderNodeOctSpecularMat')
+        mat = create_material(context, 'OC_Specular', 'OctaneSpecularMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -141,7 +142,7 @@ class OctaneAssignDiffuse(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Diffuse', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Diffuse', 'OctaneDiffuseMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -153,7 +154,7 @@ class OctaneAssignMix(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Mix', 'ShaderNodeOctMixMat')
+        mat = create_material(context, 'OC_Mix', 'OctaneMixMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -165,7 +166,7 @@ class OctaneAssignPortal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Portal', 'ShaderNodeOctPortalMat')
+        mat = create_material(context, 'OC_Portal', 'OctanePortalMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -177,7 +178,7 @@ class OctaneAssignShadowCatcher(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_ShadowCatcher', 'ShaderNodeOctShadowCatcherMat')
+        mat = create_material(context, 'OC_ShadowCatcher', 'OctaneShadowCatcherMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -189,7 +190,7 @@ class OctaneAssignToon(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Toon', 'ShaderNodeOctToonMat')
+        mat = create_material(context, 'OC_Toon', 'OctaneToonMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -201,7 +202,7 @@ class OctaneAssignMetal(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Metal', 'ShaderNodeOctMetalMat')
+        mat = create_material(context, 'OC_Metal', 'OctaneMetallicMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -213,7 +214,7 @@ class OctaneAssignLayered(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Layered', 'ShaderNodeOctLayeredMat')
+        mat = create_material(context, 'OC_Layered', 'OctaneLayeredMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -225,7 +226,7 @@ class OctaneAssignComposite(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Composite', 'ShaderNodeOctCompositeMat')
+        mat = create_material(context, 'OC_Composite', 'OctaneCompositeMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -237,7 +238,7 @@ class OctaneAssignHair(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Hair', 'ShaderNodeOctHairMat')
+        mat = create_material(context, 'OC_Hair', 'OctaneHairMaterial')
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
@@ -268,11 +269,11 @@ class OCtaneAssignClearGlass(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_ClearGlass', 'ShaderNodeOctSpecularMat')
+        mat = create_material(context, 'OC_ClearGlass', 'OctaneSpecularMaterial')
         nodes = mat.node_tree.nodes
         nodes[1].inputs['Roughness'].default_value = self.roughness
         nodes[1].inputs['Index'].default_value = self.index
-        osl_node = nodes.new('ShaderNodeOctOSLTex')
+        osl_node = nodes.new('OctaneOSLTexture')
         osl_node.location = (-210, 30)
         osl_node.mode = 'EXTERNAL'
         osl_node.filepath = os.path.join(osl_dir, 'clear_glass.osl')
@@ -350,25 +351,25 @@ class OctaneAssignSSS(Operator):
     
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_SSS', 'ShaderNodeOctUniversalMat')
+        mat = create_material(context, 'OC_SSS', 'OctaneUniversalMaterial')
         nodes = mat.node_tree.nodes
         # Diffuse Color
-        diffuseNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+        diffuseNode = nodes.new('OctaneRGBColor')
         diffuseNode.location = (-210, 300)
         diffuseNode.name = 'DiffuseColor'
         diffuseNode.inputs['Color'].default_value = self.sss_albedo
         # Transmission Color
-        transmissionNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+        transmissionNode = nodes.new('OctaneRGBColor')
         transmissionNode.location = (-210, 400)
         transmissionNode.name = 'TransmissionColor'
         transmissionNode.inputs['Color'].default_value = self.sss_transmission
         # Scatter Medium
-        scatterNode = nodes.new('ShaderNodeOctScatteringMedium')
+        scatterNode = nodes.new('OctaneScattering')
         scatterNode.location = (-210, -500)
         scatterNode.name = 'ScatterMedium'
         scatterNode.inputs['Density'].default_value = self.sss_density
-        scatterNode.inputs['Absorption Tex'].default_value = self.sss_absorption
-        scatterNode.inputs['Scattering Tex'].default_value = self.sss_scattering
+        scatterNode.inputs['Absorption'].default_value = self.sss_absorption
+        scatterNode.inputs['Scattering'].default_value = self.sss_scattering
         # Connections
         mat.node_tree.links.new(scatterNode.outputs[0], nodes[1].inputs['Medium'])
         mat.node_tree.links.new(transmissionNode.outputs[0], nodes[1].inputs['Transmission'])
@@ -436,22 +437,22 @@ class OctaneAssignEmission(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Emissive', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Emissive', 'OctaneDiffuseMaterial')
         nodes = mat.node_tree.nodes
 
         # Since this operator supports 3 different types of emission, we need to handle them seperately
         if(self.emission_type == 'RGB'):
-            emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+            emissionNode = nodes.new('OctaneBlackBodyEmission')
             emissionNode.location = (-210, 300)
             emissionNode.inputs['Power'].default_value = self.emission_power
             emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
-            rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+            rgbNode = nodes.new('OctaneRGBColor')
             rgbNode.location = (-410, 300)
             rgbNode.inputs['Color'].default_value = self.rgb_emission_color
             mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
             mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         elif(self.emission_type == 'TEX'):
-            emissionNode = nodes.new('ShaderNodeOctTextureEmission')
+            emissionNode = nodes.new('OctaneTextureEmission')
             emissionNode.location = (-210, 300)
             emissionNode.inputs['Power'].default_value = self.emission_power
             emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
@@ -461,20 +462,20 @@ class OctaneAssignEmission(Operator):
             mat.node_tree.links.new(imgNode.outputs[0], emissionNode.inputs['Texture'])
             mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         elif(self.emission_type == 'IES'):
-            emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+            emissionNode = nodes.new('OctaneBlackBodyEmission')
             emissionNode.location = (-210, 300)
             emissionNode.inputs['Power'].default_value = self.emission_power
             emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
             emissionNode.inputs['Double-sided'].default_value = self.emission_double
-            rgbNode = nodes.new('ShaderNodeOctRGBSpectrumTex')
+            rgbNode = nodes.new('OctaneRGBColor')
             rgbNode.location = (-410, 400)
             rgbNode.inputs['Color'].default_value = self.rgb_emission_color
             imgNode = nodes.new('ShaderNodeOctImageTex')
             imgNode.location = (-460, 300)
             imgNode.image = bpy.data.images.load(self.filepath)
-            projectNode = nodes.new('ShaderNodeOctPerspProjection')
+            projectNode = nodes.new('OctanePerspective')
             projectNode.location = (-660, 250)
-            projectNode.coordinate_space_mode = 'OCT_POSITION_NORMAL'
+            projectNode.coordinate_space_mode = 'Normal space (IES Lights)'
             mat.node_tree.links.new(projectNode.outputs[0], imgNode.inputs['Projection'])
             mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
             mat.node_tree.links.new(imgNode.outputs[0], emissionNode.inputs['Distribution'])
@@ -510,7 +511,7 @@ class OctaneAssignColorgrid(Operator):
     def execute(self, context):
         imgName = 'COLOR_GRID_' + self.resolutions
         # Create material
-        mat = create_material(context, 'OC_Colorgrid', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_Colorgrid', 'OctaneDiffuseMaterial')
         nodes = mat.node_tree.nodes
         imgNode = nodes.new('ShaderNodeOctImageTex')
         imgNode.location = (-210, 300)
@@ -543,7 +544,7 @@ class OctaneAssignUVgrid(Operator):
     def execute(self, context):
         imgName = 'UV_GRID_' + self.resolutions
         # Create material
-        mat = create_material(context, 'OC_UVgrid', 'ShaderNodeOctDiffuseMat')
+        mat = create_material(context, 'OC_UVgrid', 'OctaneDiffuseMaterial')
         nodes = mat.node_tree.nodes
         imgNode = nodes.new('ShaderNodeOctImageTex')
         imgNode.location = (-210, 300)
@@ -589,15 +590,15 @@ class OctaneAssignPattern(Operator):
     def execute(self, context):
         if(self.filepath != ''):
             # Create material
-            mat = create_material(context, 'OC_Pattern', 'ShaderNodeOctMixMat')
+            mat = create_material(context, 'OC_Pattern', 'OctaneMixMaterial')
             nodes = mat.node_tree.nodes
             if(self.material_type == 'Diffuse'):
-                baseNode = nodes.new('ShaderNodeOctDiffuseMat')
+                baseNode = nodes.new('OctaneDiffuseMaterial')
             else:
-                baseNode = nodes.new('ShaderNodeOctUniversalMat')
+                baseNode = nodes.new('OctaneUniversalMaterial')
             baseNode.location = (-210, 50)
             baseNode.inputs['Smooth'].default_value = context.scene.is_smooth
-            transparentNode = nodes.new('ShaderNodeOctDiffuseMat')
+            transparentNode = nodes.new('OctaneDiffuseMaterial')
             transparentNode.location = (10, 50)
             transparentNode.inputs['Opacity'].default_value = 0.0
             alphaImgNode = nodes.new('ShaderNodeOctAlphaImageTex')
@@ -700,9 +701,9 @@ class OctaneAssignMantaflowVolume(Operator):
     def execute(self, context):
         # Create material
         if(self.mat_type == 'Fire'):
-            mat = create_material(context, 'OC_Mantaflow_Fire', 'ShaderNodeOctVolumeMedium')
+            mat = create_material(context, 'OC_Mantaflow_Fire', 'OctaneVolumeMedium')
         else:
-            mat = create_material(context, 'OC_Mantaflow_Smoke', 'ShaderNodeOctVolumeMedium')
+            mat = create_material(context, 'OC_Mantaflow_Smoke', 'OctaneVolumeMedium')
         nodes = mat.node_tree.nodes
 
         # Set default values for root shader
@@ -747,7 +748,7 @@ class OctaneAssignMantaflowVolume(Operator):
             emissionRampNode.color_ramp.octane_interpolation_type = 'OCTANE_INTERPOLATION_CUBIC'
             emissionRampNode.location = (-210, 0)
 
-            emissionNode = nodes.new('ShaderNodeOctTextureEmission')
+            emissionNode = nodes.new('OctaneTextureEmission')
             emissionNode.inputs['Power'].default_value = self.fire_power
             emissionNode.location = (-210, -200)
 
@@ -822,7 +823,7 @@ class OctaneAssignEmbergenVolume(Operator):
 
     def execute(self, context):
         # Create material
-        mat = create_material(context, 'OC_Embergen_Temperature', 'ShaderNodeOctVolumeMedium')
+        mat = create_material(context, 'OC_Embergen_Temperature', 'OctaneVolumeMedium')
         nodes = mat.node_tree.nodes
 
         # Set default values for root shader
@@ -864,7 +865,7 @@ class OctaneAssignEmbergenVolume(Operator):
         emissionRampNode.location = (-210, 0)
 
         # Emission node
-        emissionNode = nodes.new('ShaderNodeOctBlackBodyEmission')
+        emissionNode = nodes.new('OctaneBlackBodyEmission')
         emissionNode.inputs['Power'].default_value = self.fire_power
         emissionNode.inputs['Surface brightness'].default_value = True
         emissionNode.location = (-210, -200)
