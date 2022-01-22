@@ -136,8 +136,8 @@ def import_material(element):
             multiplyNode = nodes.new('OctaneMultiplyTexture')
             multiplyNode.name = 'ao_multiply_albedo'
             multiplyNode.location = (-320, 300)
-            ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs['Texture1'])
-            ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs['Texture2'])
+            ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
+            ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
             ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['root'].inputs['Albedo'])
         else:
             ntree.links.new(nodes['albedo'].outputs[0], nodes['root'].inputs['Albedo'])
@@ -151,7 +151,10 @@ def import_material(element):
         ntree.links.new(nodes['roughness'].outputs[0], nodes['root'].inputs['Roughness'])
         nodes['roughness'].inputs['Gamma'].default_value = 1
     
-    # Metalness    
+    # Metalness
+    #if(element['category'] == 'Metal'):
+    #    nodes['root'].inputs['Metallic'].default_value = 1
+    
     if('metalness' in textures):
         ntree.links.new(nodes['metalness'].outputs[0], nodes['root'].inputs['Metallic'])
         nodes['metalness'].inputs['Gamma'].default_value = 1
@@ -183,7 +186,7 @@ def import_material(element):
     if('translucency' in textures):
         scatterNode = nodes.new('OctaneScattering')
         scatterNode.name = 'translucency_scatter'
-        scatterNode.inputs['Absorption'].default_value = (1, 1, 1, 1)
+        scatterNode.inputs['Absorption'].default_value = (1, 1, 1)
         scatterNode.inputs['Invert absorption'].default_value = True
         scatterNode.location = (-320, -1000)
         ntree.links.new(nodes['translucency'].outputs[0], nodes['root'].inputs['Transmission'])
