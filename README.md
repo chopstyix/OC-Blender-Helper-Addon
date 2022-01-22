@@ -2,30 +2,13 @@
 
 A helper addon for Octane Blender edition
 
-> **[New] WIP on a completely new and powerful tool for Blender & OC Blender users. See you soon**
+This is a fork from the original Blender helper addon to add support for Blender 3.0 and latest Octane Blender features in the original developers absence.
 
-
-
-> The reason I develop this addon is for speeding up user workflow, so users can access basic functions provided by Octane very quickly and newcomers can know where to start. The materials and their nodes setup are pretty rough and use them as a starting point
-
-> I welcome issue reports, please let me know where to promote and fix
-
-> Glhf
-
-
-
-## Versions
-> New Octane Helper 2021 is on the way :) See you in Jan 2021
-
-* **OctaneRender™ for Blender 2020.1.3_21.9 and later**
-* Current version **v2.7.6**
-  * Tested on **Blender_Octane_Edition_2020.1.3_21.9_stable** (latest)
-  * **Megascans Livelink Module** is included since **v2.6.0**
-    * [Archived Git Project](https://github.com/Yichen-Dou/MSLiveLink-OC-Blender)
+Tested, working on 2021.1.1 - 25.0 Blender 3.0 build.
 
 ## Downloads
 
-* Go to [Releases](https://github.com/Yichen-Dou/OC-Blender-Helper-Addon/releases)
+* Go to [Releases](https://github.com/llennoco22/OC-Blender-Helper-Addon/releases)
 
 * Download the newest **Octane_Helper.zip**
 
