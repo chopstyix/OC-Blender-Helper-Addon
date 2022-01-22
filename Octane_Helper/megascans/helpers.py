@@ -39,7 +39,7 @@ def add_components_tex(ntree, element):
     components = element['components']
     y_exp = 620
 
-    transform_node = ntree.nodes.new('ShaderNodeOctFullTransform')
+    transform_node = ntree.nodes.new('OctaneTransformValue')
     transform_node.name = 'transform'
 
     use_projection = (('surface' in element['categories'] or 'surface' in element['tags']) and prefs.use_projection_surface)
@@ -50,7 +50,10 @@ def add_components_tex(ntree, element):
     texNodes = []
 
     for component in components:
-        texNode = ntree.nodes.new('ShaderNodeOctImageTex')
+        if component['type'] in ['opacity','metallness','roughness','displacement','cavity']:
+            texNode = ntree.nodes.new('ShaderNodeOctFloatImageTex')
+        else:
+            texNode = ntree.nodes.new('ShaderNodeOctImageTex')
         texNode.location = (-720, y_exp)
         texNode.image = bpy.data.images.load(component['path'])
         texNode.show_texture = True
