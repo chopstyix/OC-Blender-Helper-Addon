@@ -118,7 +118,7 @@ def import_material(element):
     mat_name = element['name']
 
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
-    mat = create_material(bpy.context, 'MS_' + mat_name, 'ShaderNodeOctUniversalMat')
+    mat = create_material(bpy.context, 'MS_' + mat_name, 'OctaneUniversalMaterial')
     ntree = mat.node_tree
     nodes = ntree.nodes
     textures = [component['type'] for component in components]
@@ -133,14 +133,14 @@ def import_material(element):
     # Albedo and AO
     if('albedo' in textures):
         if('ao' in textures):
-            multiplyNode = nodes.new('ShaderNodeOctMultiplyTex')
+            multiplyNode = nodes.new('OctaneMultiplyTexture')
             multiplyNode.name = 'ao_multiply_albedo'
             multiplyNode.location = (-320, 300)
             ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs['Texture1'])
             ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs['Texture2'])
-            ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['root'].inputs['Albedo color'])
+            ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['root'].inputs['Albedo'])
         else:
-            ntree.links.new(nodes['albedo'].outputs[0], nodes['root'].inputs['Albedo color'])
+            ntree.links.new(nodes['albedo'].outputs[0], nodes['root'].inputs['Albedo'])
     
     # Specular
     if('specular' in textures):
@@ -149,26 +149,26 @@ def import_material(element):
     # Roughness
     if('roughness' in textures):
         ntree.links.new(nodes['roughness'].outputs[0], nodes['root'].inputs['Roughness'])
+        nodes['roughness'].inputs['Gamma'].default_value = 1
     
-    # Metalness
-    if(element['category'] == 'Metal'):
-        nodes['root'].inputs['Metallic'].default_value = 1
-    
+    # Metalness    
     if('metalness' in textures):
         ntree.links.new(nodes['metalness'].outputs[0], nodes['root'].inputs['Metallic'])
+        nodes['metalness'].inputs['Gamma'].default_value = 1
     
     # Displacement
     if('displacement' in textures):
+        nodes['displacement'].inputs['Gamma'].default_value = 1
         if prefs.disp_type == 'TEXTURE':
             resolution = get_component(components, 'displacement')['resolution']
-            dispNode = nodes.new('ShaderNodeOctDisplacementTex')
+            dispNode = nodes.new('OctaneTextureDisplacement')
             dispNode.name = 'disp'
             dispNode.displacement_level = disp_levels[resolution]
-            dispNode.displacement_surface = 'OCTANE_DISPLACEMENT_SMOOTH_NORMAL'
+            dispNode.displacement_surface = 'Follow smoothed normal'
             dispNode.inputs['Mid level'].default_value = 0.5
             dispNode.inputs['Height'].default_value = 0.1
         else:
-            dispNode = nodes.new('ShaderNodeOctVertexDisplacementTex')
+            dispNode = nodes.new('OctaneVertexDisplacement')
             dispNode.name = 'disp'
             dispNode.inputs['Auto bump map'].default_value = True
             dispNode.inputs['Mid level'].default_value = 0.1
@@ -181,32 +181,22 @@ def import_material(element):
     
     # Translucency
     if('translucency' in textures):
-        scatterNode = nodes.new('ShaderNodeOctScatteringMedium')
+        scatterNode = nodes.new('OctaneScattering')
         scatterNode.name = 'translucency_scatter'
-        scatterNode.inputs['Absorption Tex'].default_value = (1, 1, 1, 1)
-        scatterNode.inputs['Invert abs.'].default_value = True
+        scatterNode.inputs['Absorption'].default_value = (1, 1, 1, 1)
+        scatterNode.inputs['Invert absorption'].default_value = True
         scatterNode.location = (-320, -1000)
         ntree.links.new(nodes['translucency'].outputs[0], nodes['root'].inputs['Transmission'])
         ntree.links.new(nodes['translucency_scatter'].outputs[0], nodes['root'].inputs['Medium'])
     
     # Opacity
     if('opacity' in textures):
-        mixNode = nodes.new('ShaderNodeOctMixMat')
-        mixNode.name = 'opacity_mix_transparent'
-        mixNode.location = (300, 620)
-        mixNode.inputs['Amount'].default_value = 1
-        transparentNode = nodes.new('ShaderNodeOctDiffuseMat')
-        transparentNode.name = 'transparent'
-        transparentNode.location = (10, 670)
-        transparentNode.inputs['Opacity'].default_value = 0
-        ntree.links.new(nodes['opacity_mix_transparent'].outputs[0], nodes['output'].inputs['Surface'])
-        ntree.links.new(nodes['root'].outputs[0], nodes['opacity_mix_transparent'].inputs['Material1'])
-        ntree.links.new(nodes['transparent'].outputs[0], nodes['opacity_mix_transparent'].inputs['Material2'])
-        ntree.links.new(nodes['opacity'].outputs[0], nodes['opacity_mix_transparent'].inputs['Amount'])
+        ntree.links.new(nodes['opacity'].outputs[0], nodes['root'].inputs['Opacity'])
 
     # Normal
     if('normal' in textures):
         ntree.links.new(nodes['normal'].outputs[0], nodes['root'].inputs['Normal'])
+        nodes['normal'].inputs['Gamma'].default_value = 1
     
     # Bump
     # ---
