@@ -29,7 +29,6 @@ def create_material(context, name, root):
         mainMat.brdf_model = prefs.brdf_model
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
-    print("ran without issue")
     return mat
 
 def assign_material(context, mat):
@@ -67,7 +66,7 @@ def assign_oclight(context, type):
 
 def get_bright_color(color):
     hsv_color = colorsys.rgb_to_hsv(color[0], color[1], color[2])
-    return colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], 1.0) + (1.0,)
+    return colorsys.hsv_to_rgb(hsv_color[0], hsv_color[1], 1.0)
 
 def update_sss(self, context):
     if(self.enable_geneate_transmission):
@@ -254,7 +253,7 @@ class OCtaneAssignClearGlass(Operator):
         default=0.063,
         min=0.0,
         max=1.0,
-        step=10, 
+        step=10,
         precision=3
     )
 
@@ -263,7 +262,7 @@ class OCtaneAssignClearGlass(Operator):
         default=1.45,
         min=1,
         max=8,
-        step=10, 
+        step=10,
         precision=3
     )
 
@@ -272,16 +271,16 @@ class OCtaneAssignClearGlass(Operator):
         mat = create_material(context, 'OC_ClearGlass', 'OctaneSpecularMaterial')
         nodes = mat.node_tree.nodes
         nodes[1].inputs['Roughness'].default_value = self.roughness
-        nodes[1].inputs['Index'].default_value = self.index
+        nodes[1].inputs['Index of refraction'].default_value = self.index
         osl_node = nodes.new('OctaneOSLTexture')
         osl_node.location = (-210, 30)
-        osl_node.mode = 'EXTERNAL'
-        osl_node.filepath = os.path.join(osl_dir, 'clear_glass.osl')
+        osl_node.script_type = 'EXTERNAL'
+        osl_node.external_file_path = os.path.join(osl_dir, 'clear_glass.osl')
         mat.node_tree.links.new(osl_node.outputs[0], nodes[1].inputs['Opacity'])
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -290,36 +289,36 @@ class OctaneAssignSSS(Operator):
     bl_label = 'SSS Material'
     bl_idname = 'octane.assign_sss'
     bl_options = {'REGISTER', 'UNDO'}
-    
+
     sss_albedo: FloatVectorProperty(
         name="Albedo",
-        default = (0.035, 0.062, 0.085, 1.0),
-        size=4,
+        default = (0.035, 0.062, 0.085),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR",
         update=update_sss)
-    
+
     sss_transmission: FloatVectorProperty(
         name="Transmission",
-        default = get_bright_color((0.035, 0.062, 0.085, 1.0)),
-        size=4,
+        default = get_bright_color((0.035, 0.062, 0.085)),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR")
-    
+
     sss_absorption: FloatVectorProperty(
         name="Absorption",
-        default = (0, 0, 0, 1),
-        size=4,
+        default = (0, 0, 0),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR")
-    
+
     sss_scattering: FloatVectorProperty(
         name="Scattering",
-        default = (0, 0, 0, 1),
-        size=4,
+        default = (1, 1, 1),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR")
@@ -328,7 +327,7 @@ class OctaneAssignSSS(Operator):
         name="Density",
         default=5.0,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
 
     enable_geneate_transmission: BoolProperty(
@@ -348,21 +347,22 @@ class OctaneAssignSSS(Operator):
         col.prop(self, 'sss_scattering', text='Scattering')
         col.separator()
         col.prop(self, 'sss_density', text='Density')
-    
+
     def execute(self, context):
         # Create material
         mat = create_material(context, 'OC_SSS', 'OctaneUniversalMaterial')
         nodes = mat.node_tree.nodes
+        nodes['root'].inputs['Transmission type'].default_value = 'Diffuse'
         # Diffuse Color
         diffuseNode = nodes.new('OctaneRGBColor')
         diffuseNode.location = (-210, 300)
         diffuseNode.name = 'DiffuseColor'
-        diffuseNode.inputs['Color'].default_value = self.sss_albedo
+        diffuseNode.a_value = self.sss_albedo
         # Transmission Color
         transmissionNode = nodes.new('OctaneRGBColor')
         transmissionNode.location = (-210, 400)
         transmissionNode.name = 'TransmissionColor'
-        transmissionNode.inputs['Color'].default_value = self.sss_transmission
+        transmissionNode.a_value = self.sss_transmission
         # Scatter Medium
         scatterNode = nodes.new('OctaneScattering')
         scatterNode.location = (-210, -500)
@@ -373,11 +373,11 @@ class OctaneAssignSSS(Operator):
         # Connections
         mat.node_tree.links.new(scatterNode.outputs[0], nodes[1].inputs['Medium'])
         mat.node_tree.links.new(transmissionNode.outputs[0], nodes[1].inputs['Transmission'])
-        mat.node_tree.links.new(diffuseNode.outputs[0], nodes[1].inputs['Albedo color'])
+        mat.node_tree.links.new(diffuseNode.outputs[0], nodes[1].inputs['Albedo'])
         # Assign material to selected
         assign_material(context, mat)
         return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -394,27 +394,27 @@ class OctaneAssignEmission(Operator):
 
     rgb_emission_color: FloatVectorProperty(
         name="Color",
-        size=4,
-        default = (1, 1, 1, 1),
+        size=3,
+        default = (1, 1, 1),
         min = 0,
         max = 1,
         subtype="COLOR")
-    
+
     emission_power: FloatProperty(
-        name="Power", 
-        default=10, 
+        name="Power",
+        default=10,
         min=0.0001,
-        step=10, 
+        step=10,
         precision=4)
-    
+
     emission_surface_brightness: BoolProperty(
         name="Surface Brightness",
         default=True)
-    
+
     emission_double: BoolProperty(
         name="Double Sided",
         default=False)
-    
+
     light_type: EnumProperty(items=[
         ('None', 'None', ''),
         ('Mesh', 'Mesh', ''),
@@ -423,7 +423,7 @@ class OctaneAssignEmission(Operator):
         ('Spot', 'Spot', ''),
         ('Point Toon', 'Point Toon', ''),
         ('Directional Toon', 'Directional Toon', '')
-    ], name='Mark as', default='Mesh') 
+    ], name='Mark as', default='Mesh')
 
     def draw(self, context):
         layout = self.layout
@@ -448,7 +448,7 @@ class OctaneAssignEmission(Operator):
             emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
             rgbNode = nodes.new('OctaneRGBColor')
             rgbNode.location = (-410, 300)
-            rgbNode.inputs['Color'].default_value = self.rgb_emission_color
+            rgbNode.a_value = self.rgb_emission_color
             mat.node_tree.links.new(rgbNode.outputs[0], emissionNode.inputs['Texture'])
             mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
         elif(self.emission_type == 'TEX'):
@@ -466,10 +466,10 @@ class OctaneAssignEmission(Operator):
             emissionNode.location = (-210, 300)
             emissionNode.inputs['Power'].default_value = self.emission_power
             emissionNode.inputs['Surface brightness'].default_value = self.emission_surface_brightness
-            emissionNode.inputs['Double-sided'].default_value = self.emission_double
+            emissionNode.inputs['Double sided'].default_value = self.emission_double
             rgbNode = nodes.new('OctaneRGBColor')
             rgbNode.location = (-410, 400)
-            rgbNode.inputs['Color'].default_value = self.rgb_emission_color
+            rgbNode.a_value = self.rgb_emission_color
             imgNode = nodes.new('ShaderNodeOctImageTex')
             imgNode.location = (-460, 300)
             imgNode.image = bpy.data.images.load(self.filepath)
@@ -485,7 +485,7 @@ class OctaneAssignEmission(Operator):
         assign_material(context, mat)
         assign_oclight(context, self.light_type)
         return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         if(self.emission_type == 'RGB'):
             wm = context.window_manager
@@ -586,7 +586,7 @@ class OctaneAssignPattern(Operator):
         col.prop(self, 'generate_subdiv')
         col.prop(self, 'generate_shrinkwrap')
         col.prop(self, 'generate_displace')
-    
+
     def execute(self, context):
         if(self.filepath != ''):
             # Create material
@@ -611,10 +611,10 @@ class OctaneAssignPattern(Operator):
             if(self.material_type == 'Diffuse'):
                 mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Diffuse'])
             else:
-                mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Albedo color'])
+                mat.node_tree.links.new(imgNode.outputs[0], baseNode.inputs['Albedo'])
             mat.node_tree.links.new(alphaImgNode.outputs[0], nodes[1].inputs['Amount'])
-            mat.node_tree.links.new(baseNode.outputs[0], nodes[1].inputs['Material1'])
-            mat.node_tree.links.new(transparentNode.outputs[0], nodes[1].inputs['Material2'])
+            mat.node_tree.links.new(baseNode.outputs[0], nodes[1].inputs['First material'])
+            mat.node_tree.links.new(transparentNode.outputs[0], nodes[1].inputs['Second material'])
             # Assign material to selected
             assign_material(context, mat)
             # Add modifiers
@@ -651,41 +651,41 @@ class OctaneAssignMantaflowVolume(Operator):
 
     smoke_color: FloatVectorProperty(
         name="Smoke Color",
-        default = (0.129468, 0.129468, 0.129468, 1.000000),
-        size=4,
+        default = (0.129468, 0.129468, 0.129468),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR")
 
     fire_color: FloatVectorProperty(
         name="Fire Color",
-        default = (1.000000, 0.261137, 0.056232, 1.000000),
+        default = (1.000000, 0.261137, 0.056232,1),
         size=4,
         min = 0,
         max = 1,
         subtype="COLOR")
 
     fire_power: FloatProperty(
-        name="Power", 
-        default=100, 
+        name="Power",
+        default=100,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
 
     density: FloatProperty(
-        name="Density", 
-        default=8, 
+        name="Density",
+        default=8,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
-    
+
     details: FloatProperty(
-        name="Details", 
-        default=0.2, 
+        name="Details",
+        default=0.2,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
-    
+
     def draw(self, context):
         layout = self.layout
         layout.prop(self, 'mat_type', text='')
@@ -708,9 +708,9 @@ class OctaneAssignMantaflowVolume(Operator):
 
         # Set default values for root shader
         nodes[1].inputs['Density'].default_value = self.density
-        nodes[1].inputs['Vol. step length'].default_value = self.details
-        nodes[1].inputs['Absorption Tex'].default_value = self.smoke_color
-        nodes[1].inputs['Scattering Tex'].default_value = (1.000000, 1.000000, 1.000000, 1.000000)
+        nodes[1].inputs['Volume step length'].default_value = self.details
+        nodes[1].inputs['Absorption'].default_value = self.smoke_color
+        nodes[1].inputs['Scattering'].default_value = (1.000000, 1.000000, 1.000000)
 
         # Abs ramp node
         absRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
@@ -733,12 +733,12 @@ class OctaneAssignMantaflowVolume(Operator):
         sctRampNode.location = (-210, 200)
 
         # Connect abs and scatter ramps to root shader node
-        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Abs. ramp'])
-        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scat. ramp'])
+        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Absorption ramp'])
+        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scattering ramp'])
 
         # Add emission if it's a fire
         if(self.mat_type == 'Fire'):
-            emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex') 
+            emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
             emissionColor1 = emissionRampNode.color_ramp.elements[0]
             emissionColor1.position = 0
             emissionColor2 = emissionRampNode.color_ramp.elements[1]
@@ -752,9 +752,9 @@ class OctaneAssignMantaflowVolume(Operator):
             emissionNode.inputs['Power'].default_value = self.fire_power
             emissionNode.location = (-210, -200)
 
-            mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emiss. ramp'])
+            mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emission ramp'])
             mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
-        
+
         # Assign material to selected
         assign_material(context, mat)
 
@@ -775,39 +775,39 @@ class OctaneAssignEmbergenVolume(Operator):
 
     smoke_color: FloatVectorProperty(
         name="Smoke Color",
-        default = (0.478368, 0.478368, 0.478368, 1.000000),
-        size=4,
+        default = (0.478368, 0.478368, 0.478368),
+        size=3,
         min = 0,
         max = 1,
         subtype="COLOR")
 
     fire_color: FloatVectorProperty(
         name="Fire Color",
-        default = (1.000000, 0.276358, 0.086804, 1.000000),
+        default = (1.000000, 0.276358, 0.086804,1),
         size=4,
         min = 0,
         max = 1,
         subtype="COLOR")
 
     fire_power: FloatProperty(
-        name="Power", 
-        default=50, 
+        name="Power",
+        default=50,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
 
     density: FloatProperty(
-        name="Density", 
-        default=2, 
+        name="Density",
+        default=2,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
-    
+
     details: FloatProperty(
-        name="Details", 
-        default=2, 
+        name="Details",
+        default=2,
         min=0.001,
-        step=10, 
+        step=10,
         precision=3)
 
     def draw(self, context):
@@ -828,9 +828,9 @@ class OctaneAssignEmbergenVolume(Operator):
 
         # Set default values for root shader
         nodes[1].inputs['Density'].default_value = self.density
-        nodes[1].inputs['Vol. step length'].default_value = self.details
-        nodes[1].inputs['Absorption Tex'].default_value = self.smoke_color
-        nodes[1].inputs['Scattering Tex'].default_value = (1.000000, 1.000000, 1.000000, 1.000000)
+        nodes[1].inputs['Volume step length'].default_value = self.details
+        nodes[1].inputs['Absorption'].default_value = self.smoke_color
+        nodes[1].inputs['Scattering'].default_value = (1.000000, 1.000000, 1.000000)
 
         # Abs ramp node
         absRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
@@ -855,7 +855,7 @@ class OctaneAssignEmbergenVolume(Operator):
         sctRampNode.location = (-210, 200)
 
         # Emission ramp node
-        emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex') 
+        emissionRampNode = nodes.new('ShaderNodeOctVolumeRampTex')
         emissionColor1 = emissionRampNode.color_ramp.elements[0]
         emissionColor1.position = 0.366102
         emissionColor2 = emissionRampNode.color_ramp.elements[1]
@@ -871,11 +871,11 @@ class OctaneAssignEmbergenVolume(Operator):
         emissionNode.location = (-210, -200)
 
         # Link nodes
-        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Abs. ramp'])
-        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scat. ramp'])
-        mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emiss. ramp'])
+        mat.node_tree.links.new(absRampNode.outputs[0], nodes[1].inputs['Absorption ramp'])
+        mat.node_tree.links.new(sctRampNode.outputs[0], nodes[1].inputs['Scattering ramp'])
+        mat.node_tree.links.new(emissionRampNode.outputs[0], nodes[1].inputs['Emission ramp'])
         mat.node_tree.links.new(emissionNode.outputs[0], nodes[1].inputs['Emission'])
-        
+
         # Assign material to selected
         assign_material(context, mat)
 
@@ -987,7 +987,7 @@ class OctaneAutosmooth(Operator):
             obj.data.use_auto_smooth = self.enable_autosmooth
             obj.data.auto_smooth_angle = (pi * self.autosmooth_value / 180)
         return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         self.enable_autosmooth = True
         self.autosmooth_value = (context.active_object.data.auto_smooth_angle * 180 / pi)
