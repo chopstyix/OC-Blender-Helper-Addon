@@ -27,7 +27,7 @@ bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
     "author": "Yichen Dou, Ed Oconell",
-    "version": (2, 7, 8),
+    "version": (2, 7, 9),
     "blender": (3, 0, 0),
     "warning": "",
     "wiki_url": "https://github.com/llennoco22/OC-Blender-Helper-Addon",
