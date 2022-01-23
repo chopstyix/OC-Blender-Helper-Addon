@@ -26,7 +26,7 @@ import rna_keymap_ui
 bl_info = {
     "name": "Octane Helper",
     "description": "A helper addon for Octane Blender edition",
-    "author": "Yichen Dou, Ed O'Connell",
+    "author": "Yichen Dou, Ed Oconell",
     "version": (2, 7, 8),
     "blender": (3, 0, 0),
     "warning": "",
@@ -96,17 +96,17 @@ class OctaneHelperPrefs(AddonPreferences):
 
     surface_projection: EnumProperty(
         items = [
-            ('ShaderNodeOctBoxProjection', 'Box Projection', ''),
-            ('ShaderNodeOctCylProjection', 'Cylindrical Projection', ''),
-            ('ShaderNodeOctPerspProjection', 'Perspective Projection', ''),
-            ('ShaderNodeOctSphericalProjection', 'Spherical Projection', ''),
-            ('ShaderNodeOctUVWProjection', 'UVW Projection', ''),
-            ('ShaderNodeOctXYZProjection', 'XYZ Projection', ''),
-            ('ShaderNodeOctTriplanarProjection', 'Triplanar Projection', ''),
-            ('ShaderNodeOctOSLUVProjection', 'OSL Delayed Projection', ''),
-            ('ShaderNodeOctOSLProjection', 'OSL Projection', '')
+            ('OctaneBox', 'Box Projection', ''),
+            ('OctaneCylindrical', 'Cylindrical Projection', ''),
+            ('OctanePerspective', 'Perspective Projection', ''),
+            ('OctaneSpherical', 'Spherical Projection', ''),
+            ('OctaneMeshUVProjection', 'UVW Projection', ''),
+            ('OctaneXYZToUVW', 'XYZ Projection', ''),
+            ('OctaneTriplanar', 'Triplanar Projection', ''),
+            ('OctaneOSLDelayedUV', 'OSL Delayed Projection', ''),
+            ('OctaneOSLProjection', 'OSL Projection', '')
         ],
-        default = 'ShaderNodeOctUVWProjection'
+        default = 'OctaneMeshUVProjection'
     )
 
     def draw(self, context):
