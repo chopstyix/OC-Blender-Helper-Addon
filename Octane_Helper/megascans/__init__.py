@@ -141,6 +141,7 @@ def import_material(element):
             ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['root'].inputs['Albedo'])
         else:
             ntree.links.new(nodes['albedo'].outputs[0], nodes['root'].inputs['Albedo'])
+        nodes['ao'].inputs['Gamma'].default_value = 1
     
     # Specular
     if('specular' in textures):
@@ -195,6 +196,7 @@ def import_material(element):
     # Opacity
     if('opacity' in textures):
         ntree.links.new(nodes['opacity'].outputs[0], nodes['root'].inputs['Opacity'])
+        nodes['opacity'].inputs['Gamma'].default_value = 1
 
     # Normal
     if('normal' in textures):
