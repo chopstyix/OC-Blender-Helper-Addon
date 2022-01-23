@@ -50,10 +50,10 @@ def add_components_tex(ntree, element):
     texNodes = []
 
     for component in components:
-        if component['type'] in ['opacity','metallness','roughness','displacement','cavity']:
-            texNode = ntree.nodes.new('ShaderNodeOctFloatImageTex')
-        else:
+        if component['type'] in ['albedo','diffuse','specular','translucency','normal']:
             texNode = ntree.nodes.new('ShaderNodeOctImageTex')
+        else:
+            texNode = ntree.nodes.new('ShaderNodeOctFloatImageTex')
         texNode.location = (-720, y_exp)
         texNode.image = bpy.data.images.load(component['path'])
         texNode.show_texture = True
