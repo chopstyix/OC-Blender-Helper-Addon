@@ -61,28 +61,28 @@ class OctaneConnectTransformProjection(Operator):
 
     transform_type: EnumProperty(
         items = [
-            ('ShaderNodeOctScaleTransform', 'Scale Transform', ''),
-            ('ShaderNodeOctRotateTransform', 'Rotate Transform', ''),
-            ('ShaderNodeOctFullTransform', 'Full Transform', ''),
-            ('ShaderNodeOct2DTransform', '2D Transform', ''),
-            ('ShaderNodeOct3DTransform', '3D Transform', '')
+            ('OctaneScale', 'Scale Transform', ''),
+            ('OctaneRotation', 'Rotate Transform', ''),
+            ('OctaneTransformValue', 'Full Transform', ''),
+            ('Octane2DTransformation', '2D Transform', ''),
+            ('Octane3DTransformation', '3D Transform', '')
         ],
-        default = 'ShaderNodeOctFullTransform'
+        default = 'OctaneTransformValue'
     )
 
     projection_type: EnumProperty(
         items = [
-            ('ShaderNodeOctBoxProjection', 'Box Projection', ''),
-            ('ShaderNodeOctCylProjection', 'Cylindrical Projection', ''),
-            ('ShaderNodeOctPerspProjection', 'Perspective Projection', ''),
-            ('ShaderNodeOctSphericalProjection', 'Spherical Projection', ''),
-            ('ShaderNodeOctUVWProjection', 'UVW Projection', ''),
-            ('ShaderNodeOctXYZProjection', 'XYZ Projection', ''),
-            ('ShaderNodeOctTriplanarProjection', 'Triplanar Projection', ''),
-            ('ShaderNodeOctOSLUVProjection', 'OSL Delayed Projection', ''),
-            ('ShaderNodeOctOSLProjection', 'OSL Projection', '')
+            ('OctaneBox', 'Box Projection', ''),
+            ('OctaneCylindrical', 'Cylindrical Projection', ''),
+            ('OctanePerspective', 'Perspective Projection', ''),
+            ('OctaneSpherical', 'Spherical Projection', ''),
+            ('OctaneMeshUVProjection', 'UVW Projection', ''),
+            ('OctaneXYZToUVW', 'XYZ Projection', ''),
+            ('OctaneTriplanar', 'Triplanar Projection', ''),
+            ('OctaneOSLDelayedUV', 'OSL Delayed Projection', ''),
+            ('OctaneOSLProjection', 'OSL Projection', '')
         ],
-        default = 'ShaderNodeOctUVWProjection'
+        default = 'OctaneMeshUVProjection'
     )
 
     @classmethod
@@ -97,7 +97,7 @@ class OctaneConnectTransformProjection(Operator):
         if(count == len(active_nodes)):
             return True
         return False
-    
+
     def draw(self, context):
         layout = self.layout
         col = layout.column(align=True)
@@ -127,7 +127,7 @@ class OctaneConnectTransformProjection(Operator):
         if(self.use_transform):
             transform_node = ntree.nodes.new(self.transform_type)
             transform_node.location = (active_nodes[0].location.x - 320, get_y_nodes(ntree, active_nodes, 'Mid'))
-        
+
         if(self.use_projection):
             project_node = ntree.nodes.new(self.projection_type)
             if(self.use_transform):
@@ -139,14 +139,14 @@ class OctaneConnectTransformProjection(Operator):
             if(self.use_transform):
                 remove_link(ntree, active_node, 'Transform')
                 ntree.links.new(active_node.inputs['Transform'], transform_node.outputs[0])
-            
+
             if(self.use_projection):
                 remove_link(ntree, active_node, 'Projection')
                 ntree.links.new(active_node.inputs['Projection'], project_node.outputs[0])
 
         ntree.nodes.update()
         return {'FINISHED'}
-    
+
     def invoke(self, context, event):
         wm = context.window_manager
         return wm.invoke_props_dialog(self)
@@ -159,7 +159,7 @@ class OctaneSwitchAB(Operator):
     @classmethod
     def poll(cls, context):
         if(len(context.selected_nodes) != 0):
-            if(context.selected_nodes[0].bl_idname in ['ShaderNodeOctMixMat', 'ShaderNodeOctMixTex', 'ShaderNodeOctCosineMixTex']):
+            if(context.selected_nodes[0].bl_idname in ['OctaneMixMaterial', 'OctaneMixTexture', 'OctaneCosineMixTexture']):
                 return True
         return False
 
@@ -175,29 +175,29 @@ class OctaneSwitchAB(Operator):
         a = None
         b = None
 
-        if(context.selected_nodes[0].bl_idname == 'ShaderNodeOctMixMat'):
-            if(context.selected_nodes[0].inputs['Material1'].is_linked):
-                a = context.selected_nodes[0].inputs['Material1'].links[0].from_node
-                remove_link(ntree, context.selected_nodes[0], 'Material1')
-            if(context.selected_nodes[0].inputs['Material2'].is_linked):
-                b = context.selected_nodes[0].inputs['Material2'].links[0].from_node
-                remove_link(ntree, context.selected_nodes[0], 'Material2')
+        if(context.selected_nodes[0].bl_idname == 'OctaneMixMaterial'):
+            if(context.selected_nodes[0].inputs[1].is_linked):
+                a = context.selected_nodes[0].inputs[1].links[0].from_node
+                remove_link(ntree, context.selected_nodes[0], 'First material')
+            if(context.selected_nodes[0].inputs[2].is_linked):
+                b = context.selected_nodes[0].inputs[2].links[0].from_node
+                remove_link(ntree, context.selected_nodes[0], 'Second material')
             if(a):
-                ntree.links.new(a.outputs[0], context.selected_nodes[0].inputs['Material2'])
+                ntree.links.new(a.outputs[0], context.selected_nodes[0].inputs[2])
             if(b):
-                ntree.links.new(b.outputs[0], context.selected_nodes[0].inputs['Material1'])
+                ntree.links.new(b.outputs[0], context.selected_nodes[0].inputs[1])
         else:
-            if(context.selected_nodes[0].inputs['Texture1'].is_linked):
-                a = context.selected_nodes[0].inputs['Texture1'].links[0].from_node
-                remove_link(ntree, context.selected_nodes[0], 'Texture1')
-            if(context.selected_nodes[0].inputs['Texture2'].is_linked):
-                b = context.selected_nodes[0].inputs['Texture2'].links[0].from_node
-                remove_link(ntree, context.selected_nodes[0], 'Texture2')
+            if(context.selected_nodes[0].inputs[1].is_linked):
+                a = context.selected_nodes[0].inputs[1].links[0].from_node
+                remove_link(ntree, context.selected_nodes[0], 'First texture')
+            if(context.selected_nodes[0].inputs[2].is_linked):
+                b = context.selected_nodes[0].inputs[2].links[0].from_node
+                remove_link(ntree, context.selected_nodes[0], 'Second texture')
             if(a):
-                ntree.links.new(a.outputs[0], context.selected_nodes[0].inputs['Texture2'])
+                ntree.links.new(a.outputs[0], context.selected_nodes[0].inputs[2])
             if(b):
-                ntree.links.new(b.outputs[0], context.selected_nodes[0].inputs['Texture1'])
-        
+                ntree.links.new(b.outputs[0], context.selected_nodes[0].inputs[1])
+
         ntree.nodes.update()
         return {'FINISHED'}
 
@@ -254,15 +254,15 @@ class OctaneMixBy(Operator):
                 node.location.x -= 250
 
         if(len([active_node for active_node in active_nodes if 'Mat' in active_node.bl_idname])):
-            mixNode = ntree.nodes.new('ShaderNodeOctMixMat')
+            mixNode = ntree.nodes.new('OctaneMixMaterial')
             mixNode.location = loc
-            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs['Material1'])
-            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs['Material2'])
+            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs[1])
+            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs[2])
         else:
-            mixNode = ntree.nodes.new('ShaderNodeOctMixTex')
+            mixNode = ntree.nodes.new('OctaneMixTexture')
             mixNode.location = loc
-            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs['Texture1'])
-            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs['Texture2'])
+            ntree.links.new(active_nodes[0].outputs[0], mixNode.inputs[1])
+            ntree.links.new(active_nodes[1].outputs[0], mixNode.inputs[2])
 
         if(self.mix_type!='None'):
             mixAmountNode = ntree.nodes.new(self.mix_type)
@@ -317,25 +317,25 @@ class OctaneNodeConvertTo(Operator):
 
             # A list of socket objects, not strs
             # Different names for Diffuse color in Universal and Other shaders. We need to handle it. This shoule be removed in the future
-            common_sockets = [in_socket for in_socket in active_node.inputs if (in_socket.name in newNode.inputs) or (in_socket.name in ['Albedo color', 'Diffuse'] and ('Albedo color' in newNode.inputs or 'Diffuse' in newNode.inputs))]
+            common_sockets = [in_socket for in_socket in active_node.inputs if (in_socket.name in newNode.inputs) or (in_socket.name in ['Albedo', 'Diffuse'] and ('Albedo' in newNode.inputs or 'Diffuse' in newNode.inputs))]
             for common_socket in common_sockets:
                 if(common_socket.is_linked):
-                    if(common_socket.name == 'Albedo color' and 'Diffuse' in newNode.inputs):
+                    if(common_socket.name == 'Albedo' and 'Diffuse' in newNode.inputs):
                         ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs['Diffuse'])
-                    elif(common_socket.name == 'Diffuse' and 'Albedo color' in newNode.inputs):
-                        ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs['Albedo color'])
+                    elif(common_socket.name == 'Diffuse' and 'Albedo' in newNode.inputs):
+                        ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs['Albedo'])
                     else:
                         ntree.links.new(common_socket.links[0].from_node.outputs[0], newNode.inputs[common_socket.name])
                 elif(hasattr(common_socket, 'default_value') and common_socket.name not in except_list):
-                    if(common_socket.name == 'Albedo color' and 'Diffuse' in newNode.inputs):
+                    if(common_socket.name == 'Albedo' and 'Diffuse' in newNode.inputs):
                         newNode.inputs['Diffuse'].default_value = common_socket.default_value
-                    elif(common_socket.name == 'Diffuse' and 'Albedo color' in newNode.inputs):
-                        newNode.inputs['Albedo color'].default_value = common_socket.default_value
+                    elif(common_socket.name == 'Diffuse' and 'Albedo' in newNode.inputs):
+                        newNode.inputs['Albedo'].default_value = common_socket.default_value
                     else:
                         if(hasattr(newNode.inputs[common_socket.name], 'default_value')):
                             newNode.inputs[common_socket.name].default_value = common_socket.default_value
                         else:
-                            rgb_node = ntree.nodes.new('ShaderNodeOctRGBSpectrumTex')
+                            rgb_node = ntree.nodes.new('OctaneRGBColor')
                             rgb_node.inputs['Color'].default_value = common_socket.default_value
                             rgb_node.location = (newNode.location.x - 200, newNode.location.y)
                             ntree.links.new(rgb_node.outputs[0], newNode.inputs[common_socket.name])
