@@ -116,9 +116,10 @@ def import_material(element):
     
     components = element['components']
     mat_name = element['name']
+    mat_id = element['id']
 
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
-    mat = create_material(bpy.context, 'MS_' + mat_name, 'OctaneUniversalMaterial')
+    mat = create_material(bpy.context, mat_name + '_' + mat_id, 'OctaneUniversalMaterial')
     ntree = mat.node_tree
     nodes = ntree.nodes
     textures = [component['type'] for component in components]
@@ -130,47 +131,77 @@ def import_material(element):
     #if (is_in_element(['surface', 'atlas'], element)):
     bpy.types.Material.copied_mat = mat
 
-    # Albedo and AO
+    # Translucency
+    if('translucency' in textures):
+        # scatterNode = nodes.new('OctaneScattering')
+        # scatterNode.name = 'translucency_scatter'
+        # scatterNode.inputs['Absorption'].default_value = (1, 1, 1)
+        # scatterNode.inputs['Invert absorption'].default_value = True
+        # scatterNode.location = (-320, -1000)
+        nodes['Universal material'].inputs[2].default_value = 'Diffuse' # -- OPSTYIX Patch
+        ntree.links.new(nodes['translucency'].outputs[0], nodes['Universal material'].inputs['Transmission'])
+        # ntree.links.new(nodes['translucency_scatter'].outputs[0], nodes['Universal material'].inputs['Medium']) -- OPSTYIX Patch, disabled cause of preferences :)
+ 
+   # Albedo and AO
     if('albedo' in textures):
-        if('ao' in textures):
-            multiplyNode = nodes.new('OctaneMultiplyTexture')
-            multiplyNode.name = 'ao_multiply_albedo'
-            multiplyNode.location = (-320, 300)
-            ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
-            ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
-            ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['root'].inputs['Albedo'])
-        else:
-            ntree.links.new(nodes['albedo'].outputs[0], nodes['root'].inputs['Albedo'])
-        nodes['ao'].inputs['Gamma'].default_value = 1
+        ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+        # if('ao' in textures): # OPSTYIX Patch, disable cause I hate AO :)
+            # multiplyNode = nodes.new('OctaneMultiplyTexture')
+            # multiplyNode.name = 'ao_multiply_albedo'
+            # multiplyNode.location = (-320, 300)
+            # ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
+            # ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
+            # ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+        # else:
+            # ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+        # nodes['ao'].inputs['Legacy gamma'].default_value = 1
     
     # Specular
     if('specular' in textures):
-        ntree.links.new(nodes['specular'].outputs[0], nodes['root'].inputs['Specular'])
-    
+        ntree.links.new(nodes['specular'].outputs[0], nodes['Universal material'].inputs['Specular'])
+        nodes['specular'].inputs['Legacy gamma'].default_value = 1 
+
     # Roughness
     if('roughness' in textures):
-        ntree.links.new(nodes['roughness'].outputs[0], nodes['root'].inputs['Roughness'])
-        nodes['roughness'].inputs['Gamma'].default_value = 1
+        ntree.links.new(nodes['roughness'].outputs[0], nodes['Universal material'].inputs['Roughness'])
+        nodes['roughness'].inputs['Legacy gamma'].default_value = 1
     
     # Metalness
     #if(element['category'] == 'Metal'):
-    #    nodes['root'].inputs['Metallic'].default_value = 1
+    #    nodes['Universal material'].inputs['Metallic'].default_value = 1
     
     if('metalness' in textures):
-        ntree.links.new(nodes['metalness'].outputs[0], nodes['root'].inputs['Metallic'])
-        nodes['metalness'].inputs['Gamma'].default_value = 1
+        ntree.links.new(nodes['metalness'].outputs[0], nodes['Universal material'].inputs['Metallic'])
+        nodes['metalness'].inputs['Legacy gamma'].default_value = 1    
     
+    # Opacity
+    if('opacity' in textures):
+        ntree.links.new(nodes['opacity'].outputs[0], nodes['Universal material'].inputs['Opacity'])
+        nodes['opacity'].inputs['Legacy gamma'].default_value = 1
+
+    # Bump
+    if('bump' in textures):  # Added support for bump map -- OPSTYIX Patch
+        ntree.links.new(nodes['bump'].outputs[0], nodes['Universal material'].inputs['Bump'])
+        nodes['bump'].inputs['Legacy gamma'].default_value = 1
+        nodes['bump'].inputs[0].default_value = 0.2 # OPSTYIX patch
+
+    # Normal
+    if('normal' in textures):
+        ntree.links.new(nodes['normal'].outputs[0], nodes['Universal material'].inputs['Normal'])
+        nodes['normal'].inputs['Legacy gamma'].default_value = 1
+
     # Displacement
     if('displacement' in textures):
-        nodes['displacement'].inputs['Gamma'].default_value = 1
+        nodes['displacement'].inputs['Legacy gamma'].default_value = 1
         if prefs.disp_type == 'TEXTURE':
             resolution = get_component(components, 'displacement')['resolution']
             dispNode = nodes.new('OctaneTextureDisplacement')
             dispNode.name = 'disp'
-            dispNode.displacement_level = disp_levels[resolution]
-            dispNode.displacement_surface = 'Follow smoothed normal'
+            # dispNode.displacement_level = disp_levels[resolution]  # Disabled, doesn't seem to work -- OPSTYIX patch
+            # dispNode.displacement_surface = 'Follow smoothed normal' # Disabled, doesn't seem to work -- OPSTYIX patch
             dispNode.inputs['Mid level'].default_value = 0.5
             dispNode.inputs['Height'].default_value = 0.1
+            dispNode.inputs[2].default_value = '2048x2048' # Changed default value of displacement texture resolution -- OPSTYIX patch
         else:
             dispNode = nodes.new('OctaneVertexDisplacement')
             dispNode.name = 'disp'
@@ -181,31 +212,8 @@ def import_material(element):
         dispNode.location = (-320, -680)
 
         ntree.links.new(nodes['displacement'].outputs[0], nodes['disp'].inputs['Texture'])
-        ntree.links.new(nodes['disp'].outputs[0], nodes['root'].inputs['Displacement'])
-    
-    # Translucency
-    if('translucency' in textures):
-        scatterNode = nodes.new('OctaneScattering')
-        scatterNode.name = 'translucency_scatter'
-        scatterNode.inputs['Absorption'].default_value = (1, 1, 1)
-        scatterNode.inputs['Invert absorption'].default_value = True
-        scatterNode.location = (-320, -1000)
-        ntree.links.new(nodes['translucency'].outputs[0], nodes['root'].inputs['Transmission'])
-        ntree.links.new(nodes['translucency_scatter'].outputs[0], nodes['root'].inputs['Medium'])
-    
-    # Opacity
-    if('opacity' in textures):
-        ntree.links.new(nodes['opacity'].outputs[0], nodes['root'].inputs['Opacity'])
-        nodes['opacity'].inputs['Gamma'].default_value = 1
-
-    # Normal
-    if('normal' in textures):
-        ntree.links.new(nodes['normal'].outputs[0], nodes['root'].inputs['Normal'])
-        nodes['normal'].inputs['Gamma'].default_value = 1
-    
-    # Bump
-    # ---
-    
+        ntree.links.new(nodes['disp'].outputs[0], nodes['Universal material'].inputs['Displacement'])
+		
     # Fuzz
     # ---
     

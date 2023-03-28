@@ -22,7 +22,7 @@ def create_material(context, name, root):
     # Create a new shader node
     mainMat = nodes.new(root)
     mainMat.location = oldMainMat.location
-    mainMat.name = 'root'
+    mainMat.name = 'Universal material'
     if('Smooth' in mainMat.inputs):
         mainMat.inputs['Smooth'].default_value = context.scene.is_smooth
     if(hasattr(mainMat, 'brdf_model')):
@@ -38,7 +38,7 @@ def assign_material(context, mat):
             if(obj.type == 'MESH'):
                 obj.active_material = mat
                 obj.data.update()
-    # Edit mode
+    # Edit mode/
     elif(context.mode == 'EDIT_MESH'):
         for obj in context.selected_objects:
             if(obj.type == 'MESH'):

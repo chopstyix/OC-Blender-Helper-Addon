@@ -3,16 +3,16 @@ import socket
 from .. operators.nodes import get_y_nodes
 
 supported_textures = [
-    'opacity',
-    'ao',
+    'translucency',
+    # 'ao', # Disabled cause of my dislike for 'ao' -- # OPSTYIX Patch
     'albedo',
     'specular',
     'roughness',
     'metalness',
-    'displacement',
-    'translucency',
-    'normal',
+    'opacity',    
     'bump',
+    'normal',
+    'displacement',
     'fuzz',
     'cavity',
     'curvature'
@@ -39,7 +39,7 @@ def add_components_tex(ntree, element):
     components = element['components']
     y_exp = 620
 
-    transform_node = ntree.nodes.new('OctaneTransformValue')
+    transform_node = ntree.nodes.new('Octane3DTransformation')
     transform_node.name = 'transform'
 
     use_projection = (('surface' in element['categories'] or 'surface' in element['tags']) and prefs.use_projection_surface)
@@ -50,19 +50,22 @@ def add_components_tex(ntree, element):
     texNodes = []
 
     for component in components:
-        if component['type'] in ['albedo','diffuse','specular','translucency','normal']:
-            texNode = ntree.nodes.new('ShaderNodeOctImageTex')
+        if component['type'] in ['albedo','diffuse','translucency','normal']: # Removed specular -- OPSTYIX Patch
+            print("RGB")
+            texNode = ntree.nodes.new('OctaneRGBImage')
         else:
-            texNode = ntree.nodes.new('ShaderNodeOctFloatImageTex')
+            print("Greyscale")
+            texNode = ntree.nodes.new('OctaneGreyscaleImage')
         texNode.location = (-720, y_exp)
         texNode.image = bpy.data.images.load(component['path'])
         texNode.show_texture = True
         texNode.name = component['type']
+        texNode.label = component['type'] # OPSTYIX patch
         if(component['type'] == 'displacement' and prefs.disp_type == "VERTEX"):
             texNode.border_mode = 'OCT_BORDER_MODE_CLAMP'
-        ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['Transform'])
+        ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['UV transform'])
         if(use_projection):
-            ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['Projection'])
+            ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['UV transform'])
         texNodes.append(texNode)
         y_exp += -320
     
