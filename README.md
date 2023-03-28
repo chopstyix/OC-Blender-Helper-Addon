@@ -4,11 +4,11 @@ A helper addon for Octane Blender edition
 
 This is a fork from the original Blender helper addon to add support for Blender 3.0 and latest Octane Blender features in the original developers absence.
 
-Tested, working on 2021.1.1 - 25.0 Blender 3.0 build.
+Tested, working on 2022.1.1 - 27.11 Blender 3.4.1 build.
 
 ## Downloads
 
-* Go to [Releases](https://github.com/llennoco22/OC-Blender-Helper-Addon/releases)
+* Go to [Releases](https://github.com/chopstyix/OC-Blender-Helper-Addon/releases)
 
 * Download the newest **Octane_Helper.zip**
 

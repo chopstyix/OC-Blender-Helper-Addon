@@ -50,17 +50,15 @@ def add_components_tex(ntree, element):
     texNodes = []
 
     for component in components:
-        if component['type'] in ['albedo','diffuse','translucency','normal']: # Removed specular -- OPSTYIX Patch
-            print("RGB")
+        if component['type'] in ['albedo','diffuse','translucency','normal']:
             texNode = ntree.nodes.new('OctaneRGBImage')
         else:
-            print("Greyscale")
             texNode = ntree.nodes.new('OctaneGreyscaleImage')
         texNode.location = (-720, y_exp)
         texNode.image = bpy.data.images.load(component['path'])
         texNode.show_texture = True
         texNode.name = component['type']
-        texNode.label = component['type'] # OPSTYIX patch
+        texNode.label = component['type']
         if(component['type'] == 'displacement' and prefs.disp_type == "VERTEX"):
             texNode.border_mode = 'OCT_BORDER_MODE_CLAMP'
         ntree.links.new(ntree.nodes['transform'].outputs[0], texNode.inputs['UV transform'])

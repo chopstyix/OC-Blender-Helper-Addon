@@ -119,7 +119,7 @@ def import_material(element):
     mat_id = element['id']
 
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
-    mat = create_material(bpy.context, mat_name + '_' + mat_id, 'OctaneUniversalMaterial')
+    mat = create_material(bpy.context,'MS_' + mat_name + '_' + mat_id, 'OctaneUniversalMaterial')
     ntree = mat.node_tree
     nodes = ntree.nodes
     textures = [component['type'] for component in components]
