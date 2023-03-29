@@ -29,6 +29,7 @@ def create_material(context, name, root):
         mainMat.brdf_model = prefs.brdf_model
     nodes.remove(oldMainMat)
     mat.node_tree.links.new(outNode.inputs['Surface'], mainMat.outputs[0])
+    mainMat.inputs['Specular'].default_value = 0.5    
     return mat
 
 def assign_material(context, mat):

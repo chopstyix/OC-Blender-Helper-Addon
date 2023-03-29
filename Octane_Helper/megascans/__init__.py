@@ -145,16 +145,20 @@ def import_material(element):
    # Albedo and AO
     if('albedo' in textures):
         ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
-        # if('ao' in textures): # OPSTYIX Patch, disable cause I hate AO :)
-            # multiplyNode = nodes.new('OctaneMultiplyTexture')
-            # multiplyNode.name = 'ao_multiply_albedo'
-            # multiplyNode.location = (-320, 300)
-            # ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
-            # ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
-            # ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
-        # else:
-            # ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
-        # nodes['ao'].inputs['Legacy gamma'].default_value = 1
+        if('ao' in textures):
+            multiplyNode = nodes.new('OctaneMultiplyTexture')
+            multiplyNode.name = 'ao_multiply_albedo'
+            if(prefs.use_compact_nodes):
+                multiplyNode.hide = True
+                multiplyNode.location = (-320, 40)
+            else:
+                multiplyNode.location = (-320, 380)
+            ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
+            ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
+            ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+        else:
+            ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+        nodes['ao'].inputs['Legacy gamma'].default_value = 1
     
     # Specular
     if('specular' in textures):
@@ -194,14 +198,12 @@ def import_material(element):
     if('displacement' in textures):
         nodes['displacement'].inputs['Legacy gamma'].default_value = 1
         if prefs.disp_type == 'TEXTURE':
-            resolution = get_component(components, 'displacement')['resolution']
+            #resolution = get_component(components, 'displacement')['resolution']
             dispNode = nodes.new('OctaneTextureDisplacement')
             dispNode.name = 'disp'
-            # dispNode.displacement_level = disp_levels[resolution]  # Disabled, doesn't seem to work -- OPSTYIX patch
-            # dispNode.displacement_surface = 'Follow smoothed normal' # Disabled, doesn't seem to work -- OPSTYIX patch
             dispNode.inputs['Mid level'].default_value = 0.5
             dispNode.inputs['Height'].default_value = 0.1
-            dispNode.inputs[2].default_value = '2048x2048' # Changed default value of displacement texture resolution -- OPSTYIX patch
+            dispNode.inputs[2].default_value = '2048x2048'
         else:
             dispNode = nodes.new('OctaneVertexDisplacement')
             dispNode.name = 'disp'

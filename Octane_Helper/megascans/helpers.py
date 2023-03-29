@@ -4,7 +4,7 @@ from .. operators.nodes import get_y_nodes
 
 supported_textures = [
     'translucency',
-    # 'ao', # Disabled cause of my dislike for 'ao' -- # OPSTYIX Patch
+    'ao',
     'albedo',
     'specular',
     'roughness',
@@ -37,7 +37,7 @@ def get_component(components, name):
 def add_components_tex(ntree, element):
     prefs = bpy.context.preferences.addons['Octane_Helper'].preferences
     components = element['components']
-    y_exp = 620
+    y_exp = 300
 
     transform_node = ntree.nodes.new('Octane3DTransformation')
     transform_node.name = 'transform'
@@ -54,7 +54,12 @@ def add_components_tex(ntree, element):
             texNode = ntree.nodes.new('OctaneRGBImage')
         else:
             texNode = ntree.nodes.new('OctaneGreyscaleImage')
-        texNode.location = (-720, y_exp)
+        texNode.location = (-720, y_exp)            
+        if(prefs.use_compact_nodes):
+            texNode.hide = True
+            y_exp += -80
+        else:
+            y_exp += -380
         texNode.image = bpy.data.images.load(component['path'])
         texNode.show_texture = True
         texNode.name = component['type']
@@ -65,7 +70,6 @@ def add_components_tex(ntree, element):
         if(use_projection):
             ntree.links.new(ntree.nodes['projection'].outputs[0], texNode.inputs['UV transform'])
         texNodes.append(texNode)
-        y_exp += -320
     
     transform_node.location = (-1200, get_y_nodes(ntree, texNodes, 'Mid'))
     if(use_projection):

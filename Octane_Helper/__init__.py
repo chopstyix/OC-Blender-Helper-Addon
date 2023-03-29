@@ -109,6 +109,11 @@ class OctaneHelperPrefs(AddonPreferences):
         default = 'OctaneMeshUVProjection'
     )
 
+    use_compact_nodes: BoolProperty(
+        name='Use compact node setup when importing materials',
+        default=False
+    )
+    
     def draw(self, context):
         layout = self.layout
 
@@ -120,6 +125,7 @@ class OctaneHelperPrefs(AddonPreferences):
         box = layout.box()
         box.label(text='Megascans')
         col = box.column(align=True)
+        col.prop(self, 'use_compact_nodes')
         col.prop(self, 'use_projection_surface')
         col.prop(self, 'surface_projection', text='')
         col = box.column(align=True)
