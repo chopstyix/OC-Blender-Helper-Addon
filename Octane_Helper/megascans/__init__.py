@@ -148,6 +148,7 @@ def import_material(element):
         if('ao' in textures):
             multiplyNode = nodes.new('OctaneMultiplyTexture')
             multiplyNode.name = 'ao_multiply_albedo'
+            multiplyNode.label = 'AO Multiply Albedo'
             if(prefs.use_compact_nodes):
                 multiplyNode.hide = True
                 multiplyNode.location = (-320, 40)
@@ -156,9 +157,9 @@ def import_material(element):
             ntree.links.new(nodes['ao'].outputs[0], nodes['ao_multiply_albedo'].inputs[0])
             ntree.links.new(nodes['albedo'].outputs[0], nodes['ao_multiply_albedo'].inputs[1])
             ntree.links.new(nodes['ao_multiply_albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
+            nodes['ao'].inputs['Legacy gamma'].default_value = 1
         else:
             ntree.links.new(nodes['albedo'].outputs[0], nodes['Universal material'].inputs['Albedo'])
-        nodes['ao'].inputs['Legacy gamma'].default_value = 1
     
     # Specular
     if('specular' in textures):
