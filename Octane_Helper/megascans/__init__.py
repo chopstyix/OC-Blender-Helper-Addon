@@ -103,9 +103,9 @@ def import_meshes(element):
             # get selected objects
             objects += [ o for o in bpy.context.scene.objects if o.select_get() ]
     
-    # Scatter, Plants
-    if (is_in_element(['scatter', 'plants'], element) and len(objects)):
-        group_into_empty(objects, element['name'])
+    # # Scatter, Plants
+    # if (is_in_element(['scatter', 'plants'], element) and len(objects)):
+    #     group_into_empty(objects, element['name'])
 
     return objects
 
@@ -138,7 +138,7 @@ def import_material(element):
         # scatterNode.inputs['Absorption'].default_value = (1, 1, 1)
         # scatterNode.inputs['Invert absorption'].default_value = True
         # scatterNode.location = (-320, -1000)
-        nodes['Universal material'].inputs[2].default_value = 'Diffuse' # -- OPSTYIX Patch
+        nodes['Universal material'].inputs[2].default_value = 'Diffuse'
         ntree.links.new(nodes['translucency'].outputs[0], nodes['Universal material'].inputs['Transmission'])
         # ntree.links.new(nodes['translucency_scatter'].outputs[0], nodes['Universal material'].inputs['Medium']) -- OPSTYIX Patch, disabled cause of preferences :)
  
