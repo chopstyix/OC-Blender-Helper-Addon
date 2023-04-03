@@ -75,6 +75,7 @@ def add_components_tex(ntree, element):
     if(use_projection):
         projection_node.location = (-1200, transform_node.location.y - 350)
 
+#TODO: Fix. Doesn't work, this is supposed to parent the scatters to an empty object.
 # def group_into_empty(objs, name):
 #     bpy.ops.object.empty_add(type='SPHERE', radius=0.2)
 #     empty = bpy.context.view_layer.objects.active
