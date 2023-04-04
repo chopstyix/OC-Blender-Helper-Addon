@@ -4,16 +4,7 @@ from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 from . nodes import remove_connected_nodes, get_y
 import os
-
-# Search for Octane addon file location
-for mod in addon_utils.modules():
-    if not mod.bl_info['name'].find("OctaneBlender") == -1:
-        octane_filepath = mod.__file__.removesuffix('__init__.py')
-        octane_filepath = octane_filepath + "utils\\"
-
-# Import Octane addon libraries, this fixes Environment Manager
-sys.path.insert(0, octane_filepath)
-import consts, utility
+from octane import consts, utility
 
 presets_dir = bpy.utils.user_resource('SCRIPTS', path = 'presets')
 env_path = os.path.join(presets_dir, 'octane', 'environments')
