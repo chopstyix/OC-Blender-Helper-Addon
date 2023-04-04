@@ -151,11 +151,9 @@ class OctaneEnvironmentsManager(Operator):
             row.operator(OctaneDeleteEnvironment.bl_idname, text='Delete')
             
             split.prop(self, 'category', text='')
-            if(self.category == 'Environment'):
-                layout.label(text='Environment')          
+            if(self.category == 'Environment'):                
                 utility.panel_ui_node_view(context, self.layout, context.scene.world, consts.OctaneOutputNodeSocketNames.ENVIRONMENT)    
             elif(self.category == 'Visible Environment'):
-                layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane VisibleEnvironment'])
                 utility.panel_ui_node_view(context, self.layout, context.scene.world, consts.OctaneOutputNodeSocketNames.VISIBLE_ENVIRONMENT)    
 
         else:
