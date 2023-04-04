@@ -1,8 +1,19 @@
-import bpy 
+import sys
+import bpy, addon_utils 
 from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 from . nodes import remove_connected_nodes, get_y
 import os
+
+# Search for Octane addon file location
+for mod in addon_utils.modules():
+    if not mod.bl_info['name'].find("OctaneBlender") == -1:
+        octane_filepath = mod.__file__.removesuffix('__init__.py')
+        octane_filepath = octane_filepath + "utils\\"
+
+# Import Octane addon libraries, this fixes Environment Manager
+sys.path.insert(0, octane_filepath)
+import consts, utility
 
 presets_dir = bpy.utils.user_resource('SCRIPTS', path = 'presets')
 env_path = os.path.join(presets_dir, 'octane', 'environments')
@@ -150,12 +161,15 @@ class OctaneEnvironmentsManager(Operator):
             
             split.prop(self, 'category', text='')
             if(self.category == 'Environment'):
-                layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane Environment'])
+                layout.label(text='Environment')          
+                utility.panel_ui_node_view(context, self.layout, context.scene.world, consts.OctaneOutputNodeSocketNames.ENVIRONMENT)    
             elif(self.category == 'Visible Environment'):
                 layout.template_node_view(ntree, rootNode, rootNode.inputs['Octane VisibleEnvironment'])
+                utility.panel_ui_node_view(context, self.layout, context.scene.world, consts.OctaneOutputNodeSocketNames.VISIBLE_ENVIRONMENT)    
+
         else:
             layout.label(text='No World Output found')
-    
+
     def execute(self, context):
         return {'FINISHED'}
     
@@ -338,7 +352,7 @@ class OctaneAddSkyEnv(Operator):
     def execute(self, context):
         ntree = context.scene.world.node_tree
         outNode = create_world_output(context, 'OC_Sky_Env')
-        skyenvNode = ntree.nodes.new('ShaderNodeOctDaylightEnvironment')
+        skyenvNode = ntree.nodes.new('OctaneDaylightEnvironment')
         skyenvNode.location = (outNode.location.x - 200, outNode.location.y)
         ntree.links.new(skyenvNode.outputs[0], outNode.inputs['Octane Environment'])
         # Setting up the octane
