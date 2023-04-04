@@ -1,5 +1,5 @@
 import sys
-import bpy, addon_utils 
+import bpy
 from bpy.types import Operator
 from bpy.props import EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
 from . nodes import remove_connected_nodes, get_y
