@@ -412,24 +412,24 @@ class OctaneAddTexEnv(Operator):
         if self.filepath != '':
             ntree = context.scene.world.node_tree
             outNode = create_world_output(context, self.name)
-            texenvNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
+            texenvNode = ntree.nodes.new('OctaneTextureEnvironment')
             texenvNode.location = (outNode.location.x - 200, outNode.location.y)
-            imgNode = ntree.nodes.new('ShaderNodeOctImageTex')
+            imgNode = ntree.nodes.new('OctaneRGBImage')
             imgNode.location = (texenvNode.location.x - 250, outNode.location.y)
-            imgNode.inputs['Gamma'].default_value = 1
+            imgNode.inputs['Legacy gamma'].default_value = 1
             imgNode.image = bpy.data.images.load(self.filepath)
-            sphereNode = ntree.nodes.new('ShaderNodeOctSphericalProjection')
+            sphereNode = ntree.nodes.new('OctaneSpherical')
             sphereNode.location = (imgNode.location.x - 200, outNode.location.y)
-            transNode = ntree.nodes.new('ShaderNodeOct3DTransform')
+            transNode = ntree.nodes.new('Octane3DTransformation')
             transNode.location = (sphereNode.location.x-200, outNode.location.y)
             transNode.name = '3D_Transform'
             if(self.enable_backplate):
-                texvisNode = ntree.nodes.new('ShaderNodeOctTextureEnvironment')
+                texvisNode = ntree.nodes.new('OctaneTextureEnvironment')
                 texvisNode.location = (texenvNode.location.x, texenvNode.location.y-300)
                 texvisNode.inputs['Texture'].default_value = self.backplate_color
                 texvisNode.inputs['Visable env Backplate'].default_value = True
                 ntree.links.new(texvisNode.outputs[0], outNode.inputs['Octane VisibleEnvironment'])
-            ntree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere Transformation'])
+            ntree.links.new(transNode.outputs[0], sphereNode.inputs['Sphere transformation'])
             ntree.links.new(sphereNode.outputs[0], imgNode.inputs['Projection'])
             ntree.links.new(imgNode.outputs[0], texenvNode.inputs['Texture'])
             ntree.links.new(texenvNode.outputs[0], outNode.inputs['Octane Environment'])
