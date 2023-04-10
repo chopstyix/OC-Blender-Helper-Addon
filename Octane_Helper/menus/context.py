@@ -255,8 +255,8 @@ class OctaneInfoMenu(Menu):
         layout.separator()
 
         layout.label(text='Plugin')
-        layout.operator('wm.url_open', icon='URL', text='Wiki').url = 'https://github.com/llennoco22/OC-Blender-Helper-Addon'
-        layout.operator('wm.url_open', icon='URL', text='Downloads').url = 'https://github.com/llennoco22/OC-Blender-Helper-Addon/releases'
+        layout.operator('wm.url_open', icon='URL', text='Wiki').url = 'https://github.com/chopstyix/OC-Blender-Helper-Addon'
+        layout.operator('wm.url_open', icon='URL', text='Downloads').url = 'https://github.com/chopstyix/OC-Blender-Helper-Addon/releases'
         layout.separator()
         
         version = [addon.bl_info['version'] for addon in addon_utils.modules() if (addon.bl_info['name'] == 'Octane Helper')][0]
