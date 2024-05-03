@@ -116,6 +116,7 @@ class OctaneEnvironmentsManager(Operator):
     def draw(self, context):
         ntree = context.scene.world.node_tree
         index = context.scene.oc_worlds_index
+        # print("index: ",)
         layout = self.layout
 
         # Draw presets
@@ -138,12 +139,15 @@ class OctaneEnvironmentsManager(Operator):
         sub.operator(OctaneAddPaintEnv.bl_idname, text='', icon='TPAINT_HLT')
         
         # Draw nodes view
-        if(len(context.scene.oc_worlds)!=0):
-            rootNode = ntree.nodes[context.scene.oc_worlds[index].node]
+        print("oc_worlds_index: ", len(bpy.context.scene.oc_worlds))
+        # if(len(context.scene.oc_worlds)!=0):
+        if context.scene.world:
+            # rootNode = ntree.nodes[context.scene.oc_worlds[index].node]
+            # rootNode = bpy.data.worlds['World_Daylight_Environment'].node_tree.nodes["World Output"]  
             split = layout.split(factor=0.6)
             b_split = split.row(align=True)
             row = b_split.row(align=True)
-            row.enabled = (not ntree.nodes[context.scene.oc_worlds[index].node].is_active_output)
+            # row.enabled = (not ntree.nodes[context.scene.oc_worlds[index].node].is_active_output)
             row.operator(OctaneActivateEnvironment.bl_idname, text='Activate')
             row = b_split.row(align=True)
             row.operator(OctaneRenameEnvironment.bl_idname, text='Rename')
@@ -151,6 +155,7 @@ class OctaneEnvironmentsManager(Operator):
             row.operator(OctaneDeleteEnvironment.bl_idname, text='Delete')
             
             split.prop(self, 'category', text='')
+            print("test:", self.category)
             if(self.category == 'Environment'):                
                 utility.panel_ui_node_view(context, self.layout, context.scene.world, consts.OctaneOutputNodeSocketNames.ENVIRONMENT)    
             elif(self.category == 'Visible Environment'):

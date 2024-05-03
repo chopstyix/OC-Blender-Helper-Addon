@@ -1,7 +1,7 @@
 import bpy, bmesh
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
-from octane import converters
+#from octane import converters
 from math import pi
 from .. assets import osl_dir
 import colorsys
