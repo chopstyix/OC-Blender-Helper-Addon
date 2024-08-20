@@ -25,7 +25,7 @@ def get_connected_nodes(node):
     return result
 
 def get_y(ntree, target, type):
-    if(not ntree.get_output_node('octane')):
+    if(not ntree.get_output_node('ALL')):
         return 0
     ys = [node.location.y for node in ntree.nodes if node.bl_idname == target]
     if(type == 'Min'):
@@ -38,7 +38,7 @@ def get_y(ntree, target, type):
         return 0
 
 def get_y_nodes(ntree, nodes, type):
-    if(not ntree.get_output_node('octane')):
+    if(not ntree.get_output_node('ALL')):
         return 0
     ys = [node.location.y for node in nodes]
     if(type == 'Min'):

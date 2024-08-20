@@ -109,7 +109,7 @@ class OctaneLightsManager(Operator):
             else:
                 ntree = bpy.data.materials[self.emissive_material].node_tree
 
-            outNode = ntree.get_output_node('octane')
+            outNode = ntree.get_output_node('ALL')
             if(outNode.inputs['Surface'].is_linked):
                 if(outNode.inputs['Surface'].links[0].from_node.bl_idname=='ShaderNodeOctDiffuseMat'):
                     rootNode = outNode.inputs['Surface'].links[0].from_node

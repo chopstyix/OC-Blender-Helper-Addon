@@ -1,7 +1,7 @@
 import bpy, bmesh
 from bpy.types import Operator
 from bpy.props import IntProperty, EnumProperty, BoolProperty, StringProperty, FloatVectorProperty, FloatProperty
-#from octane import converters
+from octane.operators_ import converter
 from math import pi
 from .. assets import osl_dir
 import colorsys
@@ -14,7 +14,7 @@ def create_material(context, name, root):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
     ntree = mat.node_tree
-    outNode = ntree.get_output_node('octane')
+    outNode = ntree.get_output_node('ALL')
     outNode.name = 'output'
     nodes = mat.node_tree.nodes
     # Get the default shader that is created automatically and remove it later
@@ -90,12 +90,12 @@ def convert_mat_octane(obj):
         mat = slot.material
         if(mat):
             # Get the output node and determine its type. If its not octane type, convert it
-            outNode = mat.node_tree.get_output_node('octane')
-            if(outNode and outNode.target != 'octane'):
+            outNode = mat.node_tree.get_output_node('ALL')
+            if(outNode and outNode.target != 'ALL'):
                 converted_material = mat.copy()
                 converted_material.name = mat.name
-                converters.convert_to_octane_material(mat, converted_material)
-                converters.convert_all_related_material(mat, converted_material)
+                converter.convert_to_octane_material(mat, converted_material)
+                converter.convert_all_related_material(mat, converted_material)
                 slot.material = converted_material
 
 # Assign material
